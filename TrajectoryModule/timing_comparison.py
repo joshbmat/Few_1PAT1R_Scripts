@@ -195,7 +195,7 @@ def main():
     traj_flux = EMRIInspiral(func=KerrEccEqFlux)
     print("Done.\n")
 
-    # run_comparison(traj_1pa, traj_flux)
+    run_comparison(traj_1pa, traj_flux)
     run_tolerance_sweep(traj_1pa, traj_flux)
     run_observation_time_sweep(traj_1pa, traj_flux)
 

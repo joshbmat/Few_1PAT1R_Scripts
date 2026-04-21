@@ -1,0 +1,3421 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[    139221,       3413]
+NotebookOptionsPosition[    129814,       3278]
+NotebookOutlinePosition[    130213,       3294]
+CellTagsIndexPosition[    130170,       3291]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Summary", "Section",
+ CellChangeTimes->{{3.985493200339967*^9, 3.985493203021244*^9}, 
+   3.9854934286764593`*^9},ExpressionUUID->"c5df36d0-5c10-46ef-8374-\
+1f3ca0b22e17"],
+
+Cell[TextData[{
+ "We consider a fixed frequency window defined by ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"6.1", "\[LessEqual]", "p", "\[LessEqual]", "15", " "}], 
+   TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "1dc36e74-20d2-4b1f-b0cd-c7fbbbd798d3"],
+ "and a range of mass ratios ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SuperscriptBox["10", 
+     RowBox[{"-", "9"}]], "<=", "\[Epsilon]", "<=", "1"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "6aa27eaa-f433-4c51-b3f9-441c2df3d7e9"],
+ ". The main conclusions are:"
+}], "Text",
+ CellChangeTimes->{{3.9854932054463577`*^9, 3.985493293833085*^9}, {
+  3.98549343486347*^9, 
+  3.985493435332972*^9}},ExpressionUUID->"46b1cdf7-21e0-4d2e-8e1f-\
+eb1baec35edd"],
+
+Cell[TextData[{
+ StyleBox["The current 0PA flux data grid is more than adequate.",
+  FontWeight->"Bold"],
+ " With a grid of ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"6.1", "\[LessEqual]", "p", "\[LessEqual]", "30"}], 
+   TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "125ee8e2-5e91-4259-8318-d4d7f06a94fd"],
+ " in steps of ",
+ Cell[BoxData[
+  FormBox["0.1", TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "452d1a17-a1d6-46f8-8674-122a7a5f1511"],
+ ", the leading PN scaling factored out and 8th order interpolation, it \
+yields an interpolated model with errors ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[LessTilde]", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "10"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "1fd8c5ce-0c3d-4f71-b8d3-5e13548ee315"],
+ ", with the worst case close to the ISCO. A grid with half as many points is \
+about two orders of magnitude less accurate, as expected since ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SuperscriptBox["2", "8"], "=", 
+    RowBox[{"256", "\[TildeEqual]", 
+     SuperscriptBox["10", "2"]}]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "1435820c-d540-4395-8c38-1042c353802c"],
+ "."
+}], "ItemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.985493381719946*^9}},ExpressionUUID->"87f4d601-c96c-453b-b583-\
+6e006c51eea6"],
+
+Cell[TextData[{
+ StyleBox["The dephasing from interpolation error is tiny.",
+  FontWeight->"Bold"],
+ " Over an inspiral from ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"p", "=", "15"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "30be0b1b-3d43-4b21-9a06-3312ab832cf7"],
+ " to ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"p", "=", "6.1"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "56492b05-148f-48e9-9eae-76cd4be4ae2a"],
+ " the dephasing is ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[LessTilde]", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "5"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "21f34082-80a1-4e85-9c45-2cba534a3b58"],
+ " radians for mass ratio ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Epsilon]", "=", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "6"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "15bd20a7-fcba-4de2-ad39-39cd3593c9e9"],
+ ". The dephasing is dominated by the near-ISCO part, so it gets worse for \
+smaller \[Epsilon] and better for larger \[Epsilon]."
+}], "ItemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.9854934587282057`*^9}},ExpressionUUID->"4ec4f3e2-6c7e-4e77-9349-\
+25c3bb29f9ce"],
+
+Cell[TextData[{
+ "With the default options for NIntegrate the ",
+ StyleBox["dephasing is dominated by integration error",
+  FontWeight->"Bold"],
+ ". Over a fixed frequency interval ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"6.1", "\[LessEqual]", "p", "\[LessEqual]", "15"}], 
+   TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "8c763a63-05c1-4324-98ca-325af05cf1c9"],
+ "  the dephasing is ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"~", 
+     SuperscriptBox["10", 
+      RowBox[{"-", "5"}]]}], "/", "\[Epsilon]"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "fff79032-9caa-4458-b0f7-377a9b50ccca"],
+ ", so for mass ratio ",
+ Cell[BoxData[
+  FormBox[
+   SuperscriptBox["10", 
+    RowBox[{"-", "5"}]], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "560fe3dd-6bac-49e8-803f-ba1befd43fae"],
+ " the phase error is order unity."
+}], "ItemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.985493511857772*^9}},ExpressionUUID->"cac3f013-a216-4673-ad77-\
+5fe1adf9fc23"],
+
+Cell[TextData[{
+ StyleBox["Setting PrecisionGoal\[Rule]\[Infinity] helps a bit in some cases, \
+but is not the best solution",
+  FontWeight->"Bold"],
+ ". Keep in mind the definition from Mathematica\[CloseCurlyQuote]s \
+documentation: \[OpenCurlyDoubleQuote]With PrecisionGoal->p and \
+AccuracyGoal->a, the Wolfram Language attempts to make the numerical error in \
+a result of size ",
+ Cell[BoxData[
+  FormBox["x", TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "1825d298-a3a5-4da2-9158-57c541845442"],
+ " be less than ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{
+     SuperscriptBox["10", 
+      RowBox[{"-", "a"}]], "+"}], "|", "x", "|", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "p"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "7356b8cf-72b9-4174-a6b4-fb799d3f7429"],
+ ".\[CloseCurlyDoubleQuote] This means that for ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"x", "~", "1"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "2de0c98b-d316-430d-bd91-3bf377593de0"],
+ "$, PrecisionGoal and AccuracyGoal have the same effect. For ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"x", "\[GreaterGreater]", "1"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "6516e342-51a0-4fce-ad96-8a5f69682f00"],
+ " the error is mostly controlled by PrecisionGoal and for ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"x", "\[LessLess]", "1"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "777fda9a-17e1-4bc0-bab1-ec6ba36605ac"],
+ " the error is mostly controlled by AccuracyGoal.  The accumulated phase \
+over a fixed frequency interval is large ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"~", "1"}], "/", "\[Epsilon]"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "c07d04f0-d4e0-440c-80c5-aec6ead83e05"],
+ " so it is true that PrecisionGoal is controlling the error tolerance. With \
+PrecisionGoal\[Rule]\[Infinity] we have an absolute error tolerance of ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"~", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "8"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "f42f7b7c-4029-47a0-8b74-861c6d4fb46e"],
+ " (the default value for AccuracyGoal is WorkingPrecision/2), so we are \
+asking for a phase with relative error ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SuperscriptBox["10", 
+     RowBox[{"-", "8"}]], "\[Epsilon]"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "03a73e7b-2d6b-4b5e-89a9-76e398cbf34b"],
+ ". For ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Epsilon]", "\[LessTilde]", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "7"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "f7eb1d49-088d-4a71-9949-8e087fa6cf67"],
+ " this means we would need to work at greater than machine precision to \
+reach the AccuracyGoal. With Mathematica, this causes it to stop integrating \
+early, once the AccuracyGoal can no longer be met."
+}], "ItemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.98549373543887*^9}},ExpressionUUID->"1e9f3ee6-ab11-472e-a6fc-\
+7cb802d761f0"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "There are ",
+ StyleBox["two",
+  FontWeight->"Bold"],
+ " problems with accuracy of the numerical integration:"
+}], "ItemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.985493750418692*^9}},ExpressionUUID->"91ddc4ff-2e69-4721-a90b-\
+69cf37375fc4"],
+
+Cell["\<\
+Because of point 3 above, our dephasing is above tolerance (1 radian) for \
+typical EMRI mass ratios.\
+\>", "SubitemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.9854937662464533`*^9}},ExpressionUUID->"b18098b4-0852-402a-ae28-\
+40b6ec15817f"],
+
+Cell[TextData[{
+ "Because point 4 above we can\[CloseCurlyQuote]t go below a certain mass \
+ratio ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Epsilon]", "\[LessTilde]", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "7"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "cee0583b-0a88-49a5-84a2-a06544d5ec4d"],
+ "."
+}], "SubitemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.98549378556332*^9}},ExpressionUUID->"e648fa20-fdcb-4bcc-b775-\
+a773964c3a6d"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["We can resolve these with two small tweaks:", "ItemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.985493795518425*^9}},ExpressionUUID->"e4b62293-b923-4331-9946-\
+2258d2374012"],
+
+Cell[TextData[{
+ StyleBox["Rescale the phase",
+  FontWeight->"Bold"],
+ " by \[Epsilon], i.e. solve for ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Epsilon]", " ", 
+    SubscriptBox["\[Phi]", "p"]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "8818a44d-97bf-4d67-8461-d91ebaecaf6d"],
+ ". This causes the rescaled phase the be \[ScriptCapitalO](1) independently \
+of mass ratio, the same as the other evolved variables (\[CapitalOmega]). \
+This change ",
+ StyleBox["allows us to reach smaller mass ratios",
+  FontWeight->"Bold"],
+ " without Mathematica aborting the integration early. I think this is \
+similar to, but not quite the same as integrating with respect to slow time."
+}], "SubitemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.985493851388516*^9}},ExpressionUUID->"3c68b480-1c69-4e1d-935f-\
+4cba2fba7884"],
+
+Cell[TextData[{
+ "Use  a higher-than-default setting for PrecisionGoal ",
+ StyleBox["and",
+  FontWeight->"Bold"],
+ " AccuracyGoal. With both set to 12, we find a phase accuracy of ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SuperscriptBox["10", 
+     RowBox[{"-", "8"}]], "/", "\[Epsilon]"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "f246551e-720f-4f13-84e9-2d707c055e21"],
+ ", which should be enough for LISA EMRIs. Higher mass ratios will have \
+significant phase error, but they should also involve unreasonably long \
+waveforms that we will never want in actual analysis."
+}], "SubitemNumbered",
+ CellChangeTimes->{{3.985493306262289*^9, 
+  3.985493877524557*^9}},ExpressionUUID->"0fa6c665-db6e-418e-bf0a-\
+8847794e8438"]
+}, Open  ]],
+
+Cell["\<\
+So, in summary, if we use our current  0PA data with the right interpolation \
+and the right integration settings, then everything at 0PA should meet \
+requirements. (Note that this is pretty close  to the settings we used in the \
+waveform letter, a little more accurate but not too much.) There\
+\[CloseCurlyQuote]s no reason to expect new issues related to integration \
+error to arise once we include 1PA, spin effects, etc.\
+\>", "Text",
+ CellChangeTimes->{
+  3.9854934402063713`*^9, {3.9854938924853077`*^9, 
+   3.985493894065358*^9}},ExpressionUUID->"f7933aec-5184-4721-a7a3-\
+54040df21582"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Load data", "Section",
+ CellChangeTimes->{{3.985333315906748*^9, 
+  3.985333317369525*^9}},ExpressionUUID->"0e854573-25b9-4488-909f-\
+597cc72cd39e"],
+
+Cell[CellGroupData[{
+
+Cell["First order fluxes", "Subsection",
+ CellChangeTimes->{{3.79715697342671*^9, 3.797156978826098*^9}, {
+  3.797167119670039*^9, 3.797167120821348*^9}, {3.834242549091378*^9, 
+  3.834242549261044*^9}},ExpressionUUID->"4e07f168-f679-4865-b975-\
+3e7d8561fa91"],
+
+Cell[CellGroupData[{
+
+Cell["Load data", "Subsubsection",
+ CellChangeTimes->{{3.985324833224429*^9, 
+  3.985324834238509*^9}},ExpressionUUID->"ce601c64-9f1a-460a-8aef-\
+2917ae066625"],
+
+Cell["These were computed by summing up to l=30.", "Text",
+ CellChangeTimes->{{3.8486543860919456`*^9, 3.8486544261193733`*^9}, {
+  3.848654492535098*^9, 
+  3.8486544947405853`*^9}},ExpressionUUID->"9563141e-17a6-4332-add7-\
+bcef01bb6f36"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"pGrid", "=", 
+   InterpretationBox[
+    DynamicModuleBox[{Typeset`open = False}, 
+     TemplateBox[{"List", 
+       StyleBox["\"p\"", "IconizedCustomName", StripOnInput -> False], 
+       GridBox[{{
+          RowBox[{
+            TagBox["\"Head: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            TagBox["List", "IconizedItem"]}]}, {
+          RowBox[{
+            TagBox["\"Length: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            TagBox["241", "IconizedItem"]}]}, {
+          RowBox[{
+            TagBox["\"Byte count: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            
+            TagBox["2152", "IconizedItem"]}]}}, 
+        GridBoxAlignment -> {"Columns" -> {{Left}}}, DefaultBaseStyle -> 
+        "Column", 
+        GridBoxItemSize -> {
+         "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], 
+       Dynamic[Typeset`open]},
+      "IconizedObject"]],
+    CompressedData["
+1:eJw1zMmRUzEYRlGRhe12uz3P8/M8UA6AFSFQBVtSIA2RhtIQaWhPBlS3D99S
+Ov/tfPv59funEMLf8H+1x4+P1R5/8vtqj+pj9cfv+L764+kaXINrcC/cC9fk
+mlyTe+VeuRbX4lrcG/fGtb23+bb/trs21+E6XIfrcB2uy3W5LtflulyP63E9
+rsf1uD7X5/pcn+tzA27ADbgBN+CG3JAbckNuyI24ETfiRtyIG3NjbsyNuTE3
+4SbchJtwE27KTbkpN+Wm3IybcTNuxs24OTfn5tycm3MLbsEtuAW34Jbcklty
+S27JrbgVt+JW3IpbP9/ra379/P+ydrd+ul9c5BKXucKFjd5Gb6O30dvocZFL
+XOYKF7Z6W72t3lZvq8dFLnGZK1yo9Cq9Sq/Sq/S4yCUuc4ULO72d3k5vp7fT
+4yKXuMwVLuz19np7vb3eXo+LXOIyV7hw0DvoHfQOegc9LnKJy1zhwlHvqHfU
+O+od9bjIJS5zhQsnvZPeSe+kd9LjIpe4zBUunPXOeme9s95Zj4tc4jJXuHDR
+u+hd9C56Fz0uconLXOHCVe+qd9W76l31uMglLnOFCze9m95N76Z30+Mil7jM
+FS7c9e56d7273l2Pi1ziMle48PnxD8t0sKI=
+    "],
+    SelectWithContents->True,
+    Selectable->False]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]data", "=", 
+   InterpretationBox[
+    DynamicModuleBox[{Typeset`open = False}, 
+     TemplateBox[{"List", 
+       StyleBox[
+       "\"\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]\"", 
+        "IconizedCustomName", StripOnInput -> False], 
+       GridBox[{{
+          RowBox[{
+            TagBox["\"Head: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            TagBox["List", "IconizedItem"]}]}, {
+          RowBox[{
+            TagBox["\"Length: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            TagBox["241", "IconizedItem"]}]}, {
+          RowBox[{
+            TagBox["\"Byte count: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            
+            TagBox["5840", "IconizedItem"]}]}}, 
+        GridBoxAlignment -> {"Columns" -> {{Left}}}, DefaultBaseStyle -> 
+        "Column", 
+        GridBoxItemSize -> {
+         "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], 
+       Dynamic[Typeset`open]},
+      "IconizedObject"]],
+    CompressedData["
+1:eJwNzmkgFAgbAGBRyaQoIkeHDpYKGXL1vkmE0E7OpkjjLPcxrqytSMY4YmVc
+OSLCl6EciVCONBGTIalRJJNjFYMcZffbH8//R8HZz8ptjYCAwOx/vFtPMaOa
+WLh3uoRlQWzH+BR3M3n6czQ3Xcg3U2zE187/4/1rVYf26vYRIpRq9Iwu18jb
++xBlDn6UVv7+AHsPEGaNo0rQn8Q99mffPXxdemWqpOUufqEGlmtScrGQP861
+FMtCVVGDoiVPBvLilBLD7FLxt5FvdalPknHH0vqmeYFEpAg6UzlacXjvzKLG
+yo8YpM97VxmrRmOwedb0OdY1XHJ+1DAZEIkU6yG9yuFwfOXC2FnDCkFGkdLC
+NjkqFlHXmbe3B6C8xS/Orit+mHGedMLvby+8O9gXbsC+hB8G6GQpKXdsz7E0
+aap0wbOjphz+bQpeO/4jRj7QCXtMGvVuKzvgOtz/eqshGfXMgs/YV9jhSHRK
+dLe7DZZUu3hbO1khg5uxbiWZhJqeVQ5tE5a422h4116COXZlpecWh5kiY/KJ
+lu7Bk7haIJQ9KW+EToG7BV+eMESpTQmb6rMM0E1TxLxHB1G8fP2kLk0fD5+p
+HvCS08UK+ptI6akjWGSZN8Ga0cQl8TbsUSTiquvyiCztMDLfVPVqiKujTFfO
+Vf2QQ9jQHj9RTDiAwQSf9AsDv+Ea35wnL98qomNzkANPaD9ydGcvHj+3F+nk
+rTXcfgUUszt2VTFoNw65mfwYcNyJjZltuTmi8shb5dqFTssgMU1QuO2nNPa8
+rUggE6WQEJz9PjRZEoeWVNIbxSQwt2FEZCdzC/6xoVH13SVxVK6npw9d2YwK
+K34cQ2tRlJGzVO6yI6ABrTaz4/oGXFhMU/zAXo/cjq///DRYh6mn4nPce4Tw
+Lt+4OT1cEAvnIqVPwhqs7NvPdNgugBXk1/entvwDa+uZ2uWyv6CYujmj32QF
+gmof+0UxluB0DW1WfO0i7BNX+yGdtACS8ToPnDXmYZNqVPfUNz7wfblWg89n
+wb+DdCOsdAZsU2p+Uk2/Q16v0SKFMg0qJ+rmpLKnYMNXjoby3AQsn3e76eQx
+DoRfncLMBR7wQ3dqadwZg5lPI5fVyF8gRdmmbOOBUcizP/rEQvwz3BDcEJAm
+PAILak/JhWLDQGC9mco4/RGuC3VFrWRxQZ5rWe8j+AEmxd52yEYPQsPJ5Q4L
+uXdQ4aqw4Mt6C96bneQICf3Q/anuRAulD4ojv6XYmHGgY9seUtrxXsjMOLXP
+1+wNfCbXeHGd2CCxzT/wk3APbPUi8JIvvwbt7Y2yh0Y74YqLUbN60CtgGw7s
+IW5ngWajt/4Xdgc8FTPsI9x5AVEHj4xEhbVDqNrHOX23NvAdiuzRprRC4Mzv
+MnFeLUCMbdtjFf0cDHendLbefwYHSfpzOpXNMJO08dRppSZYjpSdplY9hX3q
+kt/8rBuAY8m+I7W+HtoVN++xflUH521zNRXyHsOZR6O8hOhaGDzUQn8YUgPE
+Vb2yutBqWGTJSgzGVAGVZjBvm/8ItLL2bPzzxUOoVrMZLlushIFa3hYDYiWE
+0bVsbWeZYLaFI/I8qRwmpIUDm+EBePt8VXZYLYOvP82PPuwqBdF+A21eWQm0
+CjFIaun3waXZKbMruRjIa88cE0kvAnXxmfd6pfdgbPEx69mLQuA8sEgV+l4A
+pZ6LZ6kKBbBroPJ0guNdMFYXha6CfJit7pAKG8kDvrRHYV9iLtTmqo4OmOVA
+2aURr8eSd2BvVfhs1XQWVCk65mzvy4SIlt/99ToyoM3bkxn6Ih32VXnYaL9h
+ALOpKG2clwapwqbOgsJp0L0yPS94+DYwcyI9/FxTYY09/TQn/y+YCxw/92ws
+BeJa163p1kgBo6Xi/ZmxyUD97pQX23ELZv1NGicSkyC2VC6+gpIIR9iyt3UM
+EyDfKyLpb9V4kDkXMa6nRIcR1HbIUokDjy/cOJoODYTCe9PjSLHQdD7onVLg
+TRiIFgmeuxMDAf6VO6LYN0BduK/RV/QGSA8LapFJ0VCky5bgZUfBBd2bDk3f
+rgNP28fklul16C3zJxBKr0FA93ThqNg1sBVeJJUu/wk/uD8VNT5FQimtVnO4
+5w/I77deq9MZASqSbt9b2VfghfxJjsRwODTQCllPl8KgMHH0y1nZMEiq1565
+aRQKnu4KxMmQEKid19JReRgMh4hzDD6fCtKrIc/4+lSIIcx0D8UHQf6FfHvP
+z4GwqGJxzOpY4H9PfrJVQQBECJfbHdgYAOMPcqh54f6wVTJ248R7P5BvPxU8
+1uULJDfXINZLH5DZGi2o1u0Nxbq6jGquFxy3Wfj8a84TGprrypgSnuBY4p5A
+1b8MGjti+395XoIbkQ52y3c9gOh4QGfXsDuY9jD6Ffe7Q1vD/O1OfzcYvXa1
+rbPFFQoLzMPGZV3hfu3E5bEwF6CJ5w7SuM6wNLc9INvYGTIMspXGqyggUEJV
+OqpEAR86q9o97yKk/nVrm678RYg85Lwgqu8Ey2bJfSYnL0DsWLstm+wIphdo
+TvbBDmA8uk80JeM8xFzsj9FsPQf/B6ETk/4=
+    "],
+    SelectWithContents->True,
+    Selectable->False]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]data", "=", 
+   InterpretationBox[
+    DynamicModuleBox[{Typeset`open = False}, 
+     TemplateBox[{"List", 
+       StyleBox[
+       "\"\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]\"", 
+        "IconizedCustomName", StripOnInput -> False], 
+       GridBox[{{
+          RowBox[{
+            TagBox["\"Head: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            TagBox["List", "IconizedItem"]}]}, {
+          RowBox[{
+            TagBox["\"Length: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            TagBox["241", "IconizedItem"]}]}, {
+          RowBox[{
+            TagBox["\"Byte count: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            
+            TagBox["5840", "IconizedItem"]}]}}, 
+        GridBoxAlignment -> {"Columns" -> {{Left}}}, DefaultBaseStyle -> 
+        "Column", 
+        GridBoxItemSize -> {
+         "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], 
+       Dynamic[Typeset`open]},
+      "IconizedObject"]],
+    CompressedData["
+1:eJwN0fkjFHgDB+BBB4pK7klk5VaItlKfb/RG7ZSr6DDZCOlQylVK3pBKIvdR
+mGiUK9cYypEj5IgQGlfudSUWkdbY/eH5C54ttlfN7XkoFMr0fwRUbvXZsY2J
+a16v+dACjcyuuuzsc/8wWf7E33DzpBFxPZzscevcQaK8uubepecHyDZrixvb
+1xoQ7octA37x+0m/qZrwu5cgbJn5oljTvWTdkuZYieYecqzNx1DDYBcJGm8d
+TvbeSRIldBEyqEPuzySd/np5BxHQnE7mimqTunF2VBVHk6Q59gW2Om8nZ91G
+lXvoGsQjfYpPz0WNGB2THVnMVCFMppRN9Dpl8tMnp3QiSJFYmyT0KahtJdvb
+tB3y+34j4Q4NevQseSLx1ldnZcQWsjY+Jbj9sRwRCLZhHNGWJSn5mx92XJQh
+kd/iTGPKqUSUkRAh+Ls0WTEZfmysUpJsP6bdp+wkQbLcu+KHVMUJvfwjLi6J
+kgal7jDFgY1kLsKuLb1DhLgwFk1f928gC2sjHRd+rid/yZrOXZNdT3icit5r
+vRAmYuXS0hR5IVJ0dmt+LHsN2bqmQdD5rCCxMbFYJ7xZgBzWd74rO7mavD5y
+8MyFxlVkbWRhzIfSleShqCdVs2wFYT4v4CQ38hGF0OzthuO8hM9aynLXRl6y
+2tCfkm/IQ3b+rkgVvEchX3jW0YSeLoNPW9GESrhwtjl6W3zuH+TrrfIcL/yF
+XXf4PsSELmJUzI2mfeMnbgaM/Wq9tIA0i/Z01uV5uNdtmF7j+QN55aNiimFz
+cCTZO07lz+Jme7XZquEZ/KFx8Vn05hk4Hc9J9Tv7N7gd9BajtGksCAgEn+dO
+4Yx67bDzqSnsuTLf+d3jO3QLqgK30SZRc/2e1Ve1bxC8LqNsIjUBLyVVl1aR
+cZRMN71qkRhDSMLSDZbSKBTWc/TG9UfQdYBhM2P/F2hGzRMmYcO4Yzs/F1Az
+BHWJPbt0+YdARuWTh4wHkcRpXbk7bgCxAghv+rsfgyaM15Ym/djwTtLHNacP
+/mYhpZ3UPpjurTmt/6gXVwfXEmtKL97TA3f1zPUg4quSueNcN2pv63X3cbvw
+560SjS8bukAfsLzdo9GJg1Sr4MfmHZD2sL3g682BwxJlyZb1BTf1zYdaptrh
+oM6V99Fph9MPx24Z7za4ulUqWX1qxTHjqppppVY0PslcE3fvM2I7gu5RR1tg
+bGE3vc28BWJVgpRnpc1w9czSVNVphpMaOzUpvQlu/9RJtao0gRqoFPg47RPa
+mVnm8VqfkCUuUJXn0YhJfjt3rfAGfBtSCLIu+Iijm44EfR+oR/1p9rVY8Xqc
+On78/5Kmdeit7VNQfFILp6rZ9z5tNXC6sf/plHwNJlmjYTpuHzCo8lFV/GM1
+EkJiaH+qVkNLKHFHV2AVLBnGFlazlah1FdmXcbYSf0s1ebxoeo82xzhPMaP3
+kBcuedRWWoHppcH0d6iAvf4D/9TScgwxacevG5ajp+NS80xjGSLvbFIXOlOG
+Wa+6sbhvpbi1vHfY/24phL646KZKluKHD3t/m/07KDgbK9AZJZASqpDM7i2G
+N3R0ExWLUdhz7jH3WhE6Cq9So8oL0X+IkQrJQjCM9lXUXH+LiwGno4Sb32DF
+2+CpQd03aK8L2qwYX4DyB4+H0wULUKXh4WJxKx+XGzoNl76zUZgXpurryIZd
+kNBv1YN5OBUP21S7PJzuVtdbN8KChfwacc4VFlzX99pNLOQitiUrept/LsI2
+qUj4i+fCRPmtZkdKDvhmVCU27s9BP3/4ZylONsazywy+uGZj5Z153t0bs7Ha
+c727EisLixHzrOATWcjgGREpXsyE/reABl5aJowdpOrqE15Dq2vBeWEhA5dH
+4y3tLDOQ+D8e3an8dDw09O26LZOOP9StVCf80/Dq4QWu3GwqPjO9tJbtUpFR
+xhN4iZMCVX/BYppZCkzFK83861/B/ibJ4KW9gsOh+5SU+pegFksfsDV7iepr
+r9QkOcmIMZZWyTuXjICjI1YK00w0DWcGm91lQlNWSFdFlAk/yxyr6JQXsJEs
+Sg/Uf4F0M9jPdiZB/gq/WcmNJARx4yo5EkmgMm3idr5JxAG5Ke1KeiKCHFLo
+7ryJKOi2d9RLfQ65RguJVcef46iZQOyHZQZsZuID3TIYUHwkMbNMZ+BkzEdd
+K2EG/MJk9v7wSUAZLZ35ciIecga0tNz/Ukwv/OLy1cbhQeLAL599ccidymJQ
+Wc9gX6wW8EbjGVYKUiYPpT5Fqzc7gq3yFCGOXZzvabE4nHkyrl8zFrybJw55
+FcQgRa6z6rVBDAod391xaIyG5Vdvs3DraLjbOUUoT0Uhb8xHRNQvCs+CqrlG
+0lFwPdG0mJcTidkz54VNj0aCKW/A5B+LAO/4yKPmBxFI5U+bYKhEoPdn7pHz
+9eH4cWb3Q6lr4VgqL/ucJhEOL7ovS6Q0DPVFnCWDi2EQZzW1aImHQf5u7YvP
+FaF49EBNeYtLKE40atCFFEJR4VXgG9wWglC2iUJ8QAj8xMVWaO4PwamdHKW9
+80/g/mRf05vMJ/gXhLObdA==
+    "],
+    SelectWithContents->True,
+    Selectable->False]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.9853200385380783`*^9, 3.985320039822174*^9}, {
+  3.9853201069929457`*^9, 3.9853201114368877`*^9}, {3.9853238759789743`*^9, 
+  3.98532388459732*^9}, {3.985323921949643*^9, 3.9853239226135798`*^9}, {
+  3.985324682013472*^9, 3.98532468942568*^9}},
+ CellLabel->"In[1]:=",ExpressionUUID->"e5a61958-a8ed-471f-bdf0-67918813d8a7"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+   "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]", "[", "p_", "]"}], ":=", 
+   RowBox[{"Evaluate", "[", 
+    RowBox[{
+     FractionBox["32", "5"], 
+     SuperscriptBox["p", 
+      RowBox[{"-", "5"}]], 
+     RowBox[{
+      RowBox[{"Interpolation", "[", 
+       RowBox[{
+        RowBox[{"Transpose", "[", 
+         RowBox[{"{", 
+          RowBox[{"pGrid", ",", 
+           
+           FractionBox[
+            "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]data", 
+            RowBox[{
+             FractionBox["32", "5"], 
+             SuperscriptBox["pGrid", 
+              RowBox[{"-", "5"}]]}]]}], "}"}], "]"}], ",", 
+        RowBox[{"InterpolationOrder", "->", "8"}]}], "]"}], "[", "p", "]"}]}],
+     "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.985324016574819*^9, 3.985324076148876*^9}, {
+   3.985324147449131*^9, 3.985324176343863*^9}, {3.9853242336618223`*^9, 
+   3.985324360798295*^9}, 3.9853245406991043`*^9, 3.9853247159979553`*^9, {
+   3.985324983752318*^9, 3.985324984021212*^9}, 3.98535046194387*^9},
+ CellLabel->"In[4]:=",ExpressionUUID->"62f2f318-4bf0-4a5e-90cc-b6802a31a582"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+   "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]", "[", "p_", "]"}], ":=", 
+   RowBox[{"Evaluate", "[", 
+    RowBox[{
+     FractionBox["32", "5"], 
+     SuperscriptBox["p", 
+      RowBox[{"-", "9"}]], 
+     RowBox[{
+      RowBox[{"Interpolation", "[", 
+       RowBox[{
+        RowBox[{"Transpose", "[", 
+         RowBox[{"{", 
+          RowBox[{"pGrid", ",", 
+           
+           FractionBox[
+            "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]data", 
+            RowBox[{
+             FractionBox["32", "5"], 
+             SuperscriptBox["pGrid", 
+              RowBox[{"-", "9"}]]}]]}], "}"}], "]"}], ",", 
+        RowBox[{"InterpolationOrder", "->", "8"}]}], "]"}], "[", "p", "]"}]}],
+     "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.985324016574819*^9, 3.9853240907616997`*^9}, {
+   3.9853247377225857`*^9, 3.9853247533179398`*^9}, {3.985324988072679*^9, 
+   3.9853249883188047`*^9}, 3.9853504640435257`*^9},
+ CellLabel->"In[5]:=",ExpressionUUID->"90d02370-3959-4ca2-9dd8-0f0db6baaf9a"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", "r0_", "]"}], ":=", 
+   RowBox[{
+    RowBox[{
+    "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]", "[", "r0", "]"}], "+", 
+    RowBox[{
+    "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]", "[", "r0", 
+     "]"}]}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.834566293121441*^9, 3.8345663181229124`*^9}, {
+  3.8345670486267138`*^9, 3.8345670718001957`*^9}, {3.985324812624361*^9, 
+  3.985324813998041*^9}},
+ CellLabel->"In[6]:=",ExpressionUUID->"062c9dc6-1201-4759-9d59-0ab5fdbd870f"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Check accuracy of interpolants", "Subsubsection",
+ CellChangeTimes->{{3.985324837601386*^9, 
+  3.985324844115532*^9}},ExpressionUUID->"20761753-a5eb-443b-8697-\
+4b3d6b6bee0f"],
+
+Cell["\<\
+Validate by trying a less dense grid and a higher order interpolant:\
+\>", "Text",
+ CellChangeTimes->{{3.985324969407516*^9, 3.9853249812538843`*^9}, {
+  3.985350474563953*^9, 
+  3.9853504752612543`*^9}},ExpressionUUID->"dc8c5b67-dc4c-43df-9cdb-\
+6871f8a33c80"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+   "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]2", "[", "p_", "]"}], ":=", 
+   RowBox[{"Evaluate", "[", 
+    RowBox[{
+     FractionBox["32", "5"], 
+     SuperscriptBox["p", 
+      RowBox[{"-", "5"}]], 
+     RowBox[{
+      RowBox[{"Interpolation", "[", 
+       RowBox[{
+        RowBox[{"Downsample", "[", 
+         RowBox[{
+          RowBox[{"Transpose", "[", 
+           RowBox[{"{", 
+            RowBox[{"pGrid", ",", 
+             
+             FractionBox[
+              "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]data", 
+              RowBox[{
+               FractionBox["32", "5"], 
+               SuperscriptBox["pGrid", 
+                RowBox[{"-", "5"}]]}]]}], "}"}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"2", ",", "1"}], "}"}]}], "]"}], ",", 
+        RowBox[{"InterpolationOrder", "->", "8"}]}], "]"}], "[", "p", "]"}]}],
+     "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.985324016574819*^9, 3.985324076148876*^9}, {
+   3.985324147449131*^9, 3.985324176343863*^9}, {3.9853242336618223`*^9, 
+   3.9853243923553762`*^9}, 3.985324468360588*^9, 3.985324538945485*^9, 
+   3.9853247225464277`*^9, {3.9853247945707407`*^9, 3.985324801576676*^9}, 
+   3.9853249096382732`*^9, {3.985324992955201*^9, 3.985325019031742*^9}, {
+   3.98532506852073*^9, 3.985325069590596*^9}, 3.985350468983735*^9},
+ CellLabel->"In[7]:=",ExpressionUUID->"7c427605-ae63-4889-b746-22e8d35ed971"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+   "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]2", "[", "p_", "]"}], ":=", 
+   RowBox[{"Evaluate", "[", 
+    RowBox[{
+     FractionBox["32", "5"], 
+     SuperscriptBox["p", 
+      RowBox[{"-", "9"}]], 
+     RowBox[{
+      RowBox[{"Interpolation", "[", 
+       RowBox[{
+        RowBox[{"Downsample", "[", 
+         RowBox[{
+          RowBox[{"Transpose", "[", 
+           RowBox[{"{", 
+            RowBox[{"pGrid", ",", 
+             
+             FractionBox[
+              "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]data", 
+              RowBox[{
+               FractionBox["32", "5"], 
+               SuperscriptBox["pGrid", 
+                RowBox[{"-", "9"}]]}]]}], "}"}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"2", ",", "1"}], "}"}]}], "]"}], ",", 
+        RowBox[{"InterpolationOrder", "->", "8"}]}], "]"}], "[", "p", "]"}]}],
+     "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.985324016574819*^9, 3.9853240907616997`*^9}, {
+   3.9853247377225857`*^9, 3.985324791263412*^9}, 3.9853249158713493`*^9, {
+   3.985324994076641*^9, 3.985325022811356*^9}, {3.985325071377901*^9, 
+   3.985325071409267*^9}, 3.985350471349209*^9},
+ CellLabel->"In[8]:=",ExpressionUUID->"31fc3345-e108-45f5-bbc6-9ce83aaecfd3"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]2", "[", "r0_", "]"}], ":=", 
+   RowBox[{
+    RowBox[{
+    "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]2", "[", "r0", "]"}], 
+    "+", 
+    RowBox[{
+    "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]2", "[", "r0", 
+     "]"}]}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.834566293121441*^9, 3.8345663181229124`*^9}, {
+  3.8345670486267138`*^9, 3.8345670718001957`*^9}, {3.985324812624361*^9, 
+  3.985324813998041*^9}, {3.985333282301044*^9, 3.985333284933902*^9}},
+ CellLabel->"In[9]:=",ExpressionUUID->"4857ae64-239b-42b4-8149-d180d74d50c1"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+   "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]3", "[", "p_", "]"}], ":=", 
+   RowBox[{"Evaluate", "[", 
+    RowBox[{
+     FractionBox["32", "5"], 
+     SuperscriptBox["p", 
+      RowBox[{"-", "5"}]], 
+     RowBox[{
+      RowBox[{"Interpolation", "[", 
+       RowBox[{
+        RowBox[{"Transpose", "[", 
+         RowBox[{"{", 
+          RowBox[{"pGrid", ",", 
+           
+           FractionBox[
+            "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]data", 
+            RowBox[{
+             FractionBox["32", "5"], 
+             SuperscriptBox["pGrid", 
+              RowBox[{"-", "5"}]]}]]}], "}"}], "]"}], ",", 
+        RowBox[{"InterpolationOrder", "->", "10"}]}], "]"}], "[", "p", 
+      "]"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.985324016574819*^9, 3.985324076148876*^9}, {
+   3.985324147449131*^9, 3.985324176343863*^9}, {3.9853242336618223`*^9, 
+   3.9853243923553762`*^9}, 3.985324468360588*^9, 3.985324538945485*^9, 
+   3.9853247225464277`*^9, {3.9853247945707407`*^9, 3.985324801576676*^9}, {
+   3.9853249096382732`*^9, 3.98532494378021*^9}, {3.9853249992208157`*^9, 
+   3.98532500755669*^9}},
+ CellLabel->"In[10]:=",ExpressionUUID->"7c0874a6-1c3d-4e76-9f9c-870ced50efbc"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+   "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]3", "[", "p_", "]"}], ":=", 
+   RowBox[{"Evaluate", "[", 
+    RowBox[{
+     FractionBox["32", "5"], 
+     SuperscriptBox["p", 
+      RowBox[{"-", "9"}]], 
+     RowBox[{
+      RowBox[{"Interpolation", "[", 
+       RowBox[{
+        RowBox[{"Transpose", "[", 
+         RowBox[{"{", 
+          RowBox[{"pGrid", ",", 
+           
+           FractionBox[
+            "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]data", 
+            RowBox[{
+             FractionBox["32", "5"], 
+             SuperscriptBox["pGrid", 
+              RowBox[{"-", "9"}]]}]]}], "}"}], "]"}], ",", 
+        RowBox[{"InterpolationOrder", "->", "10"}]}], "]"}], "[", "p", 
+      "]"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.985324016574819*^9, 3.9853240907616997`*^9}, {
+   3.9853247377225857`*^9, 3.985324791263412*^9}, {3.9853249158713493`*^9, 
+   3.985324947252515*^9}, {3.9853250043961067`*^9, 3.985325005310341*^9}, 
+   3.98532522831949*^9},
+ CellLabel->"In[11]:=",ExpressionUUID->"db18ac2e-f72a-400b-b411-3af5c7b59cba"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]3", "[", "r0_", "]"}], ":=", 
+   RowBox[{
+    RowBox[{
+    "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]3", "[", "r0", "]"}], 
+    "+", 
+    RowBox[{
+    "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]3", "[", "r0", 
+     "]"}]}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.834566293121441*^9, 3.8345663181229124`*^9}, {
+  3.8345670486267138`*^9, 3.8345670718001957`*^9}, {3.985324812624361*^9, 
+  3.985324813998041*^9}, {3.985333282301044*^9, 3.985333284933902*^9}, {
+  3.985405502929442*^9, 3.9854055067523937`*^9}},
+ CellLabel->"In[12]:=",ExpressionUUID->"075e0051-2745-4722-a367-8aea1809cbbb"],
+
+Cell[BoxData[
+ RowBox[{"LogPlot", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"Abs", "[", 
+      RowBox[{"1", "-", 
+       RowBox[{
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]", "[", "p", 
+         "]"}], "/", 
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]2", "[", "p", 
+         "]"}]}]}], "]"}], ",", 
+     RowBox[{"Abs", "[", 
+      RowBox[{"1", "-", 
+       RowBox[{
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]", "[", "p", 
+         "]"}], "/", 
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]3", "[", "p", 
+         "]"}]}]}], "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"p", ",", "6", ",", "28"}], "}"}], ",", 
+   RowBox[{"PlotRange", "->", "All"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.98532409369794*^9, 3.985324134310472*^9}, {
+  3.985324501728018*^9, 3.985324507409995*^9}, {3.98532454634489*^9, 
+  3.985324624014394*^9}, {3.985324854409841*^9, 3.985324856771099*^9}, {
+  3.985324951857584*^9, 3.985324953825281*^9}, {3.985325064689528*^9, 
+  3.985325078050683*^9}, {3.985325109416149*^9, 3.985325118006816*^9}, {
+  3.985325171494144*^9, 3.985325175723063*^9}},
+ CellLabel->"In[13]:=",ExpressionUUID->"b0f44854-eb93-47e6-b63b-d34332211ced"],
+
+Cell[BoxData[
+ RowBox[{"FindMaximum", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"Abs", "[", 
+      RowBox[{"1", "-", 
+       RowBox[{
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]", "[", "p", 
+         "]"}], "/", 
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]3", "[", "p", 
+         "]"}]}]}], "]"}], ",", 
+     RowBox[{"6", "<=", "p", "<=", "6.1"}]}], "}"}], ",", "p"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.9854020367423897`*^9, 3.985402098025317*^9}},
+ CellLabel->"In[14]:=",ExpressionUUID->"3dfa51ff-ba7d-43b4-8ad8-3d91e46948e5"],
+
+Cell[BoxData[
+ RowBox[{"Plot", "[", 
+  RowBox[{
+   RowBox[{"Abs", "[", 
+    RowBox[{"1", "-", 
+     RowBox[{
+      RowBox[{
+      "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]", "[", "p", "]"}], 
+      "/", 
+      RowBox[{
+      "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]3", "[", "p", 
+       "]"}]}]}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"p", ",", "6", ",", "6.3"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985402112456737*^9, 3.985402120027501*^9}},
+ CellLabel->"In[15]:=",ExpressionUUID->"71d95f37-4f10-4283-859b-46725fbc76f5"],
+
+Cell[BoxData[
+ RowBox[{"LogPlot", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"Abs", "[", 
+      RowBox[{"1", "-", 
+       RowBox[{
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]", "[", "p", 
+         "]"}], "/", 
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]2", "[", "p", 
+         "]"}]}]}], "]"}], ",", 
+     RowBox[{"Abs", "[", 
+      RowBox[{"1", "-", 
+       RowBox[{
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]", "[", "p", 
+         "]"}], "/", 
+        RowBox[{
+        "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]3", "[", "p", 
+         "]"}]}]}], "]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"p", ",", "6", ",", "28"}], "}"}], ",", 
+   RowBox[{"PlotRange", "->", "All"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.98532409369794*^9, 3.985324134310472*^9}, {
+  3.985324501728018*^9, 3.985324507409995*^9}, {3.98532454634489*^9, 
+  3.985324624014394*^9}, {3.985324854409841*^9, 3.985324856771099*^9}, {
+  3.985324951857584*^9, 3.985324953825281*^9}, {3.985325064689528*^9, 
+  3.985325078050683*^9}, {3.985325109416149*^9, 3.985325118006816*^9}, {
+  3.985325171494144*^9, 3.985325208677787*^9}},
+ CellLabel->"In[16]:=",ExpressionUUID->"dc5fcaf8-dccf-4dfd-8289-d99d2faac57f"],
+
+Cell[TextData[{
+ "So our total fluxes have a precision around ",
+ Cell[BoxData[
+  FormBox[
+   SuperscriptBox["10", 
+    RowBox[{"-", "10"}]], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "a2c39110-5ffc-4875-b02f-9fe5a4da9847"],
+ " at worst. Note the horizon flux has a higher relative error but is smaller \
+in absolute terms than the infinity flux:"
+}], "Text",
+ CellChangeTimes->{{3.985325247003669*^9, 3.985325315854569*^9}, {
+  3.98532534600487*^9, 
+  3.985325362767994*^9}},ExpressionUUID->"a97bfdf8-450a-4026-9a27-\
+b9b03a1d3f86"],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{
+  "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalH]", "[", "6", "]"}], 
+  RowBox[{
+  "\[ScriptCapitalF]\[ScriptCapitalE]\[ScriptCapitalI]", "[", "6", 
+   "]"}]]], "Input",
+ CellChangeTimes->{{3.985325325162579*^9, 3.985325337651726*^9}},
+ CellLabel->"In[17]:=",ExpressionUUID->"73ad7efc-7773-4d09-870d-be7362a9b884"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["0PA inspiral", "Section",
+ CellChangeTimes->{{3.985325382388026*^9, 
+  3.985325384524392*^9}},ExpressionUUID->"519c2be0-f358-4113-862f-\
+771d35dd98d8"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"M", "=", "1"}], ";"}]], "Input",
+ CellChangeTimes->{{3.985325953947294*^9, 3.9853259550928793`*^9}},
+ CellLabel->"In[18]:=",ExpressionUUID->"cd02986d-2d3d-41ec-9954-a18beac160ae"],
+
+Cell[TextData[{
+ "Study a range of mass ratios from ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Epsilon]", "=", 
+    SuperscriptBox["10", "0"]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "8144047d-0d7d-43b8-af3f-700242ea8b1b"],
+ " to ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Epsilon]", "=", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "10"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "8b05a8f6-a7b1-4928-9545-bd545070dedc"]
+}], "Text",
+ CellChangeTimes->{{3.9853334157047167`*^9, 
+  3.985333443775258*^9}},ExpressionUUID->"30796971-93bf-4133-b29d-\
+db09f3526273"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"\[Epsilon]s", "=", 
+   SuperscriptBox["10", 
+    RowBox[{"-", 
+     RowBox[{"Range", "[", 
+      RowBox[{"0", ",", "9"}], "]"}]}]]}], ";"}]], "Input",
+ CellChangeTimes->{{3.985333972415009*^9, 3.985333974353837*^9}, 
+   3.985338730869823*^9},
+ CellLabel->"In[19]:=",ExpressionUUID->"6e29119a-58d1-49b3-ae4f-4998b1df3c67"],
+
+Cell[CellGroupData[{
+
+Cell["Standard inspiral and default NDSolve options", "Subsection",
+ CellChangeTimes->{{3.985326123327004*^9, 3.98532612851394*^9}, {
+  3.985333099084257*^9, 
+  3.9853331143275347`*^9}},ExpressionUUID->"412e02f2-a49e-4724-b0ed-\
+744ea64f5385"],
+
+Cell[BoxData[
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[CapitalOmega]sol", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"r0sol", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{"NDSolveValue", "[", 
+      RowBox[{
+       RowBox[{"{", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}], "\[Equal]", 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", 
+                 RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", 
+              RowBox[{"r0", "[", "t", "]"}]}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", 
+             RowBox[{"r0", "[", "t", "]"}], "]"}], " ", "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", 
+                RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}]}]]}], ",", " ", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[Phi]", "'"}], "[", "t", "]"}], "==", 
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "==", 
+          RowBox[{"Sqrt", "[", 
+           FractionBox["M", 
+            SuperscriptBox[
+             RowBox[{"r0", "[", "t", "]"}], "3"]], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"r0", "[", "0", "]"}], "\[Equal]", 
+          RowBox[{"15", "M"}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[Phi]", "[", "0", "]"}], "\[Equal]", "0"}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"WhenEvent", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"r0", "[", "t", "]"}], "\[LessEqual]", 
+            RowBox[{"6.1", "M"}]}], ",", " ", "\"\<StopIntegration\>\""}], 
+          "]"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[CapitalOmega]", ",", "\[Phi]", ",", "r0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"t", ",", "0", ",", "\[Infinity]"}], "}"}]}], "]"}]}], ";", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"tmin", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"tmax", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"r0sol", "[", "\[Epsilon]", "]"}], "[", "\"\<Domain\>\"", 
+       "]"}], "[", 
+      RowBox[{"[", "1", "]"}], "]"}]}], ";"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985325834695066*^9, 3.985326040356366*^9}, {
+   3.985326092698344*^9, 3.9853260932625933`*^9}, {3.985326214740563*^9, 
+   3.985326248761726*^9}, 3.985326957073206*^9, {3.98532788190653*^9, 
+   3.985327898594636*^9}, 3.985333982074884*^9},
+ CellLabel->"In[20]:=",ExpressionUUID->"2f3c89ac-7c5d-4577-b10d-0d219033ab7b"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Check accuracy", "Subsection",
+ CellChangeTimes->{{3.985333336877019*^9, 
+  3.9853333390024233`*^9}},ExpressionUUID->"74bff0ba-dd71-4212-90aa-\
+5b86462546c1"],
+
+Cell[CellGroupData[{
+
+Cell["Higher accuracy flux data interpolation", "Subsubsection",
+ CellChangeTimes->{{3.985326123327004*^9, 3.98532612851394*^9}, {
+  3.985333099084257*^9, 3.9853331143275347`*^9}, {3.985333266349551*^9, 
+  3.9853332719405937`*^9}, {3.98533335353723*^9, 3.985333373630825*^9}, {
+  3.9854054619358187`*^9, 
+  3.985405468055818*^9}},ExpressionUUID->"9550f32b-350d-4335-9d78-\
+48da54d679ae"],
+
+Cell[BoxData[
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[CapitalOmega]sol3", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"\[Phi]sol3", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"r0sol3", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{"NDSolveValue", "[", 
+      RowBox[{
+       RowBox[{"{", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}], "\[Equal]", 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", 
+                 RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", 
+              RowBox[{"r0", "[", "t", "]"}]}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]3", "[", 
+             RowBox[{"r0", "[", "t", "]"}], "]"}], " ", "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", 
+                RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}]}]]}], ",", " ", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[Phi]", "'"}], "[", "t", "]"}], "==", 
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "==", 
+          RowBox[{"Sqrt", "[", 
+           FractionBox["M", 
+            SuperscriptBox[
+             RowBox[{"r0", "[", "t", "]"}], "3"]], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"r0", "[", "0", "]"}], "\[Equal]", 
+          RowBox[{"15", "M"}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[Phi]", "[", "0", "]"}], "\[Equal]", "0"}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"WhenEvent", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"r0", "[", "t", "]"}], "\[LessEqual]", 
+            RowBox[{"6.1", "M"}]}], ",", " ", "\"\<StopIntegration\>\""}], 
+          "]"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[CapitalOmega]", ",", "\[Phi]", ",", "r0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"t", ",", "0", ",", "\[Infinity]"}], "}"}]}], "]"}]}], ";", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"tmin3", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"tmax3", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"r0sol3", "[", "\[Epsilon]", "]"}], "[", "\"\<Domain\>\"", 
+       "]"}], "[", 
+      RowBox[{"[", "1", "]"}], "]"}]}], ";"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985325834695066*^9, 3.985326040356366*^9}, {
+   3.985326092698344*^9, 3.9853260932625933`*^9}, {3.985326214740563*^9, 
+   3.985326248761726*^9}, 3.985326957073206*^9, {3.98532788190653*^9, 
+   3.985327898594636*^9}, {3.9853332895358343`*^9, 3.98533329786329*^9}, {
+   3.985333394795891*^9, 3.985333403006357*^9}, 3.9853339861805964`*^9, {
+   3.985405473075943*^9, 3.985405487123838*^9}},
+ CellLabel->"In[21]:=",ExpressionUUID->"419111c8-c5e1-4288-b52f-6c52b24e740d"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"LogPlot", "[", 
+        RowBox[{
+         RowBox[{"Abs", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", "]"}], "-", 
+           RowBox[{
+            RowBox[{"\[Phi]sol3", "[", "\[Epsilon]", "]"}], "[", "t", "]"}]}],
+           "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmax3", "[", "\[Epsilon]", "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985338416465762*^9, 3.985338626369433*^9}, {
+   3.985338694219058*^9, 3.985338700775288*^9}, 3.9853387446272078`*^9, {
+   3.985338849395471*^9, 3.985338860696752*^9}, {3.985340041548759*^9, 
+   3.985340063779539*^9}, {3.9854055134720917`*^9, 3.985405517924518*^9}},
+ CellLabel->"In[22]:=",ExpressionUUID->"1cb68fb6-50d6-4268-8be7-e53abccc64fd"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"LogPlot", "[", 
+        RowBox[{
+         RowBox[{"Abs", "[", 
+          RowBox[{"1", "-", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", "]"}], "/", 
+            RowBox[{
+             RowBox[{"\[Phi]sol3", "[", "\[Epsilon]", "]"}], "[", "t", 
+             "]"}]}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmax2", "[", "\[Epsilon]", "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985338416465762*^9, 3.985338626369433*^9}, {
+   3.985338694219058*^9, 3.985338700775288*^9}, 3.9853387446272078`*^9, {
+   3.9853387957519073`*^9, 3.9853388395214663`*^9}, {3.985338884194521*^9, 
+   3.985338886256032*^9}, {3.985340047771641*^9, 3.985340068979169*^9}, {
+   3.985405540438735*^9, 3.985405540533852*^9}},
+ CellLabel->"In[23]:=",ExpressionUUID->"ad1312db-3fce-4c80-a54c-5dd823ef4123"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["PrecisionGoal=\[Infinity]", "Subsubsection",
+ CellChangeTimes->{{3.985326123327004*^9, 3.98532614283921*^9}, {
+  3.98533927986922*^9, 3.98533928092623*^9}, {3.985405305145835*^9, 
+  3.985405307877308*^9}},ExpressionUUID->"c4568b72-21f3-4d08-821e-\
+0fb57e28c8ee"],
+
+Cell[BoxData[
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[CapitalOmega]solHP", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"r0solHP", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{"NDSolveValue", "[", 
+      RowBox[{
+       RowBox[{"{", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}], "\[Equal]", 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", 
+                 RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", 
+              RowBox[{"r0", "[", "t", "]"}]}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", 
+             RowBox[{"r0", "[", "t", "]"}], "]"}], " ", "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", 
+                RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}]}]]}], ",", " ", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[Phi]", "'"}], "[", "t", "]"}], "==", 
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "==", 
+          RowBox[{"Sqrt", "[", 
+           FractionBox["M", 
+            SuperscriptBox[
+             RowBox[{"r0", "[", "t", "]"}], "3"]], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"r0", "[", "0", "]"}], "\[Equal]", 
+          RowBox[{"15", "M"}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[Phi]", "[", "0", "]"}], "\[Equal]", "0"}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"WhenEvent", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"r0", "[", "t", "]"}], "\[LessEqual]", 
+            RowBox[{"6.1", "M"}]}], ",", " ", "\"\<StopIntegration\>\""}], 
+          "]"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[CapitalOmega]", ",", "\[Phi]", ",", "r0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"t", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+       RowBox[{"PrecisionGoal", "\[Rule]", "\[Infinity]"}]}], "]"}]}], ";", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"tminHP", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"tmaxHP", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"r0solHP", "[", "\[Epsilon]", "]"}], "[", "\"\<Domain\>\"", 
+       "]"}], "[", 
+      RowBox[{"[", "1", "]"}], "]"}]}], ";"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985325834695066*^9, 3.985326040356366*^9}, {
+   3.985326092698344*^9, 3.9853261201885023`*^9}, 3.985326169302095*^9, {
+   3.985326256004445*^9, 3.985326267898198*^9}, {3.985326679956983*^9, 
+   3.9853266806403522`*^9}, {3.985326885205934*^9, 3.985326888054532*^9}, {
+   3.985333967387856*^9, 3.985333968583578*^9}, {3.985339303553193*^9, 
+   3.985339306022212*^9}, {3.9853397669917183`*^9, 3.985339809261866*^9}, {
+   3.9853451146173067`*^9, 3.9853451534044037`*^9}, {3.985366740152873*^9, 
+   3.985366740439851*^9}, {3.9854048398716393`*^9, 3.985404840941983*^9}},
+ CellLabel->"In[24]:=",ExpressionUUID->"4de1bee3-2564-4c0d-bf46-c21fb685e901"],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{
+   RowBox[{"\[Phi]solHP", "[", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "7"}]], "]"}], "[", 
+   RowBox[{"tmaxHP", "[", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "7"}]], "]"}], "]"}], 
+  SuperscriptBox["10", 
+   RowBox[{
+    RowBox[{"-", "MachinePrecision"}], "/", "2"}]]]], "Input",
+ CellChangeTimes->{{3.985333474274263*^9, 3.985333483847929*^9}, {
+  3.9853336546255503`*^9, 3.98533369513839*^9}, {3.9853337436194487`*^9, 
+  3.985333761580123*^9}, {3.9854088925229187`*^9, 3.985408927655032*^9}},
+ CellLabel->"In[50]:=",ExpressionUUID->"f016e15e-38bb-41be-af86-6eefa4398124"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"Table", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"Log10", "[", "\[Epsilon]", "]"}], ",", 
+       FractionBox[
+        RowBox[{
+         RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", 
+         RowBox[{"tmaxHP", "[", "\[Epsilon]", "]"}], "]"}], 
+        SuperscriptBox["10", 
+         RowBox[{
+          RowBox[{"-", "MachinePrecision"}], "/", "2"}]]], ",", 
+       RowBox[{
+        RowBox[{"r0solHP", "[", "\[Epsilon]", "]"}], "[", 
+        RowBox[{"tmaxHP", "[", "\[Epsilon]", "]"}], "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], "//", 
+   "Transpose"}], "//", "TableForm"}]], "Input",
+ CellChangeTimes->{{3.985333474274263*^9, 3.985333483847929*^9}, {
+  3.9853336546255503`*^9, 3.98533369513839*^9}, {3.9853337436194487`*^9, 
+  3.985333761580123*^9}, {3.985333948907606*^9, 3.9853339955805273`*^9}, {
+  3.985339819936162*^9, 3.9853399283064423`*^9}},
+ CellLabel->"In[26]:=",ExpressionUUID->"c5bc01b9-b2c6-4860-a131-f57641a33d09"],
+
+Cell[TextData[{
+ "This fails for sufficiently small mass ratio ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Epsilon]", "\[LessTilde]", 
+    SuperscriptBox["10", 
+     RowBox[{"-", "7"}]]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "f244228a-8f13-4a5f-8b78-6ada0117566f"],
+ " and long inspiral times. This is because the total phase evolution is \
+large, so that reaching the accuracy goal requires greater than machine \
+precision. Let\[CloseCurlyQuote]s look at the dephasing anyway, but keep in \
+mind that for the smallest three mass ratios we\[CloseCurlyQuote]re not \
+reaching ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"p", "=", "6.1"}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "4930d240-b1f2-4af8-8bd7-386fad1af8b5"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.9853335497077293`*^9, 3.985333625272369*^9}, {
+  3.985333872484865*^9, 3.9853339378806*^9}, {3.985334028813789*^9, 
+  3.985334104921176*^9}, {3.985339949557457*^9, 
+  3.985339953649919*^9}},ExpressionUUID->"882ac59e-f39f-44e5-8d9e-\
+5a57e9257c7d"],
+
+Cell["Dephasing as a function of time", "Text",
+ CellChangeTimes->{{3.985342727937459*^9, 3.985342749498765*^9}, 
+   3.9853442875455503`*^9},ExpressionUUID->"d670bb64-b3bb-42b3-b416-\
+ba908e890752"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"LogPlot", "[", 
+        RowBox[{
+         RowBox[{"Abs", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", "]"}], "-", 
+           RowBox[{
+            RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", 
+            "]"}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmaxHP", "[", "\[Epsilon]", "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985338416465762*^9, 3.985338626369433*^9}, {
+   3.985338694219058*^9, 3.985338700775288*^9}, 3.9853387446272078`*^9, {
+   3.985338849395471*^9, 3.985338860696752*^9}, {3.985339975410191*^9, 
+   3.98533997594764*^9}, {3.985340087263968*^9, 3.985340087464201*^9}, {
+   3.9853401319864883`*^9, 3.985340132355145*^9}, {3.985340232391837*^9, 
+   3.985340232871867*^9}},
+ CellLabel->"In[27]:=",ExpressionUUID->"a79f6aea-19ba-4c23-a4fc-9eb0964d26c5"],
+
+Cell["Relative dephasing as a function of time", "Text",
+ CellChangeTimes->{{3.985342727937459*^9, 3.985342740634469*^9}, {
+  3.98534279926161*^9, 3.985342801412551*^9}, {3.985344292563457*^9, 
+  3.985344293092647*^9}},ExpressionUUID->"eb47423c-c9dc-4470-b1de-\
+d31aeaafd0cd"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"LogPlot", "[", 
+        RowBox[{
+         RowBox[{"Abs", "[", 
+          RowBox[{"1", "-", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", "]"}], "/", 
+            RowBox[{
+             RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", 
+             "]"}]}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmaxHP", "[", "\[Epsilon]", "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985338416465762*^9, 3.985338626369433*^9}, {
+   3.985338694219058*^9, 3.985338700775288*^9}, 3.9853387446272078`*^9, {
+   3.9853387957519073`*^9, 3.9853388395214663`*^9}, {3.985338884194521*^9, 
+   3.985338886256032*^9}, {3.985339978684149*^9, 3.985339979202327*^9}, {
+   3.9853402497266903`*^9, 3.985340250299621*^9}, {3.9853667917052526`*^9, 
+   3.985366793318349*^9}, {3.9853668254211082`*^9, 3.985366826677197*^9}},
+ CellLabel->"In[28]:=",ExpressionUUID->"432ca352-6c46-4f74-ac66-7b1cb8a1fcd7"],
+
+Cell["Dephasing as a function of orbital frequency", "Text",
+ CellChangeTimes->{{3.985342727937459*^9, 
+  3.985342740634469*^9}},ExpressionUUID->"ba51ef11-8ffb-41ae-a605-\
+be8a1f66e984"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"ParametricPlot", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"\[CapitalOmega]sol", "[", "\[Epsilon]", "]"}], "[", "t", 
+            "]"}], ",", 
+           RowBox[{"Abs", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", "]"}], 
+             "-", 
+             RowBox[{
+              RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", 
+              "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmaxHP", "[", "\[Epsilon]", "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}], ",", 
+         RowBox[{"AspectRatio", "->", 
+          RowBox[{"1", "/", "GoldenRatio"}]}], ",", 
+         RowBox[{"PlotRange", "->", "All"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.98534248480101*^9, 3.985342562428925*^9}, {
+  3.985366809143724*^9, 3.985366810698388*^9}},
+ CellLabel->"In[29]:=",ExpressionUUID->"29989a44-a718-409c-92df-d219dc6a9471"],
+
+Cell["Dephasing over a fixed frequency interval", "Text",
+ CellChangeTimes->{{3.985342808963482*^9, 
+  3.985342817464449*^9}},ExpressionUUID->"422f17ab-935d-4449-9e9f-\
+ab08f6771bc6"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"Show", "[", 
+        RowBox[{
+         RowBox[{"ListLogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+               RowBox[{"With", "[", 
+                RowBox[{
+                 RowBox[{"{", 
+                  RowBox[{"t", "=", 
+                   RowBox[{"Min", "[", 
+                    RowBox[{
+                    RowBox[{"tmax", "[", "\[Epsilon]", "]"}], ",", 
+                    RowBox[{"tmaxHP", "[", "\[Epsilon]", "]"}]}], "]"}]}], 
+                  "}"}], ",", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", 
+                   "]"}], "-", 
+                  RowBox[{
+                   RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", 
+                   "]"}]}]}], "]"}]}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"\[Epsilon]", ",", 
+               RowBox[{"\[Epsilon]s", "[", 
+                RowBox[{"[", 
+                 RowBox[{";;", 
+                  RowBox[{"-", "4"}]}], "]"}], "]"}]}], "}"}]}], "]"}], ",", 
+           RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+           RowBox[{
+           "PlotLabel", 
+            "->", "\"\<Dephasing over fixed frequency interval \
+[\!\(\*SuperscriptBox[\(15\), \(\(-3\)/2\)]\),\!\(\*SuperscriptBox[\(6.1\), \
+\(\(-3\)/2\)]\)]\>\""}]}], "]"}], ",", 
+         RowBox[{"LogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"2", " ", 
+            SuperscriptBox["10", 
+             RowBox[{"-", "5"}]], "q"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"q", ",", 
+             SuperscriptBox["10", "0"], ",", 
+             SuperscriptBox["10", "6"]}], "}"}]}], "]"}]}], "]"}], ",", 
+       "\[IndentingNewLine]", 
+       RowBox[{"ListLogLogPlot", "[", 
+        RowBox[{
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+             RowBox[{"With", "[", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"t", "=", 
+                 RowBox[{"Min", "[", 
+                  RowBox[{
+                   RowBox[{"tmax", "[", "\[Epsilon]", "]"}], ",", 
+                   RowBox[{"tmaxHP", "[", "\[Epsilon]", "]"}]}], "]"}]}], 
+                "}"}], ",", 
+               RowBox[{"Abs", "[", 
+                RowBox[{"1", "-", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", 
+                   "]"}], "/", 
+                  RowBox[{
+                   RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", 
+                   "]"}]}]}], "]"}]}], "]"}]}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"\[Epsilon]", ",", 
+             RowBox[{"\[Epsilon]s", "[", 
+              RowBox[{"[", 
+               RowBox[{";;", 
+                RowBox[{"-", "4"}]}], "]"}], "]"}]}], "}"}]}], "]"}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{
+         "PlotLabel", 
+          "->", "\"\<Relative dephasing over fixed frequency interval \
+[\!\(\*SuperscriptBox[\(15\), \(\(-3\)/2\)]\),\!\(\*SuperscriptBox[\(6.1\), \
+\(\(-3\)/2\)]\)]\>\""}]}], "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"With", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"t", "=", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax", "[", 
+              SuperscriptBox["10", "0"], "]"}], ",", 
+             RowBox[{"tmaxHP", "[", 
+              SuperscriptBox["10", "0"], "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"ListLogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+               RowBox[{"Abs", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", 
+                  "]"}], "-", 
+                 RowBox[{
+                  RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", 
+                  "]"}]}], "]"}]}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"\[Epsilon]", ",", 
+               RowBox[{"\[Epsilon]s", "[", 
+                RowBox[{"[", 
+                 RowBox[{";;", 
+                  RowBox[{"-", "4"}]}], "]"}], "]"}]}], "}"}]}], "]"}], ",", 
+           RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+           RowBox[{"PlotLabel", "->", 
+            RowBox[{"\"\<Dephasing over fixed time interval [0, \>\"", "<>", 
+             RowBox[{"ToString", "[", "t", "]"}], "<>", "\"\<]\>\""}]}]}], 
+          "]"}]}], "]"}], ",", "\[IndentingNewLine]", 
+       RowBox[{"With", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"t", "=", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax", "[", 
+              SuperscriptBox["10", "0"], "]"}], ",", 
+             RowBox[{"tmaxHP", "[", 
+              SuperscriptBox["10", "0"], "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"ListLogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+               RowBox[{"Abs", "[", 
+                RowBox[{"1", "-", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", 
+                   "]"}], "/", 
+                  RowBox[{
+                   RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", 
+                   "]"}]}]}], "]"}]}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"\[Epsilon]", ",", 
+               RowBox[{"\[Epsilon]s", "[", 
+                RowBox[{"[", 
+                 RowBox[{";;", 
+                  RowBox[{"-", "4"}]}], "]"}], "]"}]}], "}"}]}], "]"}], ",", 
+           RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+           RowBox[{"PlotLabel", "->", 
+            
+            RowBox[{"\"\<Relative dephasing over time frequency interval [0, \
+\>\"", "<>", 
+             RowBox[{"ToString", "[", "t", "]"}], "<>", "\"\<]\>\""}]}]}], 
+          "]"}]}], "]"}]}], "}"}]}], "}"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.9853401711250896`*^9, 3.985340225841873*^9}, {
+  3.985340267683071*^9, 3.98534028355669*^9}, {3.985340328196414*^9, 
+  3.985340328578356*^9}, {3.985342376223011*^9, 3.985342459568577*^9}, {
+  3.985342823226336*^9, 3.985342958149475*^9}, {3.985342988944374*^9, 
+  3.985343088164336*^9}, {3.985345645856616*^9, 3.985345646462986*^9}, {
+  3.9853456898445883`*^9, 3.9853456911856947`*^9}, {3.985405040847453*^9, 
+  3.9854051242514267`*^9}},
+ CellLabel->"In[30]:=",ExpressionUUID->"fc3440c2-8713-4471-9383-ae493cf01b69"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Try to improve accuracy", "Subsection",
+ CellChangeTimes->{{3.9853333441454477`*^9, 3.9853333464504642`*^9}, {
+  3.98534574240342*^9, 
+  3.985345743605744*^9}},ExpressionUUID->"d7be0953-62dc-4d2a-9c69-\
+06e1d0d94275"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Evolve ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Phi]", "-", 
+    RowBox[{
+     SubscriptBox["\[CapitalOmega]", "0"], " ", "t"}]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "929d00c8-9bd1-460b-9e5b-3a3c80dda5e5"],
+ " with default NDSolve options"
+}], "Subsubsection",
+ CellChangeTimes->{{3.985326123327004*^9, 3.98532612851394*^9}, {
+  3.985333128423573*^9, 3.985333148774803*^9}, {3.9853432152716417`*^9, 
+  3.985343215495681*^9}},ExpressionUUID->"1271abf3-8152-4247-ba65-\
+b05b2bda323b"],
+
+Cell[BoxData[
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Phi]Minus\[CapitalOmega]0tsol", "[", "\[Epsilon]", "]"}], 
+      "}"}], "=", 
+     RowBox[{"NDSolveValue", "[", 
+      RowBox[{
+       RowBox[{"{", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}], "\[Equal]", 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", 
+                 RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", 
+              RowBox[{"r0", "[", "t", "]"}]}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", 
+             RowBox[{"r0", "[", "t", "]"}], "]"}], " ", "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", 
+                RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}]}]]}], ",", " ", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[Phi]Minus\[CapitalOmega]0t", "'"}], "[", "t", "]"}], "==", 
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "-", 
+           SqrtBox[
+            FractionBox["M", 
+             SuperscriptBox["15", "3"]]]}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "==", 
+          RowBox[{"Sqrt", "[", 
+           FractionBox["M", 
+            SuperscriptBox[
+             RowBox[{"r0", "[", "t", "]"}], "3"]], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"r0", "[", "0", "]"}], "\[Equal]", 
+          RowBox[{"15", "M"}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[Phi]Minus\[CapitalOmega]0t", "[", "0", "]"}], "\[Equal]",
+           "0"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"WhenEvent", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"r0", "[", "t", "]"}], "\[LessEqual]", 
+            RowBox[{"6.1", "M"}]}], ",", " ", "\"\<StopIntegration\>\""}], 
+          "]"}]}], "}"}], ",", 
+       RowBox[{"{", "\[Phi]Minus\[CapitalOmega]0t", "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"t", ",", "0", ",", "\[Infinity]"}], "}"}]}], "]"}]}], ";"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", ",", 
+     SuperscriptBox["10", 
+      RowBox[{"-", 
+       RowBox[{"Range", "[", 
+        RowBox[{"0", ",", "10"}], "]"}]}]]}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985325834695066*^9, 3.985326040356366*^9}, {
+   3.985326092698344*^9, 3.9853260932625933`*^9}, {3.985326214740563*^9, 
+   3.985326248761726*^9}, 3.985326957073206*^9, {3.98532788190653*^9, 
+   3.985327898594636*^9}, {3.985328148751795*^9, 3.985328153150156*^9}, {
+   3.985328188041909*^9, 3.985328210132288*^9}, {3.985328291741705*^9, 
+   3.985328319305922*^9}, {3.985328591169084*^9, 3.985328657960045*^9}, {
+   3.985328784705158*^9, 3.9853287889364977`*^9}, {3.9853288295610723`*^9, 
+   3.9853288702182617`*^9}, {3.9853331601387653`*^9, 3.98533316225513*^9}, {
+   3.985333193754875*^9, 3.9853332192810593`*^9}, {3.985343157815727*^9, 
+   3.985343158655429*^9}, {3.985343222841797*^9, 3.985343229692348*^9}, {
+   3.985344388405428*^9, 3.985344390727763*^9}},
+ CellLabel->"In[31]:=",ExpressionUUID->"3f68989d-1ea0-477a-96cc-ee84cb2ad337"],
+
+Cell[BoxData[
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "\[Phi]Minus\[CapitalOmega]0tMinus\[CapitalOmega]0primet2sol", "[", 
+       "\[Epsilon]", "]"}], "}"}], "=", 
+     RowBox[{"NDSolveValue", "[", 
+      RowBox[{
+       RowBox[{"{", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}], "\[Equal]", 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", 
+                 RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", 
+              RowBox[{"r0", "[", "t", "]"}]}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", 
+             RowBox[{"r0", "[", "t", "]"}], "]"}], " ", "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", 
+                RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}]}]]}], ",", " ", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+           RowBox[{
+           "\[Phi]Minus\[CapitalOmega]0tMinus\[CapitalOmega]0primet2", "'"}], 
+           "[", "t", "]"}], "==", 
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "-", 
+           RowBox[{"(", 
+            RowBox[{
+             SqrtBox[
+              FractionBox["M", 
+               SuperscriptBox["15", "3"]]], "+", 
+             RowBox[{
+              FractionBox[
+               RowBox[{"3", " ", 
+                SuperscriptBox[
+                 RowBox[{"(", 
+                  RowBox[{"1", "-", 
+                   RowBox[{"3", " ", 
+                    RowBox[{"M", "/", "15"}]}]}], ")"}], 
+                 RowBox[{"3", "/", "2"}]], " ", 
+                SqrtBox[
+                 RowBox[{"M", "/", "15"}]], " ", 
+                RowBox[{
+                "\[ScriptCapitalF]\[ScriptCapitalE]", "[", "15", "]"}], " ", 
+                "\[Epsilon]"}], 
+               RowBox[{
+                SuperscriptBox["M", "2"], " ", 
+                RowBox[{"(", 
+                 RowBox[{"1", "-", 
+                  RowBox[{"6", " ", 
+                   RowBox[{"M", "/", "15"}]}]}], ")"}]}]], "t"}]}], ")"}]}]}],
+          ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "==", 
+          RowBox[{"Sqrt", "[", 
+           FractionBox["M", 
+            SuperscriptBox[
+             RowBox[{"r0", "[", "t", "]"}], "3"]], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"r0", "[", "0", "]"}], "\[Equal]", 
+          RowBox[{"15", "M"}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+          "\[Phi]Minus\[CapitalOmega]0tMinus\[CapitalOmega]0primet2", "[", 
+           "0", "]"}], "\[Equal]", "0"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"WhenEvent", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"r0", "[", "t", "]"}], "\[LessEqual]", 
+            RowBox[{"6.1", "M"}]}], ",", " ", "\"\<StopIntegration\>\""}], 
+          "]"}]}], "}"}], ",", 
+       RowBox[{
+       "{", "\[Phi]Minus\[CapitalOmega]0tMinus\[CapitalOmega]0primet2", "}"}],
+        ",", 
+       RowBox[{"{", 
+        RowBox[{"t", ",", "0", ",", "\[Infinity]"}], "}"}]}], "]"}]}], ";"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", ",", 
+     SuperscriptBox["10", 
+      RowBox[{"-", 
+       RowBox[{"Range", "[", 
+        RowBox[{"0", ",", "10"}], "]"}]}]]}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985325834695066*^9, 3.985326040356366*^9}, {
+   3.985326092698344*^9, 3.9853260932625933`*^9}, {3.985326214740563*^9, 
+   3.985326248761726*^9}, 3.985326957073206*^9, {3.98532788190653*^9, 
+   3.985327898594636*^9}, {3.985328148751795*^9, 3.985328153150156*^9}, {
+   3.985328188041909*^9, 3.985328210132288*^9}, {3.985328291741705*^9, 
+   3.985328319305922*^9}, {3.985328591169084*^9, 3.985328657960045*^9}, {
+   3.985328784705158*^9, 3.9853287889364977`*^9}, {3.9853288295610723`*^9, 
+   3.9853288702182617`*^9}, {3.9853331601387653`*^9, 3.98533316225513*^9}, {
+   3.985333193754875*^9, 3.9853332192810593`*^9}, {3.985343157815727*^9, 
+   3.985343158655429*^9}, {3.985343222841797*^9, 3.985343229692348*^9}, {
+   3.985343460363214*^9, 3.9853435203054523`*^9}, 3.985344130117578*^9, {
+   3.985344193028377*^9, 3.985344225056294*^9}, 3.985406163164513*^9},
+ CellLabel->"In[32]:=",ExpressionUUID->"2cc6edb6-765c-4c45-af90-58b7df7f5d2a"],
+
+Cell[BoxData[
+ RowBox[{"LogPlot", "[", 
+  RowBox[{
+   RowBox[{"Evaluate", "[", 
+    RowBox[{"Abs", "@", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"\[Phi]sol", "[", 
+         SuperscriptBox["10", 
+          RowBox[{"-", "5"}]], "]"}], "[", "t", "]"}], ",", 
+       RowBox[{
+        RowBox[{"\[Phi]Minus\[CapitalOmega]0tsol", "[", 
+         SuperscriptBox["10", 
+          RowBox[{"-", "5"}]], "]"}], "[", "t", "]"}], ",", 
+       RowBox[{
+        RowBox[{
+        "\[Phi]Minus\[CapitalOmega]0tMinus\[CapitalOmega]0primet2solHP", "[", 
+         
+         SuperscriptBox["10", 
+          RowBox[{"-", "5"}]], "]"}], "[", "t", "]"}]}], "}"}]}], "]"}], ",", 
+   
+   RowBox[{"{", 
+    RowBox[{"t", ",", "0", ",", 
+     RowBox[{"tmax", "[", 
+      SuperscriptBox["10", 
+       RowBox[{"-", "5"}]], "]"}]}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985344430342126*^9, 3.98534452296844*^9}},
+ CellLabel->"In[33]:=",ExpressionUUID->"168feee9-8c22-44a0-87e2-fb9b6d3d4610"],
+
+Cell[BoxData[
+ RowBox[{"With", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", "=", 
+     SuperscriptBox["10", 
+      RowBox[{"-", "5"}]]}], "}"}], ",", 
+   RowBox[{"LogPlot", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{
+         RowBox[{"\[Phi]sol", "[", "\[Epsilon]", "]"}], "[", "t", "]"}], "-", 
+        
+        RowBox[{
+         RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", "]"}]}], ",", 
+       RowBox[{"Abs", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"\[Phi]Minus\[CapitalOmega]0tsol", "[", "\[Epsilon]", "]"}],
+           "[", "t", "]"}], "+", 
+         RowBox[{
+          SqrtBox[
+           FractionBox["M", 
+            SuperscriptBox["15", "3"]]], "t"}], "-", 
+         RowBox[{
+          RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", "]"}]}], 
+        "]"}], ",", 
+       RowBox[{"Abs", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+          "\[Phi]Minus\[CapitalOmega]0tMinus\[CapitalOmega]0primet2sol", "[", 
+           "\[Epsilon]", "]"}], "[", "t", "]"}], "+", 
+         RowBox[{
+          SqrtBox[
+           FractionBox["M", 
+            SuperscriptBox["15", "3"]]], "t"}], "+", 
+         RowBox[{
+          FractionBox["1", "2"], 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", "15"}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", "15"}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", "15", "]"}], " ",
+             "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", "15"}]}]}], ")"}]}]], 
+          SuperscriptBox["t", "2"]}], "-", 
+         RowBox[{
+          RowBox[{"\[Phi]solHP", "[", "\[Epsilon]", "]"}], "[", "t", "]"}]}], 
+        "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"t", ",", "0", ",", 
+       RowBox[{"tmax", "[", "\[Epsilon]", "]"}]}], "}"}]}], "]"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.9853438064990797`*^9, 3.985343812570168*^9}, {
+  3.985343845341606*^9, 3.985343945344205*^9}, {3.985343996510453*^9, 
+  3.9853439971616917`*^9}, {3.985344069218087*^9, 3.985344069425171*^9}, {
+  3.985344245205596*^9, 3.985344246071719*^9}},
+ CellLabel->"In[34]:=",ExpressionUUID->"bf94b768-4b66-4206-9c5d-e1b0646307a6"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Evolve ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Phi]", "-", 
+    RowBox[{"\[CapitalOmega]", " ", "t"}]}], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "fc31f468-5b80-4971-b7f7-935754ac199a"],
+ " with default NDSolve options"
+}], "Subsubsection",
+ CellChangeTimes->{{3.985326123327004*^9, 3.98532612851394*^9}, {
+  3.985333128423573*^9, 3.985333148774803*^9}, {3.9853432152716417`*^9, 
+  3.985343215495681*^9}, {3.985343301894141*^9, 
+  3.985343302977673*^9}},ExpressionUUID->"f91a9772-14ee-4d90-9995-\
+533102a893a6"],
+
+Cell[BoxData[
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Phi]Minus\[CapitalOmega]tsol", "[", "\[Epsilon]", "]"}], 
+      "}"}], "=", 
+     RowBox[{"NDSolveValue", "[", 
+      RowBox[{
+       RowBox[{"{", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}], "\[Equal]", 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", 
+                 RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", 
+              RowBox[{"r0", "[", "t", "]"}]}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", 
+             RowBox[{"r0", "[", "t", "]"}], "]"}], " ", "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", 
+                RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}]}]]}], ",", " ", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[Phi]Minus\[CapitalOmega]t", "'"}], "[", "t", "]"}], "==", 
+          RowBox[{
+           RowBox[{"-", 
+            RowBox[{
+             RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}]}], "t"}]}], ",",
+          "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "==", 
+          RowBox[{"Sqrt", "[", 
+           FractionBox["M", 
+            SuperscriptBox[
+             RowBox[{"r0", "[", "t", "]"}], "3"]], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"r0", "[", "0", "]"}], "\[Equal]", 
+          RowBox[{"15", "M"}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[Phi]Minus\[CapitalOmega]t", "[", "0", "]"}], "\[Equal]", 
+          "0"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"WhenEvent", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"r0", "[", "t", "]"}], "\[LessEqual]", 
+            RowBox[{"6.1", "M"}]}], ",", " ", "\"\<StopIntegration\>\""}], 
+          "]"}]}], "}"}], ",", 
+       RowBox[{"{", "\[Phi]Minus\[CapitalOmega]t", "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"t", ",", "0", ",", "\[Infinity]"}], "}"}]}], "]"}]}], ";"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", ",", 
+     SuperscriptBox["10", 
+      RowBox[{"-", 
+       RowBox[{"Range", "[", 
+        RowBox[{"0", ",", "10"}], "]"}]}]]}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985325834695066*^9, 3.985326040356366*^9}, {
+   3.985326092698344*^9, 3.9853260932625933`*^9}, {3.985326214740563*^9, 
+   3.985326248761726*^9}, 3.985326957073206*^9, {3.98532788190653*^9, 
+   3.985327898594636*^9}, {3.985328148751795*^9, 3.985328153150156*^9}, {
+   3.985328188041909*^9, 3.985328210132288*^9}, {3.985328291741705*^9, 
+   3.985328319305922*^9}, {3.985328591169084*^9, 3.985328657960045*^9}, {
+   3.985328784705158*^9, 3.9853287889364977`*^9}, {3.9853288295610723`*^9, 
+   3.9853288702182617`*^9}, {3.9853331601387653`*^9, 3.98533316225513*^9}, {
+   3.985333193754875*^9, 3.9853332192810593`*^9}, {3.985343157815727*^9, 
+   3.985343158655429*^9}, {3.985343222841797*^9, 3.985343275951558*^9}},
+ CellLabel->"In[35]:=",ExpressionUUID->"cf7ad8f5-2dbd-4b00-9f01-0dfc77994bf9"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[StyleBox["Scale \[Phi] by \[Epsilon] - this allows us to reach \
+higher mass ratios/integration times, but doesn\[CloseCurlyQuote]t change the \
+fundamental accuracy", "Subsubsection"]], "Subsubsection",
+ CellChangeTimes->{{3.985326123327004*^9, 3.98532612851394*^9}, {
+  3.985333099084257*^9, 3.9853331143275347`*^9}, {3.985349620346974*^9, 
+  3.985349627465631*^9}, {3.985405361451088*^9, 
+  3.985405388238679*^9}},ExpressionUUID->"c2178a97-2572-469b-b772-\
+55ec8485a298"],
+
+Cell[BoxData[
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[CapitalOmega]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], ",", 
+       
+       RowBox[{"\[Phi]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"r0\[Epsilon]sol", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{"NDSolveValue", "[", 
+      RowBox[{
+       RowBox[{"{", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}], "\[Equal]", 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", 
+                 RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", 
+              RowBox[{"r0", "[", "t", "]"}]}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", 
+             RowBox[{"r0", "[", "t", "]"}], "]"}], " ", "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", 
+                RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}]}]]}], ",", " ", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[Phi]", "'"}], "[", "t", "]"}], "==", 
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "\[Epsilon]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "==", 
+          RowBox[{"Sqrt", "[", 
+           FractionBox["M", 
+            SuperscriptBox[
+             RowBox[{"r0", "[", "t", "]"}], "3"]], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"r0", "[", "0", "]"}], "\[Equal]", 
+          RowBox[{"15", "M"}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[Phi]", "[", "0", "]"}], "\[Equal]", "0"}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"WhenEvent", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"r0", "[", "t", "]"}], "\[LessEqual]", 
+            RowBox[{"6.1", "M"}]}], ",", " ", "\"\<StopIntegration\>\""}], 
+          "]"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[CapitalOmega]", ",", "\[Phi]", ",", "r0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"t", ",", "0", ",", "\[Infinity]"}], "}"}]}], "]"}]}], ";", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"tmin\[Epsilon]", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"tmax\[Epsilon]", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"r0sol", "[", "\[Epsilon]", "]"}], "[", "\"\<Domain\>\"", 
+       "]"}], "[", 
+      RowBox[{"[", "1", "]"}], "]"}]}], ";"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985325834695066*^9, 3.985326040356366*^9}, {
+   3.985326092698344*^9, 3.9853260932625933`*^9}, {3.985326214740563*^9, 
+   3.985326248761726*^9}, 3.985326957073206*^9, {3.98532788190653*^9, 
+   3.985327898594636*^9}, 3.985333982074884*^9, {3.9853496375725594`*^9, 
+   3.985349638712945*^9}, {3.9853497236095037`*^9, 3.985349750254869*^9}, {
+   3.985366167825925*^9, 3.9853661692488003`*^9}, {3.985366325492835*^9, 
+   3.985366345761816*^9}, {3.985405767575025*^9, 3.985405799769141*^9}},
+ CellLabel->"In[36]:=",ExpressionUUID->"34f42f65-9d83-455e-aa43-cb3fa486b48f"],
+
+Cell[BoxData[
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[CapitalOmega]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"r0\[Epsilon]solHP", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{"NDSolveValue", "[", 
+      RowBox[{
+       RowBox[{"{", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}], "\[Equal]", 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", 
+                 RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", 
+              RowBox[{"r0", "[", "t", "]"}]}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", 
+             RowBox[{"r0", "[", "t", "]"}], "]"}], " ", "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", 
+                RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}]}]]}], ",", " ", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[Phi]", "'"}], "[", "t", "]"}], "==", 
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "\[Epsilon]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "==", 
+          RowBox[{"Sqrt", "[", 
+           FractionBox["M", 
+            SuperscriptBox[
+             RowBox[{"r0", "[", "t", "]"}], "3"]], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"r0", "[", "0", "]"}], "\[Equal]", 
+          RowBox[{"15", "M"}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[Phi]", "[", "0", "]"}], "\[Equal]", "0"}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"WhenEvent", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"r0", "[", "t", "]"}], "\[LessEqual]", 
+            RowBox[{"6.1", "M"}]}], ",", " ", "\"\<StopIntegration\>\""}], 
+          "]"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[CapitalOmega]", ",", "\[Phi]", ",", "r0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"t", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+       RowBox[{"PrecisionGoal", "->", "13"}], ",", 
+       RowBox[{"AccuracyGoal", "->", "13"}]}], "]"}]}], ";", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"tmin\[Epsilon]HP", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"r0sol", "[", "\[Epsilon]", "]"}], "[", "\"\<Domain\>\"", 
+       "]"}], "[", 
+      RowBox[{"[", "1", "]"}], "]"}]}], ";"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985325834695066*^9, 3.985326040356366*^9}, {
+   3.985326092698344*^9, 3.9853260932625933`*^9}, {3.985326214740563*^9, 
+   3.985326248761726*^9}, 3.985326957073206*^9, {3.98532788190653*^9, 
+   3.985327898594636*^9}, 3.985333982074884*^9, {3.9853496375725594`*^9, 
+   3.985349638712945*^9}, {3.9853497236095037`*^9, 3.985349750254869*^9}, {
+   3.985366122538412*^9, 3.985366165527236*^9}, {3.9853663512989607`*^9, 
+   3.985366362052864*^9}, {3.985405803373608*^9, 3.985405810729496*^9}},
+ CellLabel->"In[37]:=",ExpressionUUID->"baf7039e-3480-4a7d-892c-859e61578f64"],
+
+Cell["Dephasing as a function of time", "Text",
+ CellChangeTimes->{{3.985342727937459*^9, 3.985342749498765*^9}, 
+   3.9853442875455503`*^9},ExpressionUUID->"1c730eb6-3da7-48e2-90b2-\
+ae078cbb08e8"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"LogPlot", "[", 
+        RowBox[{
+         RowBox[{"Abs", "[", 
+          RowBox[{
+           FractionBox[
+            RowBox[{
+             RowBox[{"\[Phi]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], "[", 
+             "t", "]"}], "\[Epsilon]"], "-", 
+           FractionBox[
+            RowBox[{
+             RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], "[", 
+             "t", "]"}], "\[Epsilon]"]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], "]"}]}], 
+          "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985338416465762*^9, 3.985338626369433*^9}, {
+   3.985338694219058*^9, 3.985338700775288*^9}, 3.9853387446272078`*^9, {
+   3.985338849395471*^9, 3.985338860696752*^9}, {3.985339975410191*^9, 
+   3.98533997594764*^9}, {3.985340087263968*^9, 3.985340087464201*^9}, {
+   3.9853401319864883`*^9, 3.985340132355145*^9}, {3.985340232391837*^9, 
+   3.985340232871867*^9}, {3.985349823840536*^9, 3.985349841015135*^9}, {
+   3.985366173634288*^9, 3.985366182237872*^9}, {3.985366273288045*^9, 
+   3.985366274550811*^9}},
+ CellLabel->"In[38]:=",ExpressionUUID->"e3ff1b8e-6c4e-414a-9503-830ec8ed907c"],
+
+Cell["Relative dephasing as a function of time", "Text",
+ CellChangeTimes->{{3.985342727937459*^9, 3.985342740634469*^9}, {
+  3.98534279926161*^9, 3.985342801412551*^9}, {3.985344292563457*^9, 
+  3.985344293092647*^9}, {3.985366374712203*^9, 
+  3.985366375440381*^9}},ExpressionUUID->"44573272-c129-4fd0-8f65-\
+da35dda3cd68"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"LogPlot", "[", 
+        RowBox[{
+         RowBox[{"Abs", "[", 
+          RowBox[{"1", "-", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"\[Phi]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], "[", 
+               "t", "]"}], "/", "\[Epsilon]"}], ")"}], "/", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], "[",
+                "t", "]"}], "/", "\[Epsilon]"}], ")"}]}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], "]"}]}], 
+          "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985338416465762*^9, 3.985338626369433*^9}, {
+   3.985338694219058*^9, 3.985338700775288*^9}, 3.9853387446272078`*^9, {
+   3.9853387957519073`*^9, 3.9853388395214663`*^9}, {3.985338884194521*^9, 
+   3.985338886256032*^9}, {3.985339978684149*^9, 3.985339979202327*^9}, {
+   3.9853402497266903`*^9, 3.985340250299621*^9}, {3.98534991189212*^9, 
+   3.9853499168641863`*^9}, {3.985366210316684*^9, 3.98536621407863*^9}, {
+   3.9853662846805897`*^9, 3.9853662912806797`*^9}},
+ CellLabel->"In[39]:=",ExpressionUUID->"6062b0b1-959c-4b10-a8fb-9a3a2cc07a66"],
+
+Cell["Dephasing as a function of orbital frequency", "Text",
+ CellChangeTimes->{{3.985342727937459*^9, 
+  3.985342740634469*^9}},ExpressionUUID->"8fe83aee-c51b-4de9-9bf0-\
+2b7d32e3f70b"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"ParametricPlot", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"\[CapitalOmega]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], 
+            "[", "t", "]"}], ",", 
+           RowBox[{"Abs", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{
+               RowBox[{"\[Phi]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], "[", 
+               "t", "]"}], "/", "\[Epsilon]"}], "-", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], "[",
+                "t", "]"}], "/", "\[Epsilon]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], "]"}]}], 
+          "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}], ",", 
+         RowBox[{"AspectRatio", "->", 
+          RowBox[{"1", "/", "GoldenRatio"}]}], ",", 
+         RowBox[{"PlotRange", "->", "All"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.98534248480101*^9, 3.985342562428925*^9}, {
+   3.985350059380917*^9, 3.985350061822049*^9}, 3.985366317776101*^9, {
+   3.985366408906783*^9, 3.985366415324486*^9}, {3.985366657235998*^9, 
+   3.985366681586458*^9}},
+ CellLabel->"In[40]:=",ExpressionUUID->"a5ae3fd4-33e8-49e3-84c4-dd990435dfb2"],
+
+Cell["Dephasing over a fixed frequency interval", "Text",
+ CellChangeTimes->{{3.985342808963482*^9, 
+  3.985342817464449*^9}},ExpressionUUID->"c9addf66-4fa6-4394-968f-\
+8be20b0a686c"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"Show", "[", 
+        RowBox[{
+         RowBox[{"ListLogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+               RowBox[{"With", "[", 
+                RowBox[{
+                 RowBox[{"{", 
+                  RowBox[{"t", "=", 
+                   RowBox[{"Min", "[", 
+                    RowBox[{
+                    RowBox[{"tmax\[Epsilon]", "[", "\[Epsilon]", "]"}], ",", 
+                    RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], 
+                    "]"}]}], "}"}], ",", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{"\[Phi]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], "[",
+                     "t", "]"}], "/", "\[Epsilon]"}], "-", 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}],
+                     "[", "t", "]"}], "/", "\[Epsilon]"}]}]}], "]"}]}], "}"}],
+              ",", 
+             RowBox[{"{", 
+              RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+           RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+           RowBox[{
+           "PlotLabel", 
+            "->", "\"\<Dephasing over fixed frequency interval \
+[\!\(\*SuperscriptBox[\(15\), \(\(-3\)/2\)]\),\!\(\*SuperscriptBox[\(6.1\), \
+\(\(-3\)/2\)]\)]\>\""}]}], "]"}], ",", 
+         RowBox[{"LogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"2", " ", 
+            SuperscriptBox["10", 
+             RowBox[{"-", "5"}]], "q"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"q", ",", 
+             SuperscriptBox["10", "0"], ",", 
+             SuperscriptBox["10", "9"]}], "}"}]}], "]"}]}], "]"}], ",", 
+       "\[IndentingNewLine]", 
+       RowBox[{"ListLogLogPlot", "[", 
+        RowBox[{
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+             RowBox[{"With", "[", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"t", "=", 
+                 RowBox[{"Min", "[", 
+                  RowBox[{
+                   RowBox[{"tmax\[Epsilon]", "[", "\[Epsilon]", "]"}], ",", 
+                   RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], 
+                  "]"}]}], "}"}], ",", 
+               RowBox[{"Abs", "[", 
+                RowBox[{"1", "-", 
+                 RowBox[{
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"\[Phi]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], "[",
+                     "t", "]"}], "/", "\[Epsilon]"}], ")"}], "/", 
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}],
+                     "[", "t", "]"}], "/", "\[Epsilon]"}], ")"}]}]}], "]"}]}],
+               "]"}]}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{
+         "PlotLabel", 
+          "->", "\"\<Relative dephasing over fixed frequency interval \
+[\!\(\*SuperscriptBox[\(15\), \(\(-3\)/2\)]\),\!\(\*SuperscriptBox[\(6.1\), \
+\(\(-3\)/2\)]\)]\>\""}]}], "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"With", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"t", "=", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]", "[", 
+              SuperscriptBox["10", "0"], "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", 
+              SuperscriptBox["10", "0"], "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"ListLogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+               RowBox[{"Abs", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"\[Phi]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], "[",
+                    "t", "]"}], "/", "\[Epsilon]"}], "-", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], 
+                   "[", "t", "]"}], "/", "\[Epsilon]"}]}], "]"}]}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+           RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+           RowBox[{"PlotLabel", "->", 
+            RowBox[{"\"\<Dephasing over fixed time interval [0, \>\"", "<>", 
+             RowBox[{"ToString", "[", "t", "]"}], "<>", "\"\<]\>\""}]}]}], 
+          "]"}]}], "]"}], ",", "\[IndentingNewLine]", 
+       RowBox[{"With", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"t", "=", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]", "[", 
+              SuperscriptBox["10", "0"], "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", 
+              SuperscriptBox["10", "0"], "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"ListLogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+               RowBox[{"Abs", "[", 
+                RowBox[{"1", "-", 
+                 RowBox[{
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"\[Phi]\[Epsilon]sol", "[", "\[Epsilon]", "]"}], "[",
+                     "t", "]"}], "/", "\[Epsilon]"}], ")"}], "/", 
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}],
+                     "[", "t", "]"}], "/", "\[Epsilon]"}], ")"}]}]}], "]"}]}],
+               "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+           RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+           RowBox[{"PlotLabel", "->", 
+            
+            RowBox[{"\"\<Relative dephasing over time frequency interval [0, \
+\>\"", "<>", 
+             RowBox[{"ToString", "[", "t", "]"}], "<>", "\"\<]\>\""}]}]}], 
+          "]"}]}], "]"}]}], "}"}]}], "}"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.9854056189863987`*^9, 3.985405689354115*^9}},
+ CellLabel->"In[41]:=",ExpressionUUID->"cb6fb40d-11fb-4ed2-bc1f-f17be83a6cd8"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[StyleBox["Scale \[Phi] by \[Epsilon] and increase PrecisionGoal \
+and AccuracyGoal - this decreases phase error", "Subsubsection"]], \
+"Subsubsection",
+ CellChangeTimes->{{3.985326123327004*^9, 3.98532612851394*^9}, {
+  3.985333099084257*^9, 3.9853331143275347`*^9}, {3.985349620346974*^9, 
+  3.985349627465631*^9}, {3.985405361451088*^9, 3.985405388238679*^9}, {
+  3.9854057102981462`*^9, 3.98540572626924*^9}, {3.9854059836124887`*^9, 
+  3.985405986671163*^9}},ExpressionUUID->"75b1de9a-8c82-4433-8b9e-\
+c8b97812a234"],
+
+Cell[BoxData[
+ RowBox[{"Do", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"\[CapitalOmega]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"\[Phi]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"r0\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     
+     RowBox[{"NDSolveValue", "[", 
+      RowBox[{
+       RowBox[{"{", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "'"}], "[", "t", "]"}], "\[Equal]", 
+          FractionBox[
+           RowBox[{"3", " ", 
+            SuperscriptBox[
+             RowBox[{"(", 
+              RowBox[{"1", "-", 
+               RowBox[{"3", " ", 
+                RowBox[{"M", "/", 
+                 RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}], 
+             RowBox[{"3", "/", "2"}]], " ", 
+            SqrtBox[
+             RowBox[{"M", "/", 
+              RowBox[{"r0", "[", "t", "]"}]}]], " ", 
+            RowBox[{"\[ScriptCapitalF]\[ScriptCapitalE]", "[", 
+             RowBox[{"r0", "[", "t", "]"}], "]"}], " ", "\[Epsilon]"}], 
+           RowBox[{
+            SuperscriptBox["M", "2"], " ", 
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              RowBox[{"6", " ", 
+               RowBox[{"M", "/", 
+                RowBox[{"r0", "[", "t", "]"}]}]}]}], ")"}]}]]}], ",", " ", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"\[Phi]", "'"}], "[", "t", "]"}], "==", 
+          RowBox[{
+           RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "\[Epsilon]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[CapitalOmega]", "[", "t", "]"}], "==", 
+          RowBox[{"Sqrt", "[", 
+           FractionBox["M", 
+            SuperscriptBox[
+             RowBox[{"r0", "[", "t", "]"}], "3"]], "]"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"r0", "[", "0", "]"}], "\[Equal]", 
+          RowBox[{"15", "M"}]}], ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"\[Phi]", "[", "0", "]"}], "\[Equal]", "0"}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"WhenEvent", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"r0", "[", "t", "]"}], "\[LessEqual]", 
+            RowBox[{"6.1", "M"}]}], ",", " ", "\"\<StopIntegration\>\""}], 
+          "]"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[CapitalOmega]", ",", "\[Phi]", ",", "r0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"t", ",", "0", ",", "\[Infinity]"}], "}"}], ",", 
+       RowBox[{"PrecisionGoal", "->", "12"}], ",", 
+       RowBox[{"AccuracyGoal", "->", "12"}]}], "]"}]}], ";", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"tmin\[Epsilon]PG12", "[", "\[Epsilon]", "]"}], ",", 
+       RowBox[{"tmax\[Epsilon]PG12", "[", "\[Epsilon]", "]"}]}], "}"}], "=", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"r0sol", "[", "\[Epsilon]", "]"}], "[", "\"\<Domain\>\"", 
+       "]"}], "[", 
+      RowBox[{"[", "1", "]"}], "]"}]}], ";"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985325834695066*^9, 3.985326040356366*^9}, {
+   3.985326092698344*^9, 3.9853260932625933`*^9}, {3.985326214740563*^9, 
+   3.985326248761726*^9}, 3.985326957073206*^9, {3.98532788190653*^9, 
+   3.985327898594636*^9}, 3.985333982074884*^9, {3.9853496375725594`*^9, 
+   3.985349638712945*^9}, {3.9853497236095037`*^9, 3.985349750254869*^9}, {
+   3.985366167825925*^9, 3.9853661692488003`*^9}, {3.985366325492835*^9, 
+   3.985366345761816*^9}, {3.9854057372799053`*^9, 3.985405751163473*^9}, {
+   3.985405954996863*^9, 3.9854059621487226`*^9}},
+ CellLabel->"In[42]:=",ExpressionUUID->"d61894f0-ab22-4520-950c-ed041f21de35"],
+
+Cell["Dephasing as a function of time", "Text",
+ CellChangeTimes->{{3.985342727937459*^9, 3.985342749498765*^9}, 
+   3.9853442875455503`*^9},ExpressionUUID->"e52f7e23-f64d-41c5-944e-\
+82edc2c4a72f"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"LogPlot", "[", 
+        RowBox[{
+         RowBox[{"Abs", "[", 
+          RowBox[{
+           FractionBox[
+            RowBox[{
+             RowBox[{"\[Phi]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], "[",
+              "t", "]"}], "\[Epsilon]"], "-", 
+           FractionBox[
+            RowBox[{
+             RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], "[", 
+             "t", "]"}], "\[Epsilon]"]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]PG12", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], "]"}]}], 
+          "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985338416465762*^9, 3.985338626369433*^9}, {
+   3.985338694219058*^9, 3.985338700775288*^9}, 3.9853387446272078`*^9, {
+   3.985338849395471*^9, 3.985338860696752*^9}, {3.985339975410191*^9, 
+   3.98533997594764*^9}, {3.985340087263968*^9, 3.985340087464201*^9}, {
+   3.9853401319864883`*^9, 3.985340132355145*^9}, {3.985340232391837*^9, 
+   3.985340232871867*^9}, {3.985349823840536*^9, 3.985349841015135*^9}, {
+   3.985366173634288*^9, 3.985366182237872*^9}, {3.985366273288045*^9, 
+   3.985366274550811*^9}, {3.985405891812076*^9, 3.985405896764748*^9}},
+ CellLabel->"In[43]:=",ExpressionUUID->"02cd5702-ecb3-4b68-9d9f-c8a7ed4d095c"],
+
+Cell["Relative dephasing as a function of time", "Text",
+ CellChangeTimes->{{3.985342727937459*^9, 3.985342740634469*^9}, {
+  3.98534279926161*^9, 3.985342801412551*^9}, {3.985344292563457*^9, 
+  3.985344293092647*^9}, {3.985366374712203*^9, 
+  3.985366375440381*^9}},ExpressionUUID->"1afeaaf6-11e0-403d-8f02-\
+2d83f1f58774"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"LogPlot", "[", 
+        RowBox[{
+         RowBox[{"Abs", "[", 
+          RowBox[{"1", "-", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"\[Phi]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], "[",
+                "t", "]"}], "/", "\[Epsilon]"}], ")"}], "/", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], "[",
+                "t", "]"}], "/", "\[Epsilon]"}], ")"}]}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], "]"}]}], 
+          "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.985338416465762*^9, 3.985338626369433*^9}, {
+   3.985338694219058*^9, 3.985338700775288*^9}, 3.9853387446272078`*^9, {
+   3.9853387957519073`*^9, 3.9853388395214663`*^9}, {3.985338884194521*^9, 
+   3.985338886256032*^9}, {3.985339978684149*^9, 3.985339979202327*^9}, {
+   3.9853402497266903`*^9, 3.985340250299621*^9}, {3.98534991189212*^9, 
+   3.9853499168641863`*^9}, {3.985366210316684*^9, 3.98536621407863*^9}, {
+   3.9853662846805897`*^9, 3.9853662912806797`*^9}, {3.98540600856584*^9, 
+   3.9854060092969837`*^9}},
+ CellLabel->"In[44]:=",ExpressionUUID->"24617787-2c79-4116-938d-56806e3b56f6"],
+
+Cell["Dephasing as a function of orbital frequency", "Text",
+ CellChangeTimes->{{3.985342727937459*^9, 
+  3.985342740634469*^9}},ExpressionUUID->"38a95478-1596-4c8c-b60e-\
+b8a728040bde"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"ParametricPlot", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            RowBox[{
+            "\[CapitalOmega]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], "[",
+             "t", "]"}], ",", 
+           RowBox[{"Abs", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{
+               RowBox[{"\[Phi]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], "[",
+                "t", "]"}], "/", "\[Epsilon]"}], "-", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], "[",
+                "t", "]"}], "/", "\[Epsilon]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"t", ",", "0", ",", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]", "[", "\[Epsilon]", "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], "]"}]}], 
+          "}"}], ",", 
+         RowBox[{"PlotStyle", "->", 
+          RowBox[{
+           RowBox[{"ColorData", "[", "116", "]"}], "[", 
+           RowBox[{"1", "-", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotLabel", "->", 
+          RowBox[{"StringForm", "[", 
+           
+           RowBox[{"\"\<\[Epsilon] = \!\(\*SuperscriptBox[\(10\), \(``\)]\)\>\
+\"", ",", 
+            RowBox[{"Log10", "[", "\[Epsilon]", "]"}]}], "]"}]}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{"PlotLegends", "->", "None"}], ",", 
+         RowBox[{"AspectRatio", "->", 
+          RowBox[{"1", "/", "GoldenRatio"}]}], ",", 
+         RowBox[{"PlotRange", "->", "All"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+     "5"}], "]"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.98534248480101*^9, 3.985342562428925*^9}, {
+   3.985350059380917*^9, 3.985350061822049*^9}, 3.985366317776101*^9, {
+   3.985366408906783*^9, 3.985366415324486*^9}, {3.985366657235998*^9, 
+   3.985366681586458*^9}, {3.985406020316757*^9, 3.985406025417554*^9}},
+ CellLabel->"In[45]:=",ExpressionUUID->"14e1fd64-5b45-4abd-af52-fff90285c756"],
+
+Cell["Dephasing over a fixed frequency interval", "Text",
+ CellChangeTimes->{{3.985342808963482*^9, 
+  3.985342817464449*^9}},ExpressionUUID->"eb29ac82-efda-4d18-9d09-\
+a03e0a18d66c"],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"Show", "[", 
+        RowBox[{
+         RowBox[{"ListLogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+               RowBox[{"With", "[", 
+                RowBox[{
+                 RowBox[{"{", 
+                  RowBox[{"t", "=", 
+                   RowBox[{"Min", "[", 
+                    RowBox[{
+                    RowBox[{"tmax\[Epsilon]PG12", "[", "\[Epsilon]", "]"}], ",", 
+                    RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], 
+                    "]"}]}], "}"}], ",", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{
+                    "\[Phi]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], "[", 
+                    "t", "]"}], "/", "\[Epsilon]"}], "-", 
+                  RowBox[{
+                   RowBox[{
+                    RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}],
+                     "[", "t", "]"}], "/", "\[Epsilon]"}]}]}], "]"}]}], "}"}],
+              ",", 
+             RowBox[{"{", 
+              RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+           RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+           RowBox[{
+           "PlotLabel", 
+            "->", "\"\<Dephasing over fixed frequency interval \
+[\!\(\*SuperscriptBox[\(15\), \(\(-3\)/2\)]\),\!\(\*SuperscriptBox[\(6.1\), \
+\(\(-3\)/2\)]\)]\>\""}]}], "]"}], ",", 
+         RowBox[{"LogLogPlot", "[", 
+          RowBox[{
+           RowBox[{
+            SuperscriptBox["10", 
+             RowBox[{"-", "8"}]], "q"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"q", ",", 
+             SuperscriptBox["10", "0"], ",", 
+             SuperscriptBox["10", "9"]}], "}"}]}], "]"}]}], "]"}], ",", 
+       "\[IndentingNewLine]", 
+       RowBox[{"ListLogLogPlot", "[", 
+        RowBox[{
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+             RowBox[{"With", "[", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"t", "=", 
+                 RowBox[{"Min", "[", 
+                  RowBox[{
+                   RowBox[{"tmax\[Epsilon]PG12", "[", "\[Epsilon]", "]"}], ",", 
+                   RowBox[{"tmax\[Epsilon]HP", "[", "\[Epsilon]", "]"}]}], 
+                  "]"}]}], "}"}], ",", 
+               RowBox[{"Abs", "[", 
+                RowBox[{"1", "-", 
+                 RowBox[{
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    "\[Phi]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], "[", 
+                    "t", "]"}], "/", "\[Epsilon]"}], ")"}], "/", 
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}],
+                     "[", "t", "]"}], "/", "\[Epsilon]"}], ")"}]}]}], "]"}]}],
+               "]"}]}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+         RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+         RowBox[{
+         "PlotLabel", 
+          "->", "\"\<Relative dephasing over fixed frequency interval \
+[\!\(\*SuperscriptBox[\(15\), \(\(-3\)/2\)]\),\!\(\*SuperscriptBox[\(6.1\), \
+\(\(-3\)/2\)]\)]\>\""}]}], "]"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"With", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"t", "=", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]PG12", "[", 
+              SuperscriptBox["10", "0"], "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", 
+              SuperscriptBox["10", "0"], "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"ListLogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+               RowBox[{"Abs", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{
+                   "\[Phi]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], "[", 
+                   "t", "]"}], "/", "\[Epsilon]"}], "-", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}], 
+                   "[", "t", "]"}], "/", "\[Epsilon]"}]}], "]"}]}], "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+           RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+           RowBox[{"PlotLabel", "->", 
+            RowBox[{"\"\<Dephasing over fixed time interval [0, \>\"", "<>", 
+             RowBox[{"ToString", "[", "t", "]"}], "<>", "\"\<]\>\""}]}]}], 
+          "]"}]}], "]"}], ",", "\[IndentingNewLine]", 
+       RowBox[{"With", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"t", "=", 
+           RowBox[{"Min", "[", 
+            RowBox[{
+             RowBox[{"tmax\[Epsilon]PG12", "[", 
+              SuperscriptBox["10", "0"], "]"}], ",", 
+             RowBox[{"tmax\[Epsilon]HP", "[", 
+              SuperscriptBox["10", "0"], "]"}]}], "]"}]}], "}"}], ",", 
+         RowBox[{"ListLogLogPlot", "[", 
+          RowBox[{
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"1", "/", "\[Epsilon]"}], ",", 
+               RowBox[{"Abs", "[", 
+                RowBox[{"1", "-", 
+                 RowBox[{
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{
+                    "\[Phi]\[Epsilon]solPG12", "[", "\[Epsilon]", "]"}], "[", 
+                    "t", "]"}], "/", "\[Epsilon]"}], ")"}], "/", 
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{
+                    RowBox[{"\[Phi]\[Epsilon]solHP", "[", "\[Epsilon]", "]"}],
+                     "[", "t", "]"}], "/", "\[Epsilon]"}], ")"}]}]}], "]"}]}],
+               "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"\[Epsilon]", ",", "\[Epsilon]s"}], "}"}]}], "]"}], ",", 
+           RowBox[{"PlotTheme", "->", "\"\<Detailed\>\""}], ",", 
+           RowBox[{"PlotLabel", "->", 
+            
+            RowBox[{"\"\<Relative dephasing over time frequency interval [0, \
+\>\"", "<>", 
+             RowBox[{"ToString", "[", "t", "]"}], "<>", "\"\<]\>\""}]}]}], 
+          "]"}]}], "]"}]}], "}"}]}], "}"}], ",", 
+   RowBox[{"ImageSize", "->", "2000"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.9854056189863987`*^9, 3.985405689354115*^9}, {
+  3.9854060731893*^9, 3.9854061156543827`*^9}},
+ CellLabel->"In[46]:=",ExpressionUUID->"091117e0-e412-4083-a99e-5ed7dc78f1fa"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{2770, 2411},
+WindowMargins->{{Automatic, 1681}, {Automatic, -1448}},
+FrontEndVersion->"14.3 for Mac OS X x86 (64-bit) (July 8, 2025)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"ee018ccc-4f2b-4b81-8655-7e50d0ea0be6"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[576, 22, 177, 3, 66, "Section",ExpressionUUID->"c5df36d0-5c10-46ef-8374-1f3ca0b22e17"],
+Cell[756, 27, 758, 21, 33, "Text",ExpressionUUID->"46b1cdf7-21e0-4d2e-8e1f-eb1baec35edd"],
+Cell[1517, 50, 1376, 38, 50, "ItemNumbered",ExpressionUUID->"87f4d601-c96c-453b-b583-6e006c51eea6"],
+Cell[2896, 90, 1233, 36, 30, "ItemNumbered",ExpressionUUID->"4ec4f3e2-6c7e-4e77-9349-25c3bb29f9ce"],
+Cell[4132, 128, 1043, 31, 31, "ItemNumbered",ExpressionUUID->"cac3f013-a216-4673-ad77-5fe1adf9fc23"],
+Cell[5178, 161, 3123, 81, 90, "ItemNumbered",ExpressionUUID->"1e9f3ee6-ab11-472e-a6fc-7cb802d761f0"],
+Cell[CellGroupData[{
+Cell[8326, 246, 273, 8, 30, "ItemNumbered",ExpressionUUID->"91ddc4ff-2e69-4721-a90b-69cf37375fc4"],
+Cell[8602, 256, 264, 6, 25, "SubitemNumbered",ExpressionUUID->"b18098b4-0852-402a-ae28-40b6ec15817f"],
+Cell[8869, 264, 484, 14, 25, "SubitemNumbered",ExpressionUUID->"e648fa20-fdcb-4bcc-b775-a773964c3a6d"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9390, 283, 193, 3, 30, "ItemNumbered",ExpressionUUID->"e4b62293-b923-4331-9946-2258d2374012"],
+Cell[9586, 288, 851, 20, 44, "SubitemNumbered",ExpressionUUID->"3c68b480-1c69-4e1d-935f-4cba2fba7884"],
+Cell[10440, 310, 754, 18, 45, "SubitemNumbered",ExpressionUUID->"0fa6c665-db6e-418e-bf0a-8847794e8438"]
+}, Open  ]],
+Cell[11209, 331, 608, 11, 55, "Text",ExpressionUUID->"f7933aec-5184-4721-a7a3-54040df21582"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11854, 347, 154, 3, 66, "Section",ExpressionUUID->"0e854573-25b9-4488-909f-597cc72cd39e"],
+Cell[CellGroupData[{
+Cell[12033, 354, 260, 4, 53, "Subsection",ExpressionUUID->"4e07f168-f679-4865-b975-3e7d8561fa91"],
+Cell[CellGroupData[{
+Cell[12318, 362, 160, 3, 43, "Subsubsection",ExpressionUUID->"ce601c64-9f1a-460a-8aef-2917ae066625"],
+Cell[12481, 367, 239, 4, 33, "Text",ExpressionUUID->"9563141e-17a6-4332-add7-bcef01bb6f36"],
+Cell[12723, 373, 9471, 187, 79, "Input",ExpressionUUID->"e5a61958-a8ed-471f-bdf0-67918813d8a7"],
+Cell[22197, 562, 1153, 29, 53, "Input",ExpressionUUID->"62f2f318-4bf0-4a5e-90cc-b6802a31a582"],
+Cell[23353, 593, 1064, 28, 53, "Input",ExpressionUUID->"90d02370-3959-4ca2-9dd8-0f0db6baaf9a"],
+Cell[24420, 623, 582, 13, 29, "Input",ExpressionUUID->"062c9dc6-1201-4759-9d59-0ab5fdbd870f"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[25039, 641, 181, 3, 43, "Subsubsection",ExpressionUUID->"20761753-a5eb-443b-8697-4b3d6b6bee0f"],
+Cell[25223, 646, 271, 6, 33, "Text",ExpressionUUID->"dc8c5b67-dc4c-43df-9cdb-6871f8a33c80"],
+Cell[25497, 654, 1458, 35, 53, "Input",ExpressionUUID->"7c427605-ae63-4889-b746-22e8d35ed971"],
+Cell[26958, 691, 1289, 33, 53, "Input",ExpressionUUID->"31fc3345-e108-45f5-bbc6-9ce83aaecfd3"],
+Cell[28250, 726, 636, 14, 29, "Input",ExpressionUUID->"4857ae64-239b-42b4-8149-d180d74d50c1"],
+Cell[28889, 742, 1263, 31, 53, "Input",ExpressionUUID->"7c0874a6-1c3d-4e76-9f9c-870ced50efbc"],
+Cell[30155, 775, 1116, 29, 53, "Input",ExpressionUUID->"db18ac2e-f72a-400b-b411-3af5c7b59cba"],
+Cell[31274, 806, 688, 15, 29, "Input",ExpressionUUID->"075e0051-2745-4722-a367-8aea1809cbbb"],
+Cell[31965, 823, 1307, 32, 29, "Input",ExpressionUUID->"b0f44854-eb93-47e6-b63b-d34332211ced"],
+Cell[33275, 857, 621, 17, 29, "Input",ExpressionUUID->"3dfa51ff-ba7d-43b4-8ad8-3d91e46948e5"],
+Cell[33899, 876, 562, 15, 29, "Input",ExpressionUUID->"71d95f37-4f10-4283-859b-46725fbc76f5"],
+Cell[34464, 893, 1307, 32, 29, "Input",ExpressionUUID->"dc5fcaf8-dccf-4dfd-8289-d99d2faac57f"],
+Cell[35774, 927, 559, 14, 33, "Text",ExpressionUUID->"a97bfdf8-450a-4026-9a27-b9b03a1d3f86"],
+Cell[36336, 943, 358, 8, 45, "Input",ExpressionUUID->"73ad7efc-7773-4d09-870d-be7362a9b884"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[36755, 958, 157, 3, 66, "Section",ExpressionUUID->"519c2be0-f358-4113-862f-771d35dd98d8"],
+Cell[36915, 963, 214, 4, 29, "Input",ExpressionUUID->"cd02986d-2d3d-41ec-9954-a18beac160ae"],
+Cell[37132, 969, 622, 19, 33, "Text",ExpressionUUID->"30796971-93bf-4133-b29d-db09f3526273"],
+Cell[37757, 990, 356, 9, 29, "Input",ExpressionUUID->"6e29119a-58d1-49b3-ae4f-4998b1df3c67"],
+Cell[CellGroupData[{
+Cell[38138, 1003, 243, 4, 53, "Subsection",ExpressionUUID->"412e02f2-a49e-4724-b0ed-744ea64f5385"],
+Cell[38384, 1009, 3333, 84, 242, "Input",ExpressionUUID->"2f3c89ac-7c5d-4577-b10d-0d219033ab7b"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[41754, 1098, 164, 3, 53, "Subsection",ExpressionUUID->"74bff0ba-dd71-4212-90aa-5b86462546c1"],
+Cell[CellGroupData[{
+Cell[41943, 1105, 387, 6, 43, "Subsubsection",ExpressionUUID->"9550f32b-350d-4335-9d78-48da54d679ae"],
+Cell[42333, 1113, 3489, 86, 242, "Input",ExpressionUUID->"419111c8-c5e1-4288-b52f-6c52b24e740d"],
+Cell[45825, 1201, 1857, 43, 31, "Input",ExpressionUUID->"1cb68fb6-50d6-4268-8be7-e53abccc64fd"],
+Cell[47685, 1246, 1948, 45, 31, "Input",ExpressionUUID->"ad1312db-3fce-4c80-a54c-5dd823ef4123"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[49670, 1296, 268, 4, 35, "Subsubsection",ExpressionUUID->"c4568b72-21f3-4d08-821e-0fb57e28c8ee"],
+Cell[49941, 1302, 3738, 89, 242, "Input",ExpressionUUID->"4de1bee3-2564-4c0d-bf46-c21fb685e901"],
+Cell[53682, 1393, 622, 15, 49, "Input",ExpressionUUID->"f016e15e-38bb-41be-af86-6eefa4398124"],
+Cell[54307, 1410, 1073, 25, 45, "Input",ExpressionUUID->"c5bc01b9-b2c6-4860-a131-f57641a33d09"],
+Cell[55383, 1437, 1061, 25, 55, "Text",ExpressionUUID->"882ac59e-f39f-44e5-8d9e-5a57e9257c7d"],
+Cell[56447, 1464, 198, 3, 33, "Text",ExpressionUUID->"d670bb64-b3bb-42b3-b416-ba908e890752"],
+Cell[56648, 1469, 1960, 45, 76, "Input",ExpressionUUID->"a79f6aea-19ba-4c23-a4fc-9eb0964d26c5"],
+Cell[58611, 1516, 276, 4, 33, "Text",ExpressionUUID->"eb47423c-c9dc-4470-b1de-d31aeaafd0cd"],
+Cell[58890, 1522, 2052, 46, 76, "Input",ExpressionUUID->"432ca352-6c46-4f74-ac66-7b1cb8a1fcd7"],
+Cell[60945, 1570, 186, 3, 33, "Text",ExpressionUUID->"ba51ef11-8ffb-41ae-a605-be8a1f66e984"],
+Cell[61134, 1575, 2040, 50, 76, "Input",ExpressionUUID->"29989a44-a718-409c-92df-d219dc6a9471"],
+Cell[63177, 1627, 183, 3, 33, "Text",ExpressionUUID->"422f17ab-935d-4449-9e9f-ab08f6771bc6"],
+Cell[63363, 1632, 7172, 176, 213, "Input",ExpressionUUID->"fc3440c2-8713-4471-9383-ae493cf01b69"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[70584, 1814, 223, 4, 53, "Subsection",ExpressionUUID->"d7be0953-62dc-4d2a-9c69-06e1d0d94275"],
+Cell[CellGroupData[{
+Cell[70832, 1822, 535, 14, 43, "Subsubsection",ExpressionUUID->"1271abf3-8152-4247-ba65-b05b2bda323b"],
+Cell[71370, 1838, 3611, 85, 245, "Input",ExpressionUUID->"3f68989d-1ea0-477a-96cc-ee84cb2ad337"],
+Cell[74984, 1925, 4736, 115, 248, "Input",ExpressionUUID->"2cc6edb6-765c-4c45-af90-58b7df7f5d2a"],
+Cell[79723, 2042, 994, 28, 31, "Input",ExpressionUUID->"168feee9-8c22-44a0-87e2-fb9b6d3d4610"],
+Cell[80720, 2072, 2582, 71, 54, "Input",ExpressionUUID->"bf94b768-4b66-4206-9c5d-e1b0646307a6"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[83339, 2148, 559, 14, 35, "Subsubsection",ExpressionUUID->"f91a9772-14ee-4d90-9995-533102a893a6"],
+Cell[83901, 2164, 3531, 84, 214, "Input",ExpressionUUID->"cf7ad8f5-2dbd-4b00-9f01-0dfc77994bf9"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[87469, 2253, 488, 7, 35, "Subsubsection",ExpressionUUID->"c2178a97-2572-469b-b772-55ec8485a298"],
+Cell[87960, 2262, 3675, 89, 242, "Input",ExpressionUUID->"34f42f65-9d83-455e-aa43-cb3fa486b48f"],
+Cell[91638, 2353, 3780, 90, 242, "Input",ExpressionUUID->"baf7039e-3480-4a7d-892c-859e61578f64"],
+Cell[95421, 2445, 198, 3, 33, "Text",ExpressionUUID->"1c730eb6-3da7-48e2-90b2-ae078cbb08e8"],
+Cell[95622, 2450, 2254, 51, 101, "Input",ExpressionUUID->"e3ff1b8e-6c4e-414a-9503-830ec8ed907c"],
+Cell[97879, 2503, 325, 5, 33, "Text",ExpressionUUID->"44573272-c129-4fd0-8f65-da35dda3cd68"],
+Cell[98207, 2510, 2331, 53, 76, "Input",ExpressionUUID->"6062b0b1-959c-4b10-a8fb-9a3a2cc07a66"],
+Cell[100541, 2565, 186, 3, 33, "Text",ExpressionUUID->"8fe83aee-c51b-4de9-9bf0-2b7d32e3f70b"],
+Cell[100730, 2570, 2317, 55, 76, "Input",ExpressionUUID->"a5ae3fd4-33e8-49e3-84c4-dd990435dfb2"],
+Cell[103050, 2627, 183, 3, 33, "Text",ExpressionUUID->"c9addf66-4fa6-4394-968f-8be20b0a686c"],
+Cell[103236, 2632, 6983, 169, 213, "Input",ExpressionUUID->"cb6fb40d-11fb-4ed2-bc1f-f17be83a6cd8"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[110256, 2806, 534, 8, 43, "Subsubsection",ExpressionUUID->"75b1de9a-8c82-4433-8b9e-c8b97812a234"],
+Cell[110793, 2816, 3850, 92, 242, "Input",ExpressionUUID->"d61894f0-ab22-4520-950c-ed041f21de35"],
+Cell[114646, 2910, 198, 3, 33, "Text",ExpressionUUID->"e52f7e23-f64d-41c5-944e-82edc2c4a72f"],
+Cell[114847, 2915, 2308, 51, 101, "Input",ExpressionUUID->"02cd5702-ecb3-4b68-9d9f-c8a7ed4d095c"],
+Cell[117158, 2968, 325, 5, 33, "Text",ExpressionUUID->"1afeaaf6-11e0-403d-8f02-2d83f1f58774"],
+Cell[117486, 2975, 2386, 54, 76, "Input",ExpressionUUID->"24617787-2c79-4116-938d-56806e3b56f6"],
+Cell[119875, 3031, 186, 3, 33, "Text",ExpressionUUID->"38a95478-1596-4c8c-b60e-b8a728040bde"],
+Cell[120064, 3036, 2384, 56, 76, "Input",ExpressionUUID->"14e1fd64-5b45-4abd-af52-fff90285c756"],
+Cell[122451, 3094, 183, 3, 33, "Text",ExpressionUUID->"eb29ac82-efda-4d18-9d09-a03e0a18d66c"],
+Cell[122637, 3099, 7137, 174, 213, "Input",ExpressionUUID->"091117e0-e412-4083-a99e-5ed7dc78f1fa"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

@@ -1,0 +1,192 @@
+'''
+Waveform + response construction for PE validation studies.
+
+Supports two models:
+  - "1PAT1R" : few.waveform.Waveform1PAT1R, with toggles for primary spin
+               evolution (evolve_primary) and 1PA amplitude corrections
+               (zero_PA_amps_only). Parameter vector includes chi2 at index 5.
+  - "0PA_Kerr" : few.waveform.FastKerrEccentricEquatorialFlux wrapped by
+                 GenerateEMRIWaveform. No chi2 in the parameter vector.
+'''
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Dict, Literal, Optional
+
+import cupy as cp
+
+from fastlisaresponse import ResponseWrapper
+from fastlisaresponse.tdiconfig import TDIConfig
+from fastlisaresponse.utils.parallelbase import ParallelModuleBase
+from lisatools.detector import Orbits
+
+
+PARAM_NAMES_1PA = [
+    'M', 'mu', 'a', 'p0', 'e0', 'chi2', 'x_I0', 'd_L',
+    'theta_S', 'phi_S', 'theta_K', 'phi_K',
+    'Phi_phi0', 'Phi_theta0', 'Phi_r0',
+]
+
+PARAM_NAMES_0PA = [
+    'M', 'mu', 'a', 'p0', 'e0', 'x_I0', 'd_L',
+    'theta_S', 'phi_S', 'theta_K', 'phi_K',
+    'Phi_phi0', 'Phi_theta0', 'Phi_r0',
+]
+
+
+def param_names_for(model: str) -> list[str]:
+    return PARAM_NAMES_1PA if model == "1PAT1R" else PARAM_NAMES_0PA
+
+
+def sky_indices_for(model: str) -> tuple[int, int]:
+    """(index_beta, index_lambda) for fastlisaresponse.ResponseWrapper."""
+    if model == "1PAT1R":
+        return 8, 9   # theta_S, phi_S with chi2 inserted at index 5
+    return 7, 8       # standard FEW ordering without chi2
+
+
+@dataclass
+class WaveformConfig:
+    """Settings for a single waveform evaluation (injection or recovery)."""
+    model: Literal["1PAT1R", "0PA_Kerr"] = "1PAT1R"
+    dt: float = 5.0
+    T: float = 2.0
+    mode_selection_threshold: float = 0.0
+    # 1PAT1R toggles
+    evolve_chi1: bool = True
+    include_1PA_amps: bool = True
+    # General FEW kwargs
+    inspiral_kwargs: Dict[str, Any] = field(default_factory=dict)
+    amplitude_kwargs: Dict[str, Any] = field(default_factory=dict)
+    summation_kwargs: Dict[str, Any] = field(default_factory=dict)
+
+    # define param names based on model (handles chi2 as extra param)
+    def param_names(self) -> list[str]:
+        return param_names_for(self.model)
+
+    # define sky indices based on model
+    def sky_indices(self) -> tuple[int, int]:
+        return sky_indices_for(self.model)
+
+
+@dataclass
+class ResponseConfig:
+    # settings for ResponseWrapper construction
+    orbit_file: str
+    tdi_gen: str = "2nd generation"
+    tdi_chan: str = "XYZ"
+    order: int = 40
+    offset: float = 550.0
+    n_samples_delay: int = 1000
+    t_buffer: float = 10000.0
+    flip_hx: bool = True
+    is_ecliptic_latitude: bool = False
+    remove_sky_coords: bool = False
+    remove_garbage: bool = False
+
+
+class EMRIWave(ParallelModuleBase):
+    """
+    Unified waveform callable that dispatches to the right FEW backend
+    based on `WaveformConfig.model`. Returns h_+ - i h_x for ResponseWrapper.
+    """
+
+    def __init__(self, 
+                 cfg: WaveformConfig, 
+                 force_backend: Optional[str] = None):
+        super().__init__(force_backend=force_backend)
+        self.cfg = cfg
+        if cfg.model == "1PAT1R":
+            from few.waveform import Waveform1PAT1R
+            self._gen = Waveform1PAT1R()
+            # TODO: add args to include polarization, sky postions and phases. 
+            # Should return h+ - ihx in detector frame, with 1PA effects toggled on/off
+            self._call = self._call_1pa
+        elif cfg.model == "0PA_Kerr":
+            from few.waveform import GenerateEMRIWaveform
+            self._gen = GenerateEMRIWaveform(
+                "FastKerrEccentricEquatorialFlux",
+                return_list=False,
+                inspiral_kwargs=cfg.inspiral_kwargs,
+                amplitude_kwargs=cfg.amplitude_kwargs,
+                frame="detector",
+            )
+            self._call = self._call_0pa
+        else:
+            raise ValueError(f"Unknown waveform model: {cfg.model}")
+
+    @classmethod
+    def supported_backends(cls):
+        return ["fastlisaresponse_" + b for b in cls.GPU_RECOMMENDED()]
+
+    def _call_1pa(self, *params):
+        # 1PAT1R signature: (m1, m2, a, p0, theta, phi, chi2)
+        m1, m2, a, p0, _e0, chi2, _x, _dL, theta_S, phi_S = params[:10]
+        return self._gen(
+            m1, m2, a, p0, theta_S, phi_S, chi2,
+            dt=self.cfg.dt, T=self.cfg.T,
+            zero_PA_amps_only=(not self.cfg.include_1PA_amps),
+            evolve_primary=self.cfg.evolve_chi1,
+        )
+
+    def _call_0pa(self, *params):
+        waveform_kwargs = dict(
+            T=self.cfg.T, dt=self.cfg.dt,
+            mode_selection_threshold=self.cfg.mode_selection_threshold,
+        )
+        return self._gen(*params, **waveform_kwargs)
+
+    def __call__(self, *params):
+        return self._call(*params)
+
+
+def build_response(
+    cfg: WaveformConfig,
+    resp_cfg: ResponseConfig,
+    t_init: float,
+    t0_orbits: float,
+    T_response: float,
+    use_gpu: bool = True,
+):
+    """Sets up a responseWarpper callable wrapped around waveform generator and orbits.
+    This returns a callable that returns 3xNt array of TDI data for given set of EMRI params."""
+    force_backend = "cuda12x" if use_gpu else None
+
+    wave = EMRIWave(cfg, force_backend=force_backend)
+    orbits = Orbits(
+        filename=resp_cfg.orbit_file,
+        use_gpu=use_gpu,
+        force_backend=force_backend,
+        linear_interp_setup=False,
+        t0=t0_orbits,
+    )
+
+    index_beta, index_lambda = cfg.sky_indices()
+    tdi_kwargs = dict(
+        orbits=orbits,
+        order=resp_cfg.order,
+        tdi=TDIConfig(resp_cfg.tdi_gen),
+        tdi_chan=resp_cfg.tdi_chan,
+    )
+
+    response = ResponseWrapper(
+        wave,
+        T_response,
+        cfg.dt,
+        index_lambda,
+        index_beta,
+        t0=t_init,
+        t_buffer=resp_cfg.t_buffer,
+        flip_hx=resp_cfg.flip_hx,
+        force_backend=force_backend,
+        remove_sky_coords=resp_cfg.remove_sky_coords,
+        is_ecliptic_latitude=resp_cfg.is_ecliptic_latitude,
+        remove_garbage=resp_cfg.remove_garbage,
+        **tdi_kwargs,
+    )
+
+    def _call(*params):
+        return cp.asarray(response(*params))
+
+    return _call

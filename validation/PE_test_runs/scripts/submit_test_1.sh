@@ -12,11 +12,11 @@
 #SBATCH --job-name=test_1
 
 module load GCC/11.3.0 GSL CUDA/12 FFTW/3.3.10-GCC-11.3.0 
-conda activate lisatools_env
+conda activate emri_env_ddpc
 nvidia-smi
 
-HOME_FOLDER=/data/leuven/367/vsc36785/LISA/few-mojito-review/PE_tests
-SAMPLE_SCRIPTS=$HOME_FOLDER/PE_test_cases_response.py
+HOME_FOLDER=/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs
+SAMPLE_SCRIPTS=$HOME_FOLDER/PE_response.py
 INFERENCE_PARAMS=$HOME_FOLDER/config/config_test_1.yaml
 
-python $SAMPLE_SCRIPTS --inference_params=$INFERENCE_PARAMS --cluster=vsc
+python $SAMPLE_SCRIPTS --config=$INFERENCE_PARAMS

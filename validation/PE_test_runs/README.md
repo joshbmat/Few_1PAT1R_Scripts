@@ -11,9 +11,10 @@ How to set up environment to run scripts:
 
 How to run the code:
 ```console
-# Make sure to set paths in config file correctly
-python PE_response.py --config=config/config_test_1.yaml
+$ python PE_response.py --config=config/config_test_1.yaml
 ```
+Make sure to set paths in config file correctly
+
 That's it. The script will create the injection on the fly, build the likelihood and run the sampler. Some plots and checks are computed before the sampler starts and these are written into the log file to debug. The likelihood throws a warning when the waveform is evaluated at parameters that make the model crash. 
 
 ### PE tests

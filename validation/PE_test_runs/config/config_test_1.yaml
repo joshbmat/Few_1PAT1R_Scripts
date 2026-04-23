@@ -1,40 +1,74 @@
-Waveform:
-  M: 1000000.0
-  mu: 6.0
-  a: 0.5
-  p0: 10.0
-  e0: 0.0
-  x_I0: 1.0
-  d_L: 0.1
-  theta_S: 0.5689062462243505
-  phi_S: 3.069569972026508
-  theta_K: 0.11247032308126413
-  phi_K: 0.7524383205999023
-  Phi_phi0: 4.809727148143657
-  Phi_theta0: 0.635376120342196
-  Phi_r0: 4.2638433178190684
-  inspiral_kwargs:
-    DENSE_STEPPING: 0
-    max_init_len: 100000000
-  summation_kwargs:
-    pad_output: true
-  amplitude_kwargs: {}
-  waveform_kwargs:
-    mode_selection_threshold: 0.0
-    T: 1
-    dt: 5
+Injection:
+    # Injected EMRI parameters
+    EMRI:
+        M: 1000000.0
+        mu: 6.0
+        a: 0.00002     # max +/- 5*epsilon
+        p0: 10.0       # ensure this is between 6.25 and 30
+        e0: 0.0     # force this to zero
+        chi2: 0.9   # secondary spin
+        x_I0: 1.0
+        d_L: 0.1
+        theta_S: 0.5689062462243505
+        phi_S: 3.069569972026508
+        theta_K: 0.11247032308126413
+        phi_K: 0.7524383205999023
+        Phi_phi0: 4.809727148143657
+        Phi_theta0: 0.635376120342196
+        Phi_r0: 4.2638433178190684
+        
+    Waveform:
+        # settings for the injected waveform
+        1PA_settings:
+            evolve_chi1: true
+            include_1PA_amps: true
+            0PA_only: false     # if true, need to account for chi2 param which is not accepted by KerrEccEq model
+            
+        # general arguments for FEW
+        inspiral_kwargs:
+            DENSE_STEPPING: 0
+            max_init_len: 1000
+        
+        summation_kwargs:
+            pad_output: true
+        
+        amplitude_kwargs: {}
+        
+        waveform_kwargs:
+            mode_selection_threshold: 0.0
+            T: 2
+            dt: 5
+            
+    Response:
+        orbits: '/path/to/orbit/file.h5'
+        TDI_gen: '2nd generation'
+        TDI_chan: 'XYZ'
+        t_init: false        # if none, set to hard-coded value from Mojito Light
+        offset: 550  # seconds (response warm-up)
+        TDI_samples: 1000 # samples (crap data samples because of TDI)
+        sky_coords: 'equatorial'  # specify coordinate frame in which the sky position angles are given
+        index_lambda: 8
+        index_beta: 9     # these differ from usual values because of extra spin parameter
+
+Recovery:
+    # What is included in recovery template
+    evolve_chi1: true
+    include_1PA_amps: true
+    0PA_only: false     # if true, need to account for chi2 param which is not accepted by KerrEccEq model
+        
 Sampler:
   name: test_1
-  windowing: true
-  filter_freq: true
-  num_samples: 10000
-  burn_in: 0
-  use_gpu: true
+  windowing: true   # if true, apply Tukey window when transforming with FFT
+  filter_freq: true      # This restricts the inner product evaluation to LISA band
+  num_samples: 10000     # number of sampling evaluations
+  burn_in: 0           # set this during the initialization
+  use_gpu: true     
   n_temps: 3
-  n_walkers: 30
-  d: 5
-  prior_width: 3000
-  continue_run: false
-  sampling_data_path: data/sampling_data
+  n_walkers: 30    # Likelihood evaluation is not batched, despite GPU: don't exaggerate number of walkers
+  d: 5        # parameter controlling deviation from true vals when dropping initial walkers.
+  prior_width: 3000      # parameter setting the prior width
+  continue_run: false    # set to true
+  backend_file: ''    # set name of backend file with timestamp that we want to continue running
+  sampling_data_path: sampling_data
   fixed_params:
-  - ['x_I0']
+  - ['x_I0']    # list of param names that we fix during sampling. 

@@ -1,3 +1,4 @@
 *.DS_Store
 *.ipynb_checkpoints/
+validation/PE_test_runs/src/__pycache__/
 .vscode

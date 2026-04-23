@@ -1,0 +1,40 @@
+Waveform:
+  M: 1000000.0
+  mu: 6.0
+  a: 0.5
+  p0: 10.0
+  e0: 0.0
+  x_I0: 1.0
+  d_L: 0.1
+  theta_S: 0.5689062462243505
+  phi_S: 3.069569972026508
+  theta_K: 0.11247032308126413
+  phi_K: 0.7524383205999023
+  Phi_phi0: 4.809727148143657
+  Phi_theta0: 0.635376120342196
+  Phi_r0: 4.2638433178190684
+  inspiral_kwargs:
+    DENSE_STEPPING: 0
+    max_init_len: 100000000
+  summation_kwargs:
+    pad_output: true
+  amplitude_kwargs: {}
+  waveform_kwargs:
+    mode_selection_threshold: 0.0
+    T: 1
+    dt: 5
+Sampler:
+  name: test_1
+  windowing: true
+  filter_freq: true
+  num_samples: 10000
+  burn_in: 0
+  use_gpu: true
+  n_temps: 3
+  n_walkers: 30
+  d: 5
+  prior_width: 3000
+  continue_run: false
+  sampling_data_path: data/sampling_data
+  fixed_params:
+  - ['x_I0']

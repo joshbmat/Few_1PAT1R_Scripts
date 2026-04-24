@@ -110,7 +110,7 @@ rec_wcfg = _waveform_cfg(cfg["Recovery"]["Waveform"])
 if inj_wcfg.model != rec_wcfg.model:
     logger.warning("Injection and recovery models differ. Expect biases.")
 
-param_names = inj_wcfg.param_names()
+param_names = rec_wcfg.param_names()
 x_I0_index = param_names.index("x_I0") if "x_I0" in param_names else None
 
 resp_cfg = _response_cfg(cfg["Response"], cfg["Data"]["orbit_file"])
@@ -159,20 +159,24 @@ inv_cov, psd_diag = build_inv_covariance(
     channels=resp_cfg.tdi_chan,
 )
 
-# set up response for Recovery 
+# set up response for Recovery
 logger.info(f"Building recovery response ({rec_wcfg.model})")
 rec_response = build_response(rec_wcfg, resp_cfg, t_init, t0_orbits,
                                 T_response, use_gpu=use_gpu)
+
+# Truth params in the recovery model's parameter layout (may differ from
+# inj_params when injection and recovery models use different parameter vectors).
+rec_truth_params = _emri_vector(cfg["Injection"]["EMRI"], rec_wcfg.model)
 
 ############################################################
 # create prior and likelihood objects and do consistency checks before sampling
 fixed_names = list(cfg["Sampler"]["fixed_params"])
 priors, bounds, sampled_idx = build_priors(
-    param_names, inj_params, fixed_names,
+    param_names, rec_truth_params, fixed_names,
     n=float(cfg["Sampler"]["d"]),
     use_cupy=True,
 )
-fixed_idx = {param_names.index(n): inj_params[param_names.index(n)]
+fixed_idx = {param_names.index(n): rec_truth_params[param_names.index(n)]
                 for n in fixed_names if n in param_names and n != "x_I0"}
 
 llike = LogLikelihood(
@@ -188,9 +192,9 @@ llike = LogLikelihood(
     mask=mask,
 )
 
-# Do some consistency chekcs
+# Do some consistency checks
 logger.info("Running consistency checks")
-xyz_rec_true_td = rec_response(*inj_params)
+xyz_rec_true_td = rec_response(*rec_truth_params)
 xyz_rec_true_fft = cp.fft.rfft(xyz_rec_true_td * window, axis=1)[:, mask]
 
 # get SNR
@@ -200,7 +204,7 @@ snr = float(cp.sqrt(inner_prod_tdi(xyz_data_fft, xyz_data_fft, inv_cov)))
 mm = mismatch_tdi(xyz_data_fft, xyz_rec_true_fft, inv_cov)
 
 # get loglikelihood at true value
-ll_truth = float(llike([inj_params[i] for i in sampled_idx]))
+ll_truth = float(llike([rec_truth_params[i] for i in sampled_idx]))
 
 logger.info(f"SNR = {snr:.2f}")
 logger.info(f"Mismatch (injection vs recovery at truth) = {mm:.3e}")
@@ -212,7 +216,7 @@ if snr < 20:
 ndim = len(sampled_idx)
 nwalkers = int(cfg["Sampler"]["n_walkers"])
 n_temps = int(cfg["Sampler"]["n_temps"])
-start_val = np.array([inj_params[i] for i in sampled_idx])
+start_val = np.array([rec_truth_params[i] for i in sampled_idx])
 
 def _draw(shape):
     pts = start_val + 1e-7 * float(cfg["Sampler"]["d"]) * np.random.randn(*shape, ndim)

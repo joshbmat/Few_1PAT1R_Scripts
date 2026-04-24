@@ -92,10 +92,13 @@ class EMRIWave(ParallelModuleBase):
     based on `WaveformConfig.model`. Returns h_+ - i h_x for ResponseWrapper.
     """
 
-    def __init__(self, 
-                 cfg: WaveformConfig, 
+    def __init__(self,
+                 cfg: WaveformConfig,
+                 T_waveform: Optional[float] = None,
                  force_backend: Optional[str] = None):
         self.cfg = cfg
+        # T_waveform must cover cfg.T plus all TDI/response buffer padding.
+        self.T_waveform = T_waveform if T_waveform is not None else cfg.T
         # Should return h+ - ihx in detector frame, with 1PA effects toggled on/off
         if cfg.model == "1PAT1R":
             from few.waveform import GenerateEMRIWaveform
@@ -132,20 +135,20 @@ class EMRIWave(ParallelModuleBase):
         return self._gen(
             *params_0pa,
             chi2=chi2,
-            dt=self.cfg.dt, T=self.cfg.T,
+            dt=self.cfg.dt, T=self.T_waveform,
             zero_PA_amps_only=(not self.cfg.include_1PA_amps),
             evolve_primary=self.cfg.evolve_chi1,
         )
 
     def _call_0pa(self, *params, **waveform_kwargs):
         waveform_kwargs = dict(
-            T=self.cfg.T, dt=self.cfg.dt,
+            T=self.T_waveform, dt=self.cfg.dt,
             mode_selection_threshold=self.cfg.mode_selection_threshold,
         )
         return self._gen(*params, **waveform_kwargs)
 
-    def __call__(self, *params):
-        return self._call(*params)
+    def __call__(self, *params, **waveform_kwargs):
+        return self._call(*params, **waveform_kwargs)
 
 
 def build_response(
@@ -160,7 +163,7 @@ def build_response(
     This returns a callable that returns 3xNt array of TDI data for given set of EMRI params."""
     force_backend = "cuda12x" if use_gpu else None
 
-    wave = EMRIWave(cfg, force_backend=force_backend)
+    wave = EMRIWave(cfg, T_waveform=T_response, force_backend=force_backend)
     orbits = Orbits(
         filename=resp_cfg.orbit_file,
         use_gpu=use_gpu,

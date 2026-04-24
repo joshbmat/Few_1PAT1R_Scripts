@@ -98,13 +98,13 @@ class EMRIWave(ParallelModuleBase):
         self.cfg = cfg
         # Should return h+ - ihx in detector frame, with 1PA effects toggled on/off
         if cfg.model == "1PAT1R":
-            from few.waveform import Waveform1PAT1R
+            from few.waveform import GenerateEMRIWaveform
             self._gen = GenerateEMRIWaveform(
                 'Waveform1PAT1R',
-                return_list=False, 
+                return_list=False,
                 inspiral_kwargs=cfg.inspiral_kwargs,
                 amplitude_kwargs=cfg.amplitude_kwargs,
-                frame='detector'
+                frame='detector',
             )
             self._call = self._call_1pa
         elif cfg.model == "0PA_Kerr":
@@ -125,22 +125,19 @@ class EMRIWave(ParallelModuleBase):
         return ["fastlisaresponse_" + b for b in cls.GPU_RECOMMENDED()]
 
     def _call_1pa(self, *params, **waveform_kwargs):
-        # 1PAT1R has a different signature. This is handled in FEW when calling the model 
-        # through the generic interface
-        # This are params that are present in 0PA waveforms
-        params_0PA = params[:-1]
-        chi2 = params[-1]
+        # chi2 lives at index 5 in PARAM_NAMES_1PA; FEW expects it as a keyword.
+        # Strip it from the positional vector and forward the 0PA-style params.
+        chi2 = params[5]
+        params_0pa = params[:5] + params[6:]
         return self._gen(
-            *params,
-            chi2=chi2
+            *params_0pa,
+            chi2=chi2,
             dt=self.cfg.dt, T=self.cfg.T,
             zero_PA_amps_only=(not self.cfg.include_1PA_amps),
             evolve_primary=self.cfg.evolve_chi1,
         )
 
     def _call_0pa(self, *params, **waveform_kwargs):
-        # update fixed kwargs
-        self.waveform_kwargs.update(waveform_kwargs)
         waveform_kwargs = dict(
             T=self.cfg.T, dt=self.cfg.dt,
             mode_selection_threshold=self.cfg.mode_selection_threshold,

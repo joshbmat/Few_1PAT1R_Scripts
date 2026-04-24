@@ -1,423 +1,296 @@
 '''
-Main script to to PE run
+PE validation WITHOUT the LISA response.
+
+Evaluates the Whittle likelihood directly as an inner product of the
+detector-frame complex strain h+ - i hx against the analytic LISA PSD
+(`lisatools.sensitivity.LISASens`). Supports both waveform models via
+`src.waveform.EMRIWave`, so the same config schema as `PE_response.py`
+works: `Injection.Waveform.model` and `Recovery.Waveform.model` can be
+either '1PAT1R' or '0PA_Kerr' (must agree on parameter space).
+
+Use this script for waveform-stability checks and fast exploratory runs
+where TDI and realistic Mojito noise are not needed.
 '''
 
-# Imports
-import os 
-import time
+import argparse
 import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-from typing import Dict, Optional
+import os
+import time
 
 import cupy as cp
+import matplotlib.pyplot as plt
 import numpy as np
-from few.waveform import GenerateEMRIWaveform
-from lisatools.sensitivity import get_sensitivity, LISASens, CornishLISASens
-
-# check for GPU availability
-if not cp.is_available():
-    xp = np
-    logging.warning("GPU not available. Running on CPU, this will be very slow! ")
-else:
-    xp = cp
-
-import argparse 
-
-from scipy.signal.windows import tukey
-
-# Import features from eryn
+from eryn.backends import HDFBackend
 from eryn.ensemble import EnsembleSampler
 from eryn.moves import StretchMove
-from eryn.prior import ProbDistContainer, uniform_dist
-from eryn.backends import HDFBackend
+from lisatools.sensitivity import LISASens, get_sensitivity
+from scipy.signal.windows import tukey
 
-# Load custom modules
-from src.utils import zero_pad, inner_product 
 from src.io import param_load
+from src.priors import build_priors
+from src.utils import inband_freqs, inner_product
+from src.waveform import EMRIWave, WaveformConfig, param_names_for
 
-logger.info('Reading yaml file...')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+def _waveform_cfg(block: dict) -> WaveformConfig:
+    return WaveformConfig(
+        model=block["model"],
+        dt=float(block["dt"]),
+        T=float(block["T"]),
+        mode_selection_threshold=float(block.get("mode_selection_threshold", 0.0)),
+        evolve_chi1=bool(block.get("evolve_chi1", True)),
+        include_1PA_amps=bool(block.get("include_1PA_amps", True)),
+        inspiral_kwargs=dict(block.get("inspiral_kwargs") or {}),
+        amplitude_kwargs=dict(block.get("amplitude_kwargs") or {}),
+        summation_kwargs=dict(block.get("summation_kwargs") or {}),
+    )
+
+
+def _emri_vector(emri_block: dict, model: str) -> list[float]:
+    z = float(emri_block.get("z", 0.0))
+    params = []
+    for n in param_names_for(model):
+        val = float(emri_block[n])
+        if n in ("M", "mu"):
+            val *= (1.0 + z)
+        params.append(val)
+    return params
+
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--inference_params", type = str, help = "File with inference parameters", default=None)
-
+parser.add_argument("--config", type=str, required=True,
+                    help="YAML configuration file.")
 args = parser.parse_args()
-if args.inference_params is None:
-    raise ValueError("Please provide a yaml file with parameters using --inference_params option.")
-    
-params = param_load(args.inference_params)
-print(params)
 
-inspiral_kwargs = params['Waveform']['inspiral_kwargs']
-summation_kwargs = params['Waveform']['summation_kwargs']
-amplitude_kwargs = params['Waveform']['amplitude_kwargs']
-waveform_kwargs = params['Waveform']['waveform_kwargs']
+if not os.path.exists(args.config):
+    raise FileNotFoundError(args.config)
 
-EMRI_params = [
-    float(params['Waveform']['M']), 
-    float(params['Waveform']['mu']), 
-    float(params['Waveform']['a']), 
-    float(params['Waveform']['p0']), 
-    float(params['Waveform']['e0']), 
-    float(params['Waveform']['x_I0']), 
-    float(params['Waveform']['d_L']), 
-    float(params['Waveform']['theta_S']), 
-    float(params['Waveform']['phi_S']), 
-    float(params['Waveform']['theta_K']), 
-    float(params['Waveform']['phi_K']), 
-    float(params['Waveform']['Phi_phi0']), 
-    float(params['Waveform']['Phi_theta0']), 
-    float(params['Waveform']['Phi_r0'])
-]
-logger.info('EMRI parameters read from yaml file.')
-logger.info(f'EMRI parameters = {EMRI_params}')
-logger.info("Reading sampler settings from yaml file...")
-use_gpu = params['Sampler']['use_gpu']    
+cfg = param_load(args.config)
+logger.info(f"Loaded config from {args.config}")
 
-# define paths
-data_dir = params['Sampler']['sampling_data_path']
+use_gpu = bool(cfg["Sampler"]["use_gpu"])
+if use_gpu and not cp.is_available():
+    logger.warning("GPU requested but cupy is not available; falling back to CPU.")
+    use_gpu = False
+xp = cp if use_gpu else np
+force_backend = "cuda12x" if use_gpu else None
 
-# Read MCMC parameters from params
-nwalkers = params['Sampler']['n_walkers']
-n_temps = params['Sampler']['n_temps']
-iterations = params['Sampler']['num_samples']
-bruning = params['Sampler']['burn_in']
-d = params['Sampler']['d']
-continue_run = params['Sampler']['continue_run']
+# Injection / recovery configs. Allowed to differ for systematics studies, as
+# long as they share the parameter space (both 1PAT1R or both 0PA_Kerr).
+inj_wcfg = _waveform_cfg(cfg["Injection"]["Waveform"])
+rec_wcfg = _waveform_cfg(cfg["Recovery"]["Waveform"])
+if inj_wcfg.model != rec_wcfg.model:
+    raise ValueError("Injection and recovery models must share a parameter "
+                     "space (both '1PAT1R' or both '0PA_Kerr').")
 
-# Read waveform parameters
-T = params['Waveform']['waveform_kwargs']['T']
-DT = params['Waveform']['waveform_kwargs']['dt']
-FS = 1/DT
+param_names = inj_wcfg.param_names()
+x_I0_index = param_names.index("x_I0") if "x_I0" in param_names else None
+DT = inj_wcfg.dt
 
-# Read other settings
-windowing = params['Sampler']['windowing']
-filter_freq = params['Sampler']['filter_freq']
-fixed_params = params['Sampler']['fixed_params']
+inj_params = _emri_vector(cfg["Injection"]["EMRI"], inj_wcfg.model)
 
-logger.info('Sampler settings loaded')
-logger.info('Checking GPU memory...')
-def check_memory():
-    free, total = cp.cuda.Device(0).mem_info
-    print(f'Free memory  : {free/1e9:.2f} Gb\nUsed memory  : {(total-free)/1e9:.2f} Gb\nTotal memory : {total/1e9:.2f} Gb\n')
-if use_gpu:
-    check_memory()
+# Waveform generators (no response)
+logger.info(f"Building injection waveform ({inj_wcfg.model})")
+inj_wave = EMRIWave(inj_wcfg, force_backend=force_backend)
 
-param_names = ['M', 'mu', 'a', 'p0', 'e0', 'x_I0', 'd_L', 'theta_S', 'phi_S', 'theta_K', 'phi_K', 'Phi_phi0', 'Phi_theta0', 'Phi_r0']
+logger.info(f"Building recovery waveform ({rec_wcfg.model})")
+rec_wave = EMRIWave(rec_wcfg, force_backend=force_backend)
 
-param_indexing = {param_names[i]: i for i in range(len(param_names))}
+# Injection strain: complex h+ - i hx in detector frame
+h_inj = xp.asarray(inj_wave(*inj_params))
+N_t = len(h_inj)
 
-fixed_param_values = {i: EMRI_params[i] for name, i in param_indexing.items() if name in fixed_params}
-sampling_params = [i for i in range(len(param_names)) if i not in fixed_param_values.keys()]
-##======================Waveform=======================
-logger.info('Setting up waveform model...')
+windowing = bool(cfg["Sampler"]["windowing"])
+filter_freq = bool(cfg["Sampler"]["filter_freq"])
+window = xp.asarray(tukey(N_t, alpha=0.01)) if windowing else xp.ones(N_t)
+
+freqs_inband, mask = inband_freqs(N_t, DT, filter_freq=filter_freq)
+df = 1.0 / (N_t * DT)
+
+h_inj_fft = xp.fft.rfft(h_inj * window)[mask]
+
+# Analytic LISA PSD on the analysis grid
+Sn = get_sensitivity(freqs_inband, sens_fn=LISASens, return_type="PSD")
+
+# Priors
+fixed_names = list(cfg["Sampler"].get("fixed_params", []) or [])
+priors, bounds, sampled_idx = build_priors(
+    param_names, inj_params, fixed_names,
+    n=float(cfg["Sampler"]["d"]),
+    use_cupy=use_gpu,
+)
+fixed_idx = {
+    param_names.index(n): inj_params[param_names.index(n)]
+    for n in fixed_names if n in param_names and n != "x_I0"
+}
 
 
-EMRI_waveform = GenerateEMRIWaveform("FastKerrEccentricEquatorialFlux", 
-                                     inspiral_kwargs=inspiral_kwargs,
-                                     sum_kwargs=summation_kwargs,
-                                     amplitude_kwargs=amplitude_kwargs,
-                                     return_list=True)
-
-##======================Likelihood=====================
-logger.info('Setting up likelihood function')
-
-class loglikelihood:
+class LogLikelihoodDiagonal:
     """
-    Class to compute loglikelihood. We use a class here to be able to "fix" some parameters that we do not want to sample over. 
-    The __call__ method allows us to call the class instance as a function, which is what the sampler expects. 
+    Callable returning -0.5 <d - h | d - h> with a diagonal analytic PSD.
+
+    Uses the complex detector-frame strain h+ - i hx directly: for a real
+    PSD the inner product collapses to <h+|h+> + <hx|hx>, since the cross
+    term (h+|hx) is purely imaginary.
     """
-    def __init__(self, 
-                 data_f, 
-                 PSD,
-                 fixed_params: Dict[int, float] = {}, 
-                 window: np.ndarray = 1,
-                 mask: Optional[np.ndarray] = None
-                 )-> None:
+    def __init__(self, data_fft, psd, df, dt, wave, param_names,
+                 fixed_params, x_I0_index, window, mask, x_I0_value=1.0):
+        self.data_fft = data_fft
+        self.psd = psd
+        self.df = df
+        self.dt = dt
+        self.wave = wave
+        self.param_names = param_names
         self.fixed_params = fixed_params
-        self.window = xp.asarray(window)
-        if mask is not None:   
-            self.mask = mask
+        self.x_I0_index = x_I0_index
+        self.x_I0_value = x_I0_value
+        self.window = window
+        self.mask = mask
 
-        self.data_fft = data_f
-        self.PSD = PSD
-
-    def __call__(self, params):
-        """
-        Inputs: Parameters to sample over
-        Outputs: log-whittle likelihood
-        """
-        few_params = []
+    def _expand(self, sampled):
+        full = []
         k = 0
-
-        # Build full 14-parameter vector expected by FEW.
-        # x_I0 (index 5) is fixed to 1.0 and not taken from sampled params.
-        for i in range(len(param_names)):
-            if i == 5:
-                few_params.append(1.0)
+        for i in range(len(self.param_names)):
+            if i == self.x_I0_index:
+                full.append(self.x_I0_value)
             elif i in self.fixed_params:
-                few_params.append(self.fixed_params[i])
+                full.append(self.fixed_params[i])
             else:
-                few_params.append(params[k])
+                full.append(float(sampled[k]))
                 k += 1
+        return full
+
+    def __call__(self, sampled):
+        full = self._expand(sampled)
         try:
-            waveform_prop = EMRI_waveform(*few_params, **waveform_kwargs)
+            h_td = xp.asarray(self.wave(*full))
+            h_fft = xp.fft.rfft(h_td * self.window)[self.mask]
+            diff = h_fft - self.data_fft
+            return -0.5 * float(inner_product(diff, diff, self.psd, self.df, self.dt))
+        except Exception as exc:
+            logger.warning(f"Likelihood failed: {exc}")
+            for name, val in zip(self.param_names, full):
+                logger.warning(f"  {name} = {val:.6e}")
+            # large negative value -> barrier around failed points
+            return np.float32(-1e5)
 
-            # Taper and then zero pad. 
-            EMRI_padded_plus = zero_pad(waveform_prop[0] * self.window)
-            EMRI_padded_cross = zero_pad(waveform_prop[1] * self.window)
 
-            # Compute in frequency domain
-            EMRI_fft_plus = xp.fft.rfft(EMRI_padded_plus)[self.mask]
-            EMRI_fft_cross = xp.fft.rfft(EMRI_padded_cross)[self.mask]
+llike = LogLikelihoodDiagonal(
+    data_fft=h_inj_fft,
+    psd=Sn,
+    df=df,
+    dt=DT,
+    wave=rec_wave,
+    param_names=param_names,
+    fixed_params=fixed_idx,
+    x_I0_index=x_I0_index,
+    window=window,
+    mask=mask,
+)
 
-            # Compute (d - h| d- h)
-            diff_f_plus = EMRI_fft_plus- self.data_fft[0]
-            diff_f_cross = EMRI_fft_cross - self.data_fft[1]
+# Consistency checks
+logger.info("Running consistency checks")
+snr = float(np.sqrt(inner_product(h_inj_fft, h_inj_fft, Sn, df, DT)))
+ll_truth = float(llike([inj_params[i] for i in sampled_idx]))
 
-            inn_prod_plus = inner_product(diff_f_plus,diff_f_plus, self.PSD, df, DT)
-            inn_prod_cross = inner_product(diff_f_cross,diff_f_cross, self.PSD, df, DT)
-            llike_val_np = xp.asnumpy(-0.5 * (inn_prod_plus + inn_prod_cross)) 
-        except Exception as e:
-            logger.info(f'Failed: {e}')
-            # return very low loglikelihood to steer away from this area
-            return np.float32(-10000)
-        return (llike_val_np)
+logger.info(f"SNR = {snr:.2f}")
+logger.info(f"loglike at truth = {ll_truth:.3e}")
+if snr < 20:
+    logger.warning("Injection SNR below 20 -- may not be recoverable.")
 
-####=======================True  waveform==========================
-logger.info("Generating True waveform...")
-true_waveform = EMRI_waveform(*EMRI_params,
-                         **waveform_kwargs)
+# Starting positions (same tight-ball convention as PE_response.py)
+ndim = len(sampled_idx)
+nwalkers = int(cfg["Sampler"]["n_walkers"])
+n_temps = int(cfg["Sampler"]["n_temps"])
+start_val = np.array([inj_params[i] for i in sampled_idx])
 
-####=======================True  waveform==========================
-logger.info("Computing true SNR")
 
-N_t_wav = len(true_waveform[0])
-window = xp.asarray(tukey(N_t_wav, alpha=0.1)) if windowing else xp.ones(N_t_wav)
+def _draw(shape):
+    pts = start_val + 1e-7 * float(cfg["Sampler"]["d"]) * np.random.randn(*shape, ndim)
+    for k in range(ndim):
+        lo, hi = bounds[k]
+        pts[..., k] = np.clip(pts[..., k], lo, hi)
+    return pts
 
-# Taper and then zero pad. 
-EMRI_padded_plus = xp.asarray(zero_pad(true_waveform[0] * window))
-EMRI_padded_cross = xp.asarray(zero_pad(true_waveform[1] * window))
-N_t = len(EMRI_padded_plus)
 
-# get frequencies and make mask
-freq = xp.fft.rfftfreq(N_t, DT)
+start = _draw((n_temps, nwalkers)) if n_temps > 1 else _draw((nwalkers,))
+flat = start.reshape(-1, ndim)
+if not np.all(np.isfinite(priors.logpdf(flat))):
+    raise ValueError("Starting positions outside prior support.")
 
-freq[0] = freq[1]   # To "retain" the zeroth frequency
+# Run log + backend paths
+home = os.getcwd()
+data_dir = cfg["Sampler"]["sampling_data_path"]
+timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+fixed_tag = "_".join(f"{n}_{cfg['Injection']['EMRI'][n]}" for n in fixed_names)
+tag = f"{cfg['Sampler']['name']}_fixed{fixed_tag}_{timestamp}"
+out_dir = os.path.join(home, "..", "..", data_dir)
+os.makedirs(out_dir, exist_ok=True)
+fp = os.path.join(out_dir, f"SamplingResults_{tag}.h5")
+log_fp = os.path.join(out_dir, f"RunLog_{tag}.txt")
 
-if filter_freq:
-    # filter frequencies between upper and lower bound
-    upper_bound = 1/(2*DT) # nyquist limit
-    lower_bound = 1e-5 # end of the LISA band
+with open(log_fp, "w") as f:
+    f.write(f"# PE run log (no response) -- {timestamp}\n")
+    f.write(f"Config: {args.config}\n")
+    f.write(f"Injection model: {inj_wcfg.model} "
+            f"(evolve_chi1={inj_wcfg.evolve_chi1}, "
+            f"include_1PA_amps={inj_wcfg.include_1PA_amps})\n")
+    f.write(f"Recovery  model: {rec_wcfg.model} "
+            f"(evolve_chi1={rec_wcfg.evolve_chi1}, "
+            f"include_1PA_amps={rec_wcfg.include_1PA_amps})\n")
+    f.write(f"Fixed params: {fixed_names}\n")
+    f.write(f"Sampler: ntemps={n_temps}, nwalkers={nwalkers}, "
+            f"iterations={cfg['Sampler']['num_samples']}, "
+            f"d={cfg['Sampler']['d']}\n")
+    f.write(f"SNR (injection): {snr:.4f}\n")
+    f.write(f"loglike at truth: {ll_truth:.6e}\n")
+    f.write(f"Backend: {fp}\n")
 
-    # create boolean mask 
-    mask = (freq >= lower_bound) & (freq <= upper_bound)
-            
-    # apply mask
-    freqs = xp.asarray(freq[mask])
-df = xp.diff(xp.asarray(freqs))
+# Diagnostic plot: injection strain vs LISA ASD
+plots_dir = os.path.join(home, cfg["Sampler"].get("plots_path", "../../Plots"))
+os.makedirs(plots_dir, exist_ok=True)
 
-# get LISA SciRdv1 noise curve
-Sn = get_sensitivity(freqs, sens_fn=LISASens, return_type="PSD")
+freqs_np = cp.asnumpy(freqs_inband) if use_gpu else np.asarray(freqs_inband)
+h_fft_np = cp.asnumpy(h_inj_fft) if use_gpu else np.asarray(h_inj_fft)
+psd_np = cp.asnumpy(Sn) if use_gpu else np.asarray(Sn)
 
-# Compute in frequency domain
-EMRI_fft_plus = xp.fft.rfft(EMRI_padded_plus)[mask]
-EMRI_fft_cross = xp.fft.rfft(EMRI_padded_cross)[mask]
+fig, ax = plt.subplots(figsize=(9, 5))
+ax.loglog(freqs_np, 2 * freqs_np * np.abs(h_fft_np),
+          label="Injection strain (h+ - i hx)", alpha=0.8)
+ax.loglog(freqs_np, np.sqrt(freqs_np * psd_np),
+          label="LISA noise ASD", ls=":", color="k")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Characteristic strain")
+ax.set_title(f"{cfg['Sampler']['name']} - no response")
+ax.grid(which="both", alpha=0.4)
+ax.legend()
+fig.tight_layout()
+fig.savefig(os.path.join(plots_dir, f"{tag}_fd.png"), dpi=150)
+plt.close(fig)
+logger.info(f"Plots written to {plots_dir}")
 
-SNR2_true_plus = inner_product(EMRI_fft_plus, EMRI_fft_plus, Sn, df, DT)
-SNR2_true_cross = inner_product(EMRI_fft_cross, EMRI_fft_cross, Sn, df, DT)
-SNR2_true = SNR2_true_plus + SNR2_true_cross
-
-SNR_true = np.sqrt(xp.asnumpy(SNR2_true))
-print(f'    Optimal SNR of the signal = {float(SNR_true)}')
-
-##===========================Likelihood tests============================
-logger.info("Setting up likelihood object")
-
-# define fixed parameters (if any) and window
-
-fixed_params = {} # e.g. {0: M, 1: mu} to
-##breakpoint()
-llike = loglikelihood([EMRI_fft_plus, EMRI_fft_cross], 
-                      Sn, 
-                      window=window, 
-                      mask=mask,
-                      fixed_params=fixed_param_values)
-
-validation_params = [
-    float(params['Waveform']['M']), 
-    float(params['Waveform']['mu']), 
-    float(params['Waveform']['a']), 
-    float(params['Waveform']['p0']),
-    float(params['Waveform']['e0']), 
-    # float(params['Waveform']['x_I0']), 
-    float(params['Waveform']['d_L']), 
-    float(params['Waveform']['theta_S']), 
-    float(params['Waveform']['phi_S']), 
-    float(params['Waveform']['theta_K']), 
-    float(params['Waveform']['phi_K']), 
-    float(params['Waveform']['Phi_phi0']),
-    float(params['Waveform']['Phi_theta0']), 
-    float(params['Waveform']['Phi_r0'])
-]
-
-if llike(validation_params) == 0.0:
-    logger.info('Congrats, this is a good validation!')
-else: 
-    logger.info('Unfortunately, you have done something wrong :-(\n Go and debug your code. ')
-
-##===========================MCMC Settings============================
-logger.info("Setting up MCMC settings: starting points and temperatures")
-tempering_kwargs=dict(ntemps=n_temps)  # Sampler requires the number of temperatures as a dictionary
-
-# ================= SET UP PRIORS ========================
-logger.info("Setting up priors")
-#breakpoint()
-Delta_theta_intrinsic = [100, 1e-3, 1e-4, 1e-4, 1e-4, 1e-3]  # M, mu, a, p0, e0 x0
-Delta_theta_D = 0.5
-n = d
-epsilon_prior_width = 1e-12
-# iterate over parameters to assign prior to each one. 
-priors_in = {}
-k = 0
-for i, param_name in enumerate(param_names):
-    if param_name in fixed_params:
-        # we dont sample this parameters so no prior
-        continue
-    else:
-        # add a tight prior around the true value, with respect to the waveform parameter space bounds
-        if param_name in ['M', 'mu']:
-            priors_in[k] = uniform_dist(max(EMRI_params[i] - n*Delta_theta_intrinsic[i], 2), EMRI_params[i] + n*Delta_theta_intrinsic[i])
-        elif param_name in ['a']:
-            if EMRI_params[i] >= 0:
-                a_min = max(EMRI_params[i] - n*Delta_theta_intrinsic[i], 0.0)
-                a_max = min(EMRI_params[i] + n*Delta_theta_intrinsic[i], 0.999)
-                if a_max <= a_min:
-                    a_max = min(a_min + max(Delta_theta_intrinsic[i], epsilon_prior_width), 0.999)
-                    a_min = max(0.0, a_max - max(Delta_theta_intrinsic[i], epsilon_prior_width))
-                priors_in[k] = uniform_dist(a_min, a_max)
-            else:
-                priors_in[k] = uniform_dist(max(EMRI_params[i] - n*Delta_theta_intrinsic[i], -0.999),
-                                     min(EMRI_params[i] + n*Delta_theta_intrinsic[i], 0.0))
-                
-        elif param_name in ['e0']:
-            e0 = params['Waveform']['e0']
-            if e0 + n*Delta_theta_intrinsic[4] > 0.9:
-                e0_max = 0.9
-            else: 
-                e0_max = e0 + 2*n*Delta_theta_intrinsic[4]
-            e0_min = max(EMRI_params[i] - n*Delta_theta_intrinsic[i], 0.0)
-            if e0_max <= e0_min:
-                e0_max = min(e0_min + max(Delta_theta_intrinsic[i], epsilon_prior_width), 0.9)
-                e0_min = max(0.0, e0_max - max(Delta_theta_intrinsic[i], epsilon_prior_width))
-            priors_in[k] = uniform_dist(e0_min, e0_max)
-            logger.info(f'Capped eccentricity prior between {e0_min} and {e0_max}')
-        elif param_name in ['p0']:
-            priors_in[k] = uniform_dist(EMRI_params[i] - n*Delta_theta_intrinsic[i], EMRI_params[i] + n*Delta_theta_intrinsic[i])
-        elif param_name in ['x_I0']:
-            logger.warning('Inclination is fixed to 1.')
-            k -= 1
-        elif param_name in ['d_L']:
-            priors_in[k] = uniform_dist(max(EMRI_params[i] - n*Delta_theta_D, 0.1), EMRI_params[i] + n* Delta_theta_D)
-        elif param_name in ['theta_S', 'theta_K']:
-            priors_in[k] = uniform_dist(0, np.pi)
-        else:
-            priors_in[k] = uniform_dist(0, 2*np.pi)
-        logger.info(f'Prior for {param_name} added')
-        k += 1
-logger.info(f'Priors are set: {priors_in}')
-priors = ProbDistContainer(priors_in, use_cupy = True)   # Set up priors so they can be used with the sampler.
-
-# Instantiate starting points only after priors are defined to ensure all walkers are in support.
-# We add constraint that walkers must be within extremely small distance from the true value, to accelaret convergence
-# Generate starting points constrained to be very close to true values
-epsilon = 1e-6  # Small deviation from true values
-constrained_start = []
-max_attempts = 1000
-
-for walker in range(nwalkers):
-    for attempt in range(max_attempts):
-        candidate = priors.rvs(size=(1,))[0]
-        # Check if candidate is close enough to true values
-        if np.all(np.abs(candidate - EMRI_params[sampling_params]) < epsilon):
-            constrained_start.append(candidate)
-            break
-    else:
-        # If max attempts exceeded, use closest valid point
-        logger.warning(f"Walker {walker} exceeded max attempts, using closest valid point")
-        constrained_start.append(candidate)
-
-start = np.asarray(constrained_start)
-start = priors.rvs(size=(nwalkers,))
-
-if n_temps > 1:
-    # For parallel tempering, initialize each temperature with valid points from the same prior support.
-    start = np.asarray([priors.rvs(size=(nwalkers,)) for _ in range(n_temps)])
-
-if np.size(start.shape) == 1:
-    start = start.reshape(start.shape[-1], 1)
-    ndim = 1
-else:
-    ndim = start.shape[-1]
-
-start_logpdf = np.asarray(priors.logpdf(np.asarray(start)))
-if not np.all(np.isfinite(start_logpdf)):
-    raise ValueError("Initial walker positions contain points outside prior support.")
-
-# =================== SET UP PROPOSAL ==================
-#breakpoint()
-moves_stretch = StretchMove(a=2.0, use_gpu=True)
-
-# Quick checks
-if n_temps > 1:
-    print("Value of starting log-likelihood points", llike(start[0][0])) 
-    if np.isinf(sum(priors.logpdf(np.asarray(start[0])))):
-        logger.info("You are outside the prior range, you fucked up")
-        quit()
-else:
-    for k in range(start.shape[0]):
-        print("Value of starting log-likelihood points", llike(start[k])) 
-        
-#breakpoint()
-home_folder = os.getcwd()
-fixedparam_str = "_".join([f"{param_name}_{params['Waveform'][param_name]}" for param_name in fixed_params])
-
-timestamp_str = time.strftime("%Y-%m-%d_%H-%M-%S")
-
-fp = f"{home_folder}/../../{data_dir}/SamplingResults_{str(params['Sampler']['name'])}_fixed{fixedparam_str}_{timestamp_str}.h5"
+# Sampler
 backend = HDFBackend(fp)
-logger.info(f"Using backend file: {fp}")
-logger.info(f'Set up sampler and run!')
+if bool(cfg["Sampler"]["continue_run"]) and os.path.exists(fp):
+    logger.info(f"Continuing from existing backend {fp}")
+    start = backend.get_last_sample()
 
+ensemble = EnsembleSampler(
+    nwalkers,
+    ndim,
+    llike,
+    priors,
+    backend=backend,
+    tempering_kwargs=dict(ntemps=n_temps),
+    moves=StretchMove(a=2.0, use_gpu=use_gpu),
+)
 
-if continue_run:
-    # check for existing backend file
-    if os.path.exists(fp):
-        logger.info("Found existing backend file, continuing from last sample")
-        backend = HDFBackend(fp) # Set up backend
-
-        start = backend.get_last_sample() # Start from last sample
-    else:
-        logger.info("No existing backend file found, starting fresh sampling run")
-    ensemble = EnsembleSampler(
-                            nwalkers,          
-                            ndim,
-                            llike,
-                            priors,
-                            backend = backend,                 # Store samples to a .h5 file
-                            tempering_kwargs=tempering_kwargs,  # Allow tempering!
-                            moves = moves_stretch
-                            )
-else:
-    logger.info("Resetting backend and starting fresh sampling run")
-    ensemble = EnsembleSampler(
-                            nwalkers,          
-                            ndim,
-                            llike,
-                            priors,
-                            backend = backend,                 # Store samples to a .h5 file
-                            tempering_kwargs=tempering_kwargs,  # Allow tempering!
-                            moves = moves_stretch
-                            )
-
-out = ensemble.run_mcmc(start, iterations, progress=True)  # Run the sampler
+logger.info(f"Starting MCMC: {cfg['Sampler']['num_samples']} iterations -> {fp}")
+ensemble.run_mcmc(start, int(cfg["Sampler"]["num_samples"]), progress=True)
+logger.info("Done.")

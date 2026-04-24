@@ -72,8 +72,15 @@ def _response_cfg(block: dict, orbit_file: str) -> ResponseConfig:
 
 
 def _emri_vector(emri_block: dict, model: str) -> list[float]:
+    z = float(emri_block.get("z", 0.0))
     names = param_names_for(model)
-    return [float(emri_block[n]) for n in names]
+    params = []
+    for n in names:
+        val = float(emri_block[n])
+        if n in ("M", "mu"):
+            val *= (1.0 + z)
+        params.append(val)
+    return params
 
 
 parser = argparse.ArgumentParser()

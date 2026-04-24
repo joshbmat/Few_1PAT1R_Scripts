@@ -95,13 +95,17 @@ class EMRIWave(ParallelModuleBase):
     def __init__(self, 
                  cfg: WaveformConfig, 
                  force_backend: Optional[str] = None):
-        super().__init__(force_backend=force_backend)
         self.cfg = cfg
+        # Should return h+ - ihx in detector frame, with 1PA effects toggled on/off
         if cfg.model == "1PAT1R":
             from few.waveform import Waveform1PAT1R
-            self._gen = Waveform1PAT1R()
-            # TODO: add args to include polarization, sky postions and phases. 
-            # Should return h+ - ihx in detector frame, with 1PA effects toggled on/off
+            self._gen = GenerateEMRIWaveform(
+                'Waveform1PAT1R',
+                return_list=False, 
+                inspiral_kwargs=cfg.inspiral_kwargs,
+                amplitude_kwargs=cfg.amplitude_kwargs,
+                frame='detector'
+            )
             self._call = self._call_1pa
         elif cfg.model == "0PA_Kerr":
             from few.waveform import GenerateEMRIWaveform
@@ -120,17 +124,23 @@ class EMRIWave(ParallelModuleBase):
     def supported_backends(cls):
         return ["fastlisaresponse_" + b for b in cls.GPU_RECOMMENDED()]
 
-    def _call_1pa(self, *params):
-        # 1PAT1R signature: (m1, m2, a, p0, theta, phi, chi2)
-        m1, m2, a, p0, _e0, chi2, _x, _dL, theta_S, phi_S = params[:10]
+    def _call_1pa(self, *params, **waveform_kwargs):
+        # 1PAT1R has a different signature. This is handled in FEW when calling the model 
+        # through the generic interface
+        # This are params that are present in 0PA waveforms
+        params_0PA = params[:-1]
+        chi2 = params[-1]
         return self._gen(
-            m1, m2, a, p0, theta_S, phi_S, chi2,
+            *params,
+            chi2=chi2
             dt=self.cfg.dt, T=self.cfg.T,
             zero_PA_amps_only=(not self.cfg.include_1PA_amps),
             evolve_primary=self.cfg.evolve_chi1,
         )
 
-    def _call_0pa(self, *params):
+    def _call_0pa(self, *params, **waveform_kwargs):
+        # update fixed kwargs
+        self.waveform_kwargs.update(waveform_kwargs)
         waveform_kwargs = dict(
             T=self.cfg.T, dt=self.cfg.dt,
             mode_selection_threshold=self.cfg.mode_selection_threshold,

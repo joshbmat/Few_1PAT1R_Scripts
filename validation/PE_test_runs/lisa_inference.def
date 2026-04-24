@@ -1,0 +1,41 @@
+Bootstrap: docker
+From: continuumio/miniconda3
+
+%files
+    emri_env.yaml /opt/emri_env.yaml
+
+%environment
+    # these environment variables are for using the container after build has completed
+    export PATH="/opt/conda/envs/emri/bin:$PATH"
+    export CUDA_HOME=/opt/conda/envs/emri
+    export FEW_FILE_STORAGE_DIR=/opt/few_data
+    export FEW_DATA_DIR=/opt/few_data
+
+%post
+    # Install system-level build dependencies
+    apt-get update && apt-get install -y --no-install-recommends \
+        build-essential git liblapacke-dev libgsl-dev && \
+        apt-get clean && rm -rf /var/lib/apt/lists/*
+    
+    # Create FEW data dir and fix write permissions
+    mkdir -p /opt/few_data
+    chmod 777 /opt/few_data
+
+    #  Create the Conda environment
+    /opt/conda/bin/conda env create -f /opt/emri_env.yaml -p /opt/conda/envs/emri && \
+    /opt/conda/bin/conda clean --all -y
+
+    # Install StableEMRIFisher and fetch data
+    export PATH="/opt/conda/envs/emri/bin:$PATH"
+    export FEW_FILE_STORAGE_DIR=/opt/few_data
+    export FEW_DATA_DIR=/opt/few_data
+   
+    # Install stableEMRIFisher from source    
+    git clone https://github.com/perturber/StableEMRIFisher.git && \
+    pip install ./StableEMRIFisher && rm -rf ./StableEMRIFisher
+
+    # Run tests to download data files into /opt/few_data
+    python -m few.tests || echo "Data downloaded (tests may skip GPU kernels during build)."
+
+%runscript
+    exec python "$@"

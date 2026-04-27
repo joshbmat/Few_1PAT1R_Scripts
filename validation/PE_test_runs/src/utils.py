@@ -76,6 +76,13 @@ def mismatch_tdi(
     return float(1.0 - cp.abs(ab) / cp.sqrt(aa * bb))
 
 
+def dl_from_z(z: float) -> float:
+    """Luminosity distance in Gpc for redshift z under Planck 2015 cosmology."""
+    from astropy.cosmology import Planck15
+    import astropy.units as u
+    return float(Planck15.luminosity_distance(z).to(u.Gpc).value)
+
+
 def inner_product(
     h: ArrayLike,
     d: ArrayLike,

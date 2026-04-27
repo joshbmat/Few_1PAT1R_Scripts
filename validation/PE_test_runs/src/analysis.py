@@ -106,11 +106,17 @@ def sampled_params_from_config(
     fixed.add('x_I0')
 
     sampled_names = [n for n in all_names if n not in fixed]
-    true_vals = np.array([
-        float(emri[n]) if n in emri and emri[n] is not None else float('nan')
-        for n in sampled_names
-    ])
-    return sampled_names, true_vals
+    z = float(emri.get('z', 0.0))
+    true_vals = []
+    for n in sampled_names:
+        if n in emri and emri[n] is not None:
+            val = float(emri[n])
+            if n in ('M', 'mu'):
+                val *= (1.0 + z)
+            true_vals.append(val)
+        else:
+            true_vals.append(float('nan'))
+    return sampled_names, np.array(true_vals)
 
 
 # ── Core sample loading ───────────────────────────────────────────────────────

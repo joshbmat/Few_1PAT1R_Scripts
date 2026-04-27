@@ -1,18 +1,26 @@
 """
-Post-processing utilities for EMRI PE runs with the Eryn sampler.
+Post-processing utilities for EMRI PE runs with Eryn.
 
-Public API
+Implemented functions:
 ----------
+========= data processing functions =========  
 sampled_params_from_config  derive sampled param names and true values from config dict
 load_samples                load Eryn HDF backend; return per-temperature sample arrays
 plot_log_like               log-likelihood trace plot for one temperature
 cut_samples_autocorr        thin samples by integrated auto-correlation time
+    This only makes sense for the cold chain
 filter_lost_walkers         remove stuck/lost walkers from the cold chain
+    Again, only makes sense for cold chain
+
+========= Plotting functions =========    
 corner_plot                 multi-posterior corner plot driven by config
+    Flexible function which plots several posteriors on the same figure, allowing comparison
 plot_sky_position           Mollweide sky map with 99 % HDR inset
+
+========= Statistical functions =========  
 plot_chain_convergence      per-parameter trace plots
 plot_covariance_evolution   running marginal-variance curves
-plot_gelman_rubin           running Gelman–Rubin R-hat convergence diagnostics
+plot_gelman_rubin           running Gelman-Rubin R-hat convergence diagnostics
 plot_seaborn_diagnostics    seaborn pair-plot + violin plots
 """
 from __future__ import annotations
@@ -145,11 +153,11 @@ def plot_log_like(
     log_like: np.ndarray,
     temps: Optional[List[int]] = None,
     discard: int = 0,
-    ax=None,
     title: Optional[str] = None,
 ):
     """
-    Plot log-likelihood traces.
+    Plot log-likelihood traces — one stacked sub-panel per temperature so the
+    cold chain (T=0) is never buried by the hot chains.
 
     Parameters
     ----------
@@ -161,26 +169,28 @@ def plot_log_like(
     if temps is None:
         temps = list(range(N_temps))
 
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(10, 4))
+    n = len(temps)
+    fig, axes = plt.subplots(
+        n, 1,
+        figsize=(10, 2.5 * n),
+        sharex=True,
+        squeeze=False,
+    )
+    axes = axes[:, 0]
 
-    iters = np.arange(N_iters) + discard
-    palette = sns.color_palette('coolwarm', len(temps))
+    iters   = np.arange(N_iters) + discard
+    palette = sns.color_palette('coolwarm', n)
 
     for i, t in enumerate(temps):
-        ax.plot(iters, log_like[:, t, :], alpha=0.5, lw=0.7,
-                color=palette[i], label=f'T={t}' if len(temps) > 1 else None)
+        axes[i].plot(iters, log_like[:, t, :], alpha=0.5, lw=0.7, color=palette[i])
+        axes[i].set_ylabel(r'$\ln\mathcal{L}$', fontsize=10)
+        axes[i].set_title(f'T = {t}', fontsize=9, loc='right', pad=3)
+        axes[i].tick_params(labelsize=8)
 
-    ax.set_xlabel('Iteration')
-    ax.set_ylabel('Log likelihood')
-    ax.set_title(title or 'Log likelihood traces')
-    if len(temps) > 1:
-        # one legend entry per temperature
-        handles = [mlines.Line2D([], [], color=palette[i], label=f'T={t}')
-                   for i, t in enumerate(temps)]
-        ax.legend(handles=handles, fontsize=9)
+    axes[-1].set_xlabel('Iteration', fontsize=11)
+    fig.suptitle(title or 'Log-likelihood traces', fontsize=12, y=1.01)
     plt.tight_layout()
-    return ax
+    return fig
 
 
 # ── Auto-correlation thinning ─────────────────────────────────────────────────
@@ -334,7 +344,7 @@ def corner_plot(
         label_kwargs=dict(fontsize=base_font),
         max_n_ticks=3,
         show_titles=False,
-        labelpad=0.4,
+        labelpad=0.1,
         range=unified_range,
         quiet=True,
     )
@@ -375,7 +385,7 @@ def corner_plot(
             axes[yi, xi].axvline(active_true[xi], color='k', lw=0.8)
             axes[yi, xi].plot(active_true[xi], active_true[yi], 'sk', ms=3)
 
-    tick_fs = max(8, base_font - 4)
+    tick_fs = max(6, base_font - 6)
     for ax in figure.get_axes():
         ax.tick_params(axis='both', labelsize=tick_fs)
 
@@ -387,18 +397,29 @@ def corner_plot(
     ] if p]
     title = '  |  '.join(title_parts)
 
-    figure.legend(
-        handles=legend_handles,
-        fontsize=base_font,
-        frameon=True,
-        bbox_to_anchor=(1.0, N),
-        loc='upper right',
-        title=title or None,
-        title_fontsize=base_font,
-    )
+    # Place legend in the unused top-right corner of the lower-triangular grid.
+    # For N==1 there are no empty panels, so fall back to a figure-level legend.
+    if N > 1:
+        legend_ax = axes[0, N - 1]
+        legend_ax.legend(
+            handles=legend_handles,
+            fontsize=max(8, base_font - 2),
+            frameon=True,
+            loc='center',
+        )
+        legend_ax.axis('off')
+    else:
+        figure.legend(
+            handles=legend_handles,
+            fontsize=max(8, base_font - 2),
+            frameon=True,
+            loc='upper right',
+        )
+
+    if title:
+        figure.suptitle(title, fontsize=base_font, y=1.01)
 
     figure.set_size_inches(fig_size, fig_size)
-    plt.tight_layout()
 
     if plot_name:
         figure.savefig(plot_name, bbox_inches='tight')

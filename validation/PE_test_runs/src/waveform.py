@@ -99,6 +99,9 @@ class EMRIWave(ParallelModuleBase):
         self.cfg = cfg
         # T_waveform must cover cfg.T plus all TDI/response buffer padding.
         self.T_waveform = T_waveform if T_waveform is not None else cfg.T
+        # Set by build_response after ResponseWrapper is constructed so we can
+        # zero-pad plunging waveforms to the exact length fastlisaresponse expects.
+        self.min_output_length: int = 0
         # Should return h+ - ihx in detector frame, with 1PA effects toggled on/off
         if cfg.model == "1PAT1R":
             from few.waveform import GenerateEMRIWaveform
@@ -138,17 +141,23 @@ class EMRIWave(ParallelModuleBase):
             dt=self.cfg.dt, T=self.T_waveform,
             zero_PA_amps_only=(not self.cfg.include_1PA_amps),
             evolve_primary=self.cfg.evolve_chi1,
+            pad_output=True,
         )
 
     def _call_0pa(self, *params, **waveform_kwargs):
         waveform_kwargs = dict(
             T=self.T_waveform, dt=self.cfg.dt,
             mode_selection_threshold=self.cfg.mode_selection_threshold,
+            pad_output=True,
         )
         return self._gen(*params, **waveform_kwargs)
 
     def __call__(self, *params, **waveform_kwargs):
-        return self._call(*params, **waveform_kwargs)
+        h = self._call(*params, **waveform_kwargs)
+        if self.min_output_length > 0 and len(h) < self.min_output_length:
+            xp = cp.get_array_module(h)
+            h = xp.concatenate([h, xp.zeros(self.min_output_length - len(h), dtype=h.dtype)])
+        return h
 
 
 def build_response(
@@ -195,6 +204,13 @@ def build_response(
         remove_garbage=resp_cfg.remove_garbage,
         **tdi_kwargs,
     )
+
+    # Tell the wave generator to zero-pad up to the exact length that
+    # fastlisaresponse expects (pyResponseTDI.num_pts). Without this,
+    # plunging systems whose inspiral ends before T_response would produce
+    # a waveform that is too short, triggering the assert inside
+    # get_projections even when pad_output=True is set on the FEW generator.
+    wave.min_output_length = response.response_model.num_pts
 
     def _call(*params):
         return cp.asarray(response(*params))

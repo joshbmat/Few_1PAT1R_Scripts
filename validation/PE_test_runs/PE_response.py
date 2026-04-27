@@ -230,17 +230,17 @@ flat = start.reshape(-1, ndim)
 if not np.all(np.isfinite(priors.logpdf(flat))):
     raise ValueError("Starting positions outside prior support.")
 
-# Create a shortt summary of set-up and checks: SNR, mismatch at true vals, starting loglikelihood values. 
+# Create a shortt summary of set-up and checks: SNR, mismatch at true vals, starting loglikelihood values.
 home = os.getcwd()
 data_dir = cfg["Sampler"]["sampling_data_path"]
 # Add timestamp to avoid overwriting previous runs by accident.
 timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
 fixed_tag = "_".join(f"{n}_{cfg['Injection']['EMRI'][n]}" for n in fixed_names)
 tag = f"{cfg['Sampler']['name']}_fixed{fixed_tag}_{timestamp}"
-out_dir = os.path.join(home, "..", data_dir)
-os.makedirs(out_dir, exist_ok=True)
-fp = os.path.join(out_dir, f"SamplingResults_{tag}.h5")
-log_fp = os.path.join(out_dir, f"RunLog_{tag}.txt")
+run_dir = os.path.join(home, "..", data_dir, f"{cfg['Sampler']['name']}_{timestamp}")
+os.makedirs(run_dir, exist_ok=True)
+fp = os.path.join(run_dir, f"SamplingResults_{tag}.h5")
+log_fp = os.path.join(run_dir, f"RunLog_{tag}.txt")
 
 with open(log_fp, "w") as f:
     f.write(f"# PE run log -- {timestamp}\n")
@@ -266,8 +266,7 @@ with open(log_fp, "w") as f:
 
 ###################
 # Make some diagnostic plots
-plots_dir = os.path.join(home, cfg["Sampler"].get("plots_path", "../../Plots"))
-os.makedirs(plots_dir, exist_ok=True)
+plots_dir = run_dir
 freqs_np = cp.asnumpy(freqs_inband)
 data_fft_np = cp.asnumpy(xyz_data_fft)
 rec_fft_np = cp.asnumpy(xyz_rec_true_fft)

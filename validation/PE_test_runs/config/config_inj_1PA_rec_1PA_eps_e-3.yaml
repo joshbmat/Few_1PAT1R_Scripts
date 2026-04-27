@@ -77,4 +77,4 @@ Sampler:
     continue_run: false
     sampling_data_path: ./sampling_data
     plots_path: ./Plots
-    fixed_params: ['x_I0', 'e0', 'Phi_theta0']
+    fixed_params: ['x_I0', 'e0', 'Phi_theta0', 'Phi_r0']

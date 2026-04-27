@@ -305,6 +305,22 @@ for ax in axes:
     ax.grid(alpha=0.4)
 fig.tight_layout()
 fig.savefig(os.path.join(plots_dir, f"{tag}_X_td.png"), dpi=150)
+
+# Sepctrogram of the injected signal (X channel)
+fig, ax = plt.subplots(figsize=(10, 5))
+f_min_plot = 1e-5
+fs = 1 / DT
+required_nfft = int(np.ceil(fs / f_min_plot))
+N_fft = min(xyz_data_np.shape[1], max(256, required_nfft))
+ax.specgram(xyz_data_np[0], NFFT=N_fft, Fs=fs,
+            cmap="viridis")
+ax.set_yscale('log')
+ax.set_ylim(f_min_plot, fs / 2)
+ax.set_xlabel("Time [s]")
+ax.set_ylabel("Frequency [Hz]")
+ax.set_title(f"{cfg['Sampler']['name']} - Spectrogram of injected signal (X channel)")
+fig.tight_layout()
+fig.savefig(os.path.join(plots_dir, f"{tag}_X_spectrogram.png"), dpi=150)
 plt.close(fig)
 logger.info(f"Plots written to {plots_dir}")
 

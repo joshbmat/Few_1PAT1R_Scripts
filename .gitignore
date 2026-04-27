@@ -2,3 +2,8 @@
 *.ipynb_checkpoints/
 validation/PE_test_runs/src/__pycache__/
 .vscode
+sampling_data/
+Plots/
+validation/PE_test_runs/Plots/
+validation/PE_test_runs/sampling_data/
+validation/PE_test_runs/scripts/out/

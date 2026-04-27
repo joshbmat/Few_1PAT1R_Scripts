@@ -7,7 +7,7 @@ Injection:
     EMRI:
         # masses are source frame masses and will be redshifted with parameter z. 
         M: 1000000.0
-        mu: 100.0
+        mu: 6.0
         a: 0.00002
         p0: 10.0
         e0: 0.0
@@ -51,9 +51,9 @@ Recovery:
     # Waveform settings for the recovery template. Leave equal to injection
     # for a self-consistent test; toggle for systematics studies.
     Waveform:
-        model: 0PA_Kerr
-        evolve_chi1: false
-        include_1PA_amps: false
+        model: 1PAT1R
+        evolve_chi1: true
+        include_1PA_amps: true
         dt: 5
         T: 2
         mode_selection_threshold: 0.0
@@ -65,7 +65,7 @@ Recovery:
         amplitude_kwargs: {}
 
 Sampler:
-    name: inj_1PA_rec_0PA_eps_e-4
+    name: test_1
     windowing: true
     filter_freq: true
     num_samples: 10000

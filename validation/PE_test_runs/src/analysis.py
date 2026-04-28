@@ -3,21 +3,23 @@ Post-processing utilities for EMRI PE runs with Eryn.
 
 Implemented functions:
 ----------
-========= data processing functions =========  
+========= data processing functions =========
 sampled_params_from_config  derive sampled param names and true values from config dict
 load_samples                load Eryn HDF backend; return per-temperature sample arrays
+load_samples_named          load Eryn HDF backend; return {param_name: (N_temps, N_iters, N_walkers)}
 plot_log_like               log-likelihood trace plot for one temperature
 cut_samples_autocorr        thin samples by integrated auto-correlation time
     This only makes sense for the cold chain
 filter_lost_walkers         remove stuck/lost walkers from the cold chain
     Again, only makes sense for cold chain
 
-========= Plotting functions =========    
+========= Plotting functions =========
 corner_plot                 multi-posterior corner plot driven by config
-    Flexible function which plots several posteriors on the same figure, allowing comparison
+    Flexible function which plots several posteriors on the same figure, allowing comparison.
+    entry['samples'] may be an ndarray (N, P) or a named dict {param: (N_temps, N_iters, N_walkers)}.
 plot_sky_position           Mollweide sky map with 99 % HDR inset
 
-========= Statistical functions =========  
+========= Statistical functions =========
 plot_chain_convergence      per-parameter trace plots
 plot_covariance_evolution   running marginal-variance curves
 plot_gelman_rubin           running Gelman-Rubin R-hat convergence diagnostics
@@ -153,6 +155,52 @@ def load_samples(
     return samples_per_temp, reader, log_like, (N_iters, N_temps, N_walkers, N_params)
 
 
+def load_samples_named(
+    file_path: str,
+    param_names: List[str],
+    discard: int = 0,
+) -> Tuple[Dict[str, np.ndarray], 'ErynHDFBackend', np.ndarray, tuple]:
+    """
+    Load samples from an Eryn HDF backend into a parameter-keyed dictionary.
+
+    Parameters
+    ----------
+    file_path   : path to the .h5 file
+    param_names : ordered list of sampled parameter names (as returned by
+                  ``sampled_params_from_config``); must match the number of
+                  parameters stored in the backend
+    discard     : number of burn-in iterations to discard
+
+    Returns
+    -------
+    named_samples : {param_name: ndarray (N_temps, N_iters, N_walkers)}
+    reader        : open ErynHDFBackend
+    log_like      : ndarray (N_iters, N_temps, N_walkers)
+    shape         : (N_iters, N_temps, N_walkers, N_params)
+    """
+    reader = ErynHDFBackend(file_path, read_only=True)
+    chain  = reader.get_chain(discard=discard)['model_0']
+    N_iters, N_temps, N_walkers = chain.shape[:3]
+    N_params = chain.shape[-1]
+
+    if len(param_names) != N_params:
+        raise ValueError(
+            f"len(param_names)={len(param_names)} does not match "
+            f"N_params={N_params} stored in {file_path}"
+        )
+
+    # chain: (N_iters, N_temps, N_walkers, 1, N_params) — squeeze model dim
+    traces = chain[:, :, :, 0, :]          # (N_iters, N_temps, N_walkers, N_params)
+    traces = traces.transpose(1, 0, 2, 3)  # (N_temps, N_iters, N_walkers, N_params)
+
+    named_samples = {
+        name: traces[:, :, :, k]
+        for k, name in enumerate(param_names)
+    }
+    log_like = reader.get_log_like(discard=discard)
+    return named_samples, reader, log_like, (N_iters, N_temps, N_walkers, N_params)
+
+
 # Log-likelihood plot
 
 def plot_log_like(
@@ -285,6 +333,28 @@ def filter_lost_walkers(
 
 #  Corner plot
 
+def _extract_flat_samples(
+    entry_samples,
+    active_names: List[str],
+    keep_idx: List[int],
+    temp: int = 0,
+) -> np.ndarray:
+    """
+    Return a (N_samples, N_active_params) array from either sample format.
+
+    Parameters
+    ----------
+    entry_samples : ndarray (N, P)  *or*  {param_name: ndarray(N_temps, N_iters, N_walkers)}
+    active_names  : ordered list of parameter names to extract
+    keep_idx      : positional indices of active_names within the legacy ndarray columns
+    temp          : temperature index to use when entry_samples is a named dict
+    """
+    if isinstance(entry_samples, dict):
+        cols = [entry_samples[name][temp].ravel() for name in active_names]
+        return np.column_stack(cols)
+    return np.array(entry_samples)[:, keep_idx]
+
+
 def corner_plot(
     samples_dict: Dict[str, Dict],
     true_vals: np.ndarray,
@@ -292,6 +362,7 @@ def corner_plot(
     inj_model: str = '',
     rec_model: str = '',
     exclude_sky: bool = False,
+    temp: int = 0,
     plot_name: Optional[str] = None,
 ):
     """
@@ -299,17 +370,37 @@ def corner_plot(
 
     Parameters
     ----------
-    samples_dict : {label: {'color': str, 'samples': ndarray (N, P)}}
-                   samples are aligned with `param_names`
-    true_vals    : injected values aligned with `param_names`
-    param_names  : names of the *sampled* parameters (no x_I0, no fixed)
+    samples_dict : {label: {'color': str, 'samples': s}}
+                   where ``s`` is either:
+                   - ndarray (N, P) aligned column-wise with ``param_names``
+                   - dict {param_name: ndarray (N_temps, N_iters, N_walkers)}
+                     as returned by ``load_samples_named``
+    true_vals    : injected values aligned with ``param_names``
+    param_names  : reference parameter list (defines order and true-value alignment)
     inj_model    : injection model name shown in the title
     rec_model    : recovery model name shown in the title
     exclude_sky  : drop sky-position params (theta_S, phi_S, theta_K, phi_K)
+    temp         : temperature index to use when samples are in named-dict format
     plot_name    : if given, save the figure here
+
+    Notes
+    -----
+    When mixing 1PA (has chi2) and 0PA (no chi2) samples, pass each run's
+    samples as a named dict from ``load_samples_named``.  The function takes
+    the *intersection* of available parameter names across all entries so that
+    each posterior is plotted on the correct axis regardless of its model's
+    parameter ordering.
     """
+    # Determine the set of params available in every entry.
+    # Named-dict entries declare their own keys; legacy ndarray entries are
+    # assumed to cover all of param_names.
+    common = set(param_names)
+    for entry in samples_dict.values():
+        if isinstance(entry['samples'], dict):
+            common &= set(entry['samples'].keys())
+
     keep_idx = [i for i, n in enumerate(param_names)
-                if not (exclude_sky and n in SKY_PARAMS)]
+                if n in common and not (exclude_sky and n in SKY_PARAMS)]
 
     active_names  = [param_names[i] for i in keep_idx]
     active_true   = np.array([true_vals[i] for i in keep_idx])
@@ -326,7 +417,9 @@ def corner_plot(
 
     # Unified range across all datasets (robust percentiles)
     all_samples = np.concatenate(
-        [np.array(e['samples'])[:, keep_idx] for e in samples_dict.values()], axis=0
+        [_extract_flat_samples(e['samples'], active_names, keep_idx, temp)
+         for e in samples_dict.values()],
+        axis=0,
     )
     unified_range = []
     for i in range(N):
@@ -360,7 +453,7 @@ def corner_plot(
 
     for label, entry in samples_dict.items():
         color   = entry['color']
-        samples = np.array(entry['samples'])[:, keep_idx]
+        samples = _extract_flat_samples(entry['samples'], active_names, keep_idx, temp)
 
         try:
             figure = corner.corner(
@@ -474,11 +567,29 @@ def _hdr_bounds(
            float(y[mask].min()), float(y[mask].max())
 
 
+def _sky_columns(
+    entry_samples,
+    param_names: List[str],
+    temp: int = 0,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Extract flat (N,) arrays for theta_S and phi_S from either sample format."""
+    if isinstance(entry_samples, dict):
+        return (
+            entry_samples['theta_S'][temp].ravel(),
+            entry_samples['phi_S'][temp].ravel(),
+        )
+    i_th = param_names.index('theta_S')
+    i_ph = param_names.index('phi_S')
+    arr  = np.asarray(entry_samples)
+    return arr[:, i_th], arr[:, i_ph]
+
+
 def plot_sky_position(
     samples_dict: Dict[str, Dict],
     param_names: List[str],
     true_theta_S: Optional[float] = None,
     true_phi_S:   Optional[float] = None,
+    temp: int = 0,
     plot_name: Optional[str] = None,
 ):
     """
@@ -486,18 +597,24 @@ def plot_sky_position(
 
     Parameters
     ----------
-    samples_dict : {label: {'color': str, 'samples': ndarray (N, P)}}
-                   samples aligned with `param_names`
-    param_names  : names of the sampled parameters (used to locate theta_S / phi_S)
+    samples_dict : {label: {'color': str, 'samples': s}}
+                   where ``s`` is ndarray (N, P) or named dict from
+                   ``load_samples_named``
+    param_names  : names of the sampled parameters (used for legacy ndarray lookup)
     true_theta_S : injected ecliptic colatitude (rad), optional
     true_phi_S   : injected ecliptic longitude (rad), optional
+    temp         : temperature index to use for named-dict samples
     """
-    if 'theta_S' not in param_names or 'phi_S' not in param_names:
-        warnings.warn("theta_S or phi_S not in param_names — sky plot skipped.")
-        return None
-
-    i_th = param_names.index('theta_S')
-    i_ph = param_names.index('phi_S')
+    # Check that sky params are available in at least the first entry
+    first_samples = next(iter(samples_dict.values()))['samples']
+    if isinstance(first_samples, dict):
+        if 'theta_S' not in first_samples or 'phi_S' not in first_samples:
+            warnings.warn("theta_S or phi_S not in samples dict — sky plot skipped.")
+            return None
+    else:
+        if 'theta_S' not in param_names or 'phi_S' not in param_names:
+            warnings.warn("theta_S or phi_S not in param_names — sky plot skipped.")
+            return None
 
     fig = plt.figure(figsize=(14, 7))
     ax_main = fig.add_subplot(111, projection='mollweide')
@@ -508,9 +625,9 @@ def plot_sky_position(
     legend_handles = []
 
     for label, entry in samples_dict.items():
-        color   = entry['color']
-        samples = np.asarray(entry['samples'])
-        ra, dec = ecliptic_to_icrs(samples[:, i_th], samples[:, i_ph])
+        color    = entry['color']
+        th_S, ph_S = _sky_columns(entry['samples'], param_names, temp)
+        ra, dec = ecliptic_to_icrs(th_S, ph_S)
         all_ra.append(ra)
         all_dec.append(dec)
 
@@ -551,8 +668,8 @@ def plot_sky_position(
 
             for label, entry in samples_dict.items():
                 color   = entry['color']
-                samples = np.asarray(entry['samples'])
-                ra, dec = ecliptic_to_icrs(samples[:, i_th], samples[:, i_ph])
+                th_S_i, ph_S_i = _sky_columns(entry['samples'], param_names, temp)
+                ra, dec = ecliptic_to_icrs(th_S_i, ph_S_i)
                 ax_ins.scatter(ra, dec, s=1.0, alpha=0.25,
                                color=color, rasterized=True)
 

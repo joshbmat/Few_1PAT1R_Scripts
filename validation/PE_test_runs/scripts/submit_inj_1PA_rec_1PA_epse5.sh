@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH -t 10:00:00
+#SBATCH -t 14:00:00
 #SBATCH --cluster=wice
 #SBATCH --nodes=1
 #SBATCH --ntasks=18

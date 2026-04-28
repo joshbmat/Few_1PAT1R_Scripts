@@ -65,7 +65,7 @@ Recovery:
         amplitude_kwargs: {}
 
 Sampler:
-    name: test_1
+    name: test_1PA_full
     windowing: true
     filter_freq: true
     num_samples: 10000

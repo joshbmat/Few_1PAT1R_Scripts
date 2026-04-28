@@ -9,7 +9,7 @@
 #SBATCH --mail-type=FAIL,BEGIN,END
 #SBATCH --mail-user=bert.depoorter@student.kuleuven.be
 #SBATCH -A lp_lisagw
-#SBATCH --job-name=test_evolution_primary_off
+#SBATCH --job-name=test_full_1PA
 
 module load GCC/11.3.0 GSL CUDA/12 FFTW/3.3.10-GCC-11.3.0 
 conda activate emri_env_ddpc
@@ -17,6 +17,6 @@ nvidia-smi
 
 HOME_FOLDER=/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs
 SAMPLE_SCRIPTS=$HOME_FOLDER/PE_response.py
-INFERENCE_PARAMS=$HOME_FOLDER/config/config_test_evolution_primary_off.yaml
+INFERENCE_PARAMS=$HOME_FOLDER/config/config_test_full_1PA.yaml
 
 python $SAMPLE_SCRIPTS --config=$INFERENCE_PARAMS

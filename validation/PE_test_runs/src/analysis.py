@@ -40,7 +40,7 @@ from eryn.backends import HDFBackend as ErynHDFBackend
 from src.waveform import param_names_for
 
 
-# ── Parameter metadata ────────────────────────────────────────────────────────
+# Parameter metadata
 
 PARAM_LABELS: Dict[str, str] = {
     'M':          r'$M\,/\,M_{\odot}$',
@@ -62,7 +62,7 @@ PARAM_LABELS: Dict[str, str] = {
 SKY_PARAMS = frozenset({'theta_S', 'phi_S', 'theta_K', 'phi_K'})
 
 
-# ── Config helpers ────────────────────────────────────────────────────────────
+# Config helpers 
 
 def _emri_dict(config: dict) -> dict:
     """Return the EMRI parameter sub-dict, supporting both old and new layouts."""
@@ -119,7 +119,7 @@ def sampled_params_from_config(
     return sampled_names, np.array(true_vals)
 
 
-# ── Core sample loading ───────────────────────────────────────────────────────
+# sample loading
 
 def load_samples(
     file_path: str,
@@ -153,7 +153,7 @@ def load_samples(
     return samples_per_temp, reader, log_like, (N_iters, N_temps, N_walkers, N_params)
 
 
-# ── Log-likelihood plot ───────────────────────────────────────────────────────
+# Log-likelihood plot
 
 def plot_log_like(
     log_like: np.ndarray,
@@ -199,7 +199,7 @@ def plot_log_like(
     return fig
 
 
-# ── Auto-correlation thinning ─────────────────────────────────────────────────
+# Auto-correlation thinning
 
 def cut_samples_autocorr(
     reader: ErynHDFBackend,
@@ -228,7 +228,7 @@ def cut_samples_autocorr(
         return samples_per_temp
 
 
-# ── Lost-walker filtering ─────────────────────────────────────────────────────
+#  Lost-walker filtering 
 
 def filter_lost_walkers(
     reader: ErynHDFBackend,
@@ -283,7 +283,7 @@ def filter_lost_walkers(
     return clean_samples, kept, ll_clean
 
 
-# ── Corner plot ───────────────────────────────────────────────────────────────
+#  Corner plot
 
 def corner_plot(
     samples_dict: Dict[str, Dict],
@@ -391,7 +391,7 @@ def corner_plot(
             axes[yi, xi].axvline(active_true[xi], color='k', lw=0.8)
             axes[yi, xi].plot(active_true[xi], active_true[yi], 'sk', ms=3)
 
-    tick_fs = max(6, base_font - 6)
+    tick_fs = max(5, base_font - 8)
     for ax in figure.get_axes():
         ax.tick_params(axis='both', labelsize=tick_fs)
 
@@ -433,7 +433,7 @@ def corner_plot(
     return figure
 
 
-# ── Sky position plot ─────────────────────────────────────────────────────────
+# Sky position plot
 
 def ecliptic_to_icrs(
     theta_S: np.ndarray,
@@ -536,7 +536,7 @@ def plot_sky_position(
     ax_main.legend(handles=legend_handles, loc='lower left', fontsize=10,
                    framealpha=0.8)
 
-    # ── Inset: 99 % HDR zoom (Cartesian) ────────────────────────────────────
+    # ── Inset: 99 % HDR zoom (Cartesian )
     if all_ra:
         ra_all  = np.concatenate(all_ra)
         dec_all = np.concatenate(all_dec)
@@ -612,7 +612,7 @@ def plot_sky_position(
     return fig
 
 
-# ── Chain convergence ─────────────────────────────────────────────────────────
+# Chain convergence
 
 def plot_chain_convergence(
     reader: ErynHDFBackend,
@@ -661,7 +661,7 @@ def plot_chain_convergence(
     return fig
 
 
-# ── Covariance evolution ──────────────────────────────────────────────────────
+# Covariance evolution 
 
 def plot_covariance_evolution(
     reader: ErynHDFBackend,
@@ -723,7 +723,7 @@ def plot_covariance_evolution(
     return fig
 
 
-# ── Gelman–Rubin convergence ──────────────────────────────────────────────────
+#  Gelman–Rubin convergence test
 
 def plot_gelman_rubin(
     reader: ErynHDFBackend,
@@ -737,7 +737,7 @@ def plot_gelman_rubin(
     """
     Running Gelman–Rubin R-hat statistic per parameter.
 
-    R-hat ≈ 1 indicates convergence. The dashed line marks
+    R-hat \sim 1 indicates convergence. The dashed line marks
     `convergence_threshold` (default 1.01).
 
     Returns
@@ -804,7 +804,7 @@ def plot_gelman_rubin(
     return rhat
 
 
-# ── Seaborn diagnostics ───────────────────────────────────────────────────────
+# Seaborn diagnostics 
 
 def plot_seaborn_diagnostics(
     samples: np.ndarray,
@@ -829,7 +829,7 @@ def plot_seaborn_diagnostics(
     labels = [PARAM_LABELS.get(n, n) for n in param_names]
     df     = pd.DataFrame(samples, columns=labels)
 
-    # ── Pair plot ──────────────────────────────────────────────────────────
+    #  Pair plot
     pair_cols = labels[:max_pair_params]
     g = sns.pairplot(
         df[pair_cols],
@@ -848,7 +848,7 @@ def plot_seaborn_diagnostics(
         )
     plt.show()
 
-    # ── Violin plot ────────────────────────────────────────────────────────
+    #  Violin plot
     # Normalize columns (z-score) so all fit on a single axis
     df_norm = (df - df.mean()) / df.std().replace(0, 1)
     df_melted = df_norm.melt(var_name='Parameter', value_name='z-score')

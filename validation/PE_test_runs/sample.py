@@ -277,7 +277,16 @@ logger.info(f"Plots written to {plots_dir}")
 
 # Sampler
 backend = HDFBackend(fp)
-if bool(cfg["Sampler"]["continue_run"]) and os.path.exists(fp):
+resume_path = cfg["Sampler"].get("resume_backend", None)
+if resume_path:
+    if not os.path.exists(resume_path):
+        raise FileNotFoundError(
+            f"resume_backend path does not exist: {resume_path}"
+        )
+    logger.info(f"Resuming from existing backend: {resume_path}")
+    resume_reader = HDFBackend(resume_path, read_only=True)
+    start = resume_reader.get_last_sample()
+elif bool(cfg["Sampler"]["continue_run"]) and os.path.exists(fp):
     logger.info(f"Continuing from existing backend {fp}")
     start = backend.get_last_sample()
 

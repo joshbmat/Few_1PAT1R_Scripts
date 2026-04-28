@@ -75,6 +75,12 @@ Sampler:
     n_walkers: 30
     d: 5
     continue_run: false
+    # resume_backend: path to an existing .h5 file to resume from.
+    # The run continues from the last sample of that backend and writes new
+    # iterations into a freshly-timestamped backend in sampling_data_path.
+    # Example:
+    #   resume_backend: ./sampling_data/inj_1PA_rec_0PA_eps_e-4_2026-04-28_07-29-27/SamplingResults_....h5
+    resume_backend: null
     sampling_data_path: ./sampling_data
     plots_path: ./Plots
     fixed_params: ['x_I0', 'e0', 'Phi_theta0', 'Phi_r0']

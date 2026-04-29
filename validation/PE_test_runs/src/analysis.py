@@ -430,8 +430,8 @@ def corner_plot(
             w = max(0.1 * abs(c), 1e-6)
             unified_range.append((c - w, c + w))
         else:
-            lo, hi = np.percentile(col, [0.1, 99.9])
-            unified_range.append((lo, hi))
+            lo, hi = np.percentile(col, [0.002, 99.998])
+            unified_range.append((lo*0.8, hi*1.2))
 
     base_kwargs = dict(
         bins=30,

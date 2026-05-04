@@ -25,7 +25,7 @@ Injection:
 
     Waveform:
         model: 1PAT1R              # '1PAT1R' or '0PA_Kerr'
-        evolve_chi1: true
+        evolve_chi1: false
         include_1PA_amps: true
         dt: 5
         T: 2
@@ -52,7 +52,7 @@ Recovery:
     # for a self-consistent test; toggle for systematics studies.
     Waveform:
         model: 1PAT1R
-        evolve_chi1: true
+        evolve_chi1: false
         include_1PA_amps: true
         dt: 5
         T: 2
@@ -65,7 +65,7 @@ Recovery:
         amplitude_kwargs: {}
 
 Sampler:
-    name: test_reproduce_Ollie
+    name: test_reproduce_Ollie_evolve_primary_off
     windowing: true
     filter_freq: true
     num_samples: 10000

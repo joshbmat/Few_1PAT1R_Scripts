@@ -7,3 +7,4 @@ Plots/
 validation/PE_test_runs/Plots/
 validation/PE_test_runs/sampling_data/
 validation/PE_test_runs/scripts/out/
+*.png

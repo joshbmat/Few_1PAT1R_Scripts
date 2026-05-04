@@ -26,7 +26,7 @@ Injection:
     Waveform:
         model: 1PAT1R              # '1PAT1R' or '0PA_Kerr'
         evolve_chi1: true
-        include_1PA_amps: true
+        include_1PA_amps: false
         dt: 5
         T: 2
         mode_selection_threshold: 0.0
@@ -53,7 +53,7 @@ Recovery:
     Waveform:
         model: 1PAT1R
         evolve_chi1: true
-        include_1PA_amps: true
+        include_1PA_amps: false
         dt: 5
         T: 2
         mode_selection_threshold: 0.0
@@ -65,7 +65,7 @@ Recovery:
         amplitude_kwargs: {}
 
 Sampler:
-    name: test_reproduce_Ollie
+    name: test_reproduce_Ollie_amps_off
     windowing: true
     filter_freq: true
     num_samples: 10000

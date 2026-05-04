@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 def _waveform_cfg(block: dict) -> WaveformConfig:
+    lmax_raw = block.get("lmax", None)
     return WaveformConfig(
         model=block["model"],
         dt=float(block["dt"]),
@@ -49,6 +50,7 @@ def _waveform_cfg(block: dict) -> WaveformConfig:
         inspiral_kwargs=dict(block.get("inspiral_kwargs") or {}),
         amplitude_kwargs=dict(block.get("amplitude_kwargs") or {}),
         summation_kwargs=dict(block.get("summation_kwargs") or {}),
+        lmax=int(lmax_raw) if lmax_raw is not None else None,
     )
 
 

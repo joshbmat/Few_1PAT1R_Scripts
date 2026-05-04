@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 # We do this separately for injection and recovery since we want to be able to use different waveform settings for each
 # These return a dataclass config object that can be use to build a response wrapper callable with tuned settings 
 def _waveform_cfg(block: dict) -> WaveformConfig:
+    lmax_raw = block.get("lmax", None)
     return WaveformConfig(
         model=block["model"],
         dt=float(block["dt"]),
@@ -54,6 +55,7 @@ def _waveform_cfg(block: dict) -> WaveformConfig:
         inspiral_kwargs=dict(block.get("inspiral_kwargs") or {}),
         amplitude_kwargs=dict(block.get("amplitude_kwargs") or {}),
         summation_kwargs=dict(block.get("summation_kwargs") or {}),
+        lmax=int(lmax_raw) if lmax_raw is not None else None,
     )
 
 
@@ -326,7 +328,16 @@ logger.info(f"Plots written to {plots_dir}")
 ###################
 # Sampler and backend
 backend = HDFBackend(fp)
-if bool(cfg["Sampler"]["continue_run"]) and os.path.exists(fp):
+resume_path = cfg["Sampler"].get("resume_backend", None)
+if resume_path:
+    if not os.path.exists(resume_path):
+        raise FileNotFoundError(
+            f"resume_backend path does not exist: {resume_path}"
+        )
+    logger.info(f"Resuming from existing backend: {resume_path}")
+    resume_reader = HDFBackend(resume_path, read_only=True)
+    start = resume_reader.get_last_sample()
+elif bool(cfg["Sampler"]["continue_run"]) and os.path.exists(fp):
     logger.info(f"Continuing from existing backend {fp}")
     start = backend.get_last_sample()
 

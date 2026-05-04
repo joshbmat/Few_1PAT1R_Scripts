@@ -415,7 +415,9 @@ def corner_plot(
     fig_size  = max(4.0, N * 2.5)
     base_font = max(10, int(fig_size * 1.3))
 
-    # Unified range across all datasets (robust percentiles)
+    # Unified range across all datasets (robust percentiles).
+    # Ranges are expanded to include the true value so it is always visible
+    # even when the posterior is significantly biased.
     all_samples = np.concatenate(
         [_extract_flat_samples(e['samples'], active_names, keep_idx, temp)
          for e in samples_dict.values()],
@@ -428,10 +430,15 @@ def corner_plot(
         if std == 0:
             c = active_true[i] if np.isfinite(active_true[i]) else 0.0
             w = max(0.1 * abs(c), 1e-6)
-            unified_range.append((c - w, c + w))
+            lo, hi = c - w, c + w
         else:
             lo, hi = np.percentile(col, [0.002, 99.998])
-            unified_range.append((lo, hi))
+        if np.isfinite(active_true[i]):
+            span = max(hi - lo, 1e-30)
+            pad  = 0.05 * span
+            lo = min(lo, active_true[i] - pad)
+            hi = max(hi, active_true[i] + pad)
+        unified_range.append((lo, hi))
 
     base_kwargs = dict(
         bins=30,

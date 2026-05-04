@@ -11,8 +11,9 @@ Supports two models:
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass, field
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import cupy as cp
 
@@ -60,6 +61,11 @@ class WaveformConfig:
     inspiral_kwargs: Dict[str, Any] = field(default_factory=dict)
     amplitude_kwargs: Dict[str, Any] = field(default_factory=dict)
     summation_kwargs: Dict[str, Any] = field(default_factory=dict)
+    # Restrict mode content to l <= lmax.  None means no restriction.
+    # Set to 5 when recovering a 1PA injection with a 0PA model so both
+    # templates use the same harmonic content (Waveform1PAT1R only has
+    # amplitudes up to l=5).
+    lmax: Optional[int] = None
 
     # define param names based on model (handles chi2 as extra param)
     def param_names(self) -> list[str]:
@@ -84,6 +90,45 @@ class ResponseConfig:
     is_ecliptic_latitude: bool = False
     remove_sky_coords: bool = False
     remove_garbage: bool = False
+
+
+def _mode_selection_from_lmax(gen, lmax: int) -> Optional[List[Tuple]]:
+    """
+    Return a mode-selection list filtered to l <= lmax from a FEW
+    GenerateEMRIWaveform instance (equatorial orbits: k=0 always).
+
+    Returns None if the amplitude module's mode arrays cannot be found,
+    in which case the caller should proceed without restriction and warn.
+    """
+    import numpy as np
+    amp = None
+    for attr in ("amp_gen", "amplitude_gen"):
+        try:
+            amp = getattr(gen, attr)
+            break
+        except AttributeError:
+            pass
+    if amp is None:
+        warnings.warn(
+            f"Cannot locate amplitude generator on {type(gen).__name__} to "
+            f"apply lmax={lmax}. Proceeding without mode restriction."
+        )
+        return None
+    try:
+        l_arr = np.asarray(amp.l_arr)
+        m_arr = np.asarray(amp.m_arr)
+        n_arr = np.asarray(amp.n_arr)
+    except AttributeError:
+        warnings.warn(
+            f"Amplitude generator {type(amp).__name__} has no l_arr/m_arr/n_arr. "
+            f"Cannot apply lmax={lmax}. Proceeding without mode restriction."
+        )
+        return None
+    mask = l_arr <= lmax
+    return [
+        (int(l_arr[i]), int(m_arr[i]), int(n_arr[i]), 0)
+        for i in range(len(l_arr)) if mask[i]
+    ]
 
 
 class EMRIWave(ParallelModuleBase):
@@ -122,6 +167,10 @@ class EMRIWave(ParallelModuleBase):
                 amplitude_kwargs=cfg.amplitude_kwargs,
                 frame="detector",
             )
+            self._lmax_mode_selection = (
+                _mode_selection_from_lmax(self._gen, cfg.lmax)
+                if cfg.lmax is not None else None
+            )
             self._call = self._call_0pa
         else:
             raise ValueError(f"Unknown waveform model: {cfg.model}")
@@ -150,6 +199,8 @@ class EMRIWave(ParallelModuleBase):
             mode_selection_threshold=self.cfg.mode_selection_threshold,
             pad_output=True,
         )
+        if self._lmax_mode_selection is not None:
+            waveform_kwargs['mode_selection'] = self._lmax_mode_selection
         return self._gen(*params, **waveform_kwargs)
 
     def __call__(self, *params, **waveform_kwargs):

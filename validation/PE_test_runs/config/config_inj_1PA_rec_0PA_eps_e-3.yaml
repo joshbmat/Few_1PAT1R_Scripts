@@ -57,6 +57,7 @@ Recovery:
         dt: 5
         T: 2
         mode_selection_threshold: 0.0
+        lmax: 5                          # match 1PA mode content (l<=5 only)
         inspiral_kwargs:
             DENSE_STEPPING: 0
             max_init_len: 1000

@@ -431,7 +431,7 @@ def corner_plot(
             unified_range.append((c - w, c + w))
         else:
             lo, hi = np.percentile(col, [0.002, 99.998])
-            unified_range.append((lo*0.8, hi*1.2))
+            unified_range.append((lo, hi))
 
     base_kwargs = dict(
         bins=30,

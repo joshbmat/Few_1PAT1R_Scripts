@@ -286,6 +286,7 @@ freqs_np = cp.asnumpy(freqs_inband)
 data_fft_np = cp.asnumpy(xyz_data_fft)
 rec_fft_np = cp.asnumpy(xyz_rec_true_fft)
 xyz_rec_true_np = cp.asnumpy(xyz_rec_true_td)
+window_np = cp.asnumpy(window)
 
 # X-channel FD: injection vs recovery-at-truth vs noise PSD
 fig, ax = plt.subplots(figsize=(9, 5))
@@ -304,16 +305,17 @@ fig.tight_layout()
 fig.savefig(os.path.join(plots_dir, f"{tag}_X_fd.png"), dpi=150)
 plt.close(fig)
 
-# Time-domain X channel + residual
+# Time-domain X channel + residual (windowed, matching what enters the likelihood)
 t_axis = t_init + np.arange(N_t) * DT
 fig, axes = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
-axes[0].plot(t_axis, xyz_data_np[0], lw=0.6, label="Injection")
-axes[0].plot(t_axis, xyz_rec_true_np[0], lw=0.6, ls="--",
+axes[0].plot(t_axis, xyz_data_np[0] * window_np, lw=0.6, label="Injection")
+axes[0].plot(t_axis, xyz_rec_true_np[0] * window_np, lw=0.6, ls="--",
                 label="Recovery at truth")
-axes[0].set_ylabel("TDI X")
+axes[0].set_ylabel("TDI X (windowed)")
 axes[0].legend()
-axes[1].plot(t_axis, xyz_data_np[0] - xyz_rec_true_np[0], lw=0.6, color="C3")
-axes[1].set_ylabel("Residual")
+axes[1].plot(t_axis, (xyz_data_np[0] - xyz_rec_true_np[0]) * window_np,
+             lw=0.6, color="C3")
+axes[1].set_ylabel("Residual (windowed)")
 axes[1].set_xlabel("Time [s]")
 for ax in axes:
     ax.grid(alpha=0.4)

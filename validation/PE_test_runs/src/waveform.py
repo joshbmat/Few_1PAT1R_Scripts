@@ -97,38 +97,49 @@ def _mode_selection_from_lmax(gen, lmax: int) -> Optional[List[Tuple]]:
     Return a mode-selection list filtered to l <= lmax from a FEW
     GenerateEMRIWaveform instance (equatorial orbits: k=0 always).
 
-    Returns None if the amplitude module's mode arrays cannot be found,
-    in which case the caller should proceed without restriction and warn.
+    Returns None if mode arrays cannot be found anywhere in the generator
+    hierarchy, in which case the caller should proceed without restriction
+    and warn.
     """
     import numpy as np
-    amp = None
-    for attr in ("amp_gen", "amplitude_gen"):
+
+    # Build an ordered list of objects to probe for l_arr/m_arr/n_arr.
+    # GenerateEMRIWaveform stores the actual waveform at .waveform_generator;
+    # for FastKerrEccentricEquatorialFlux the mode arrays live directly on
+    # that object (inherited from SphericalHarmonic).  For other backends the
+    # arrays may live on a dedicated amplitude sub-module.
+    candidates = [gen]
+    wg = getattr(gen, "waveform_generator", None)
+    if wg is not None:
+        candidates.append(wg)
+        for attr in ("amp_gen", "amplitude_gen", "amp"):
+            sub = getattr(wg, attr, None)
+            if sub is not None:
+                candidates.append(sub)
+    for attr in ("amp_gen", "amplitude_gen", "amp"):
+        sub = getattr(gen, attr, None)
+        if sub is not None:
+            candidates.append(sub)
+
+    for obj in candidates:
         try:
-            amp = getattr(gen, attr)
-            break
+            l_arr = np.asarray(obj.l_arr)
+            m_arr = np.asarray(obj.m_arr)
+            n_arr = np.asarray(obj.n_arr)
         except AttributeError:
-            pass
-    if amp is None:
-        warnings.warn(
-            f"Cannot locate amplitude generator on {type(gen).__name__} to "
-            f"apply lmax={lmax}. Proceeding without mode restriction."
-        )
-        return None
-    try:
-        l_arr = np.asarray(amp.l_arr)
-        m_arr = np.asarray(amp.m_arr)
-        n_arr = np.asarray(amp.n_arr)
-    except AttributeError:
-        warnings.warn(
-            f"Amplitude generator {type(amp).__name__} has no l_arr/m_arr/n_arr. "
-            f"Cannot apply lmax={lmax}. Proceeding without mode restriction."
-        )
-        return None
-    mask = l_arr <= lmax
-    return [
-        (int(l_arr[i]), int(m_arr[i]), int(n_arr[i]), 0)
-        for i in range(len(l_arr)) if mask[i]
-    ]
+            continue
+        mask = l_arr <= lmax
+        return [
+            (int(l_arr[i]), int(m_arr[i]), int(n_arr[i]), 0)
+            for i in range(len(l_arr)) if mask[i]
+        ]
+
+    warnings.warn(
+        f"Cannot locate mode arrays (l_arr/m_arr/n_arr) on "
+        f"{type(gen).__name__} or its sub-modules to apply lmax={lmax}. "
+        f"Proceeding without mode restriction."
+    )
+    return None
 
 
 class EMRIWave(ParallelModuleBase):

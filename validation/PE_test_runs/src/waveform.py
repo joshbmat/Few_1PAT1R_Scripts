@@ -178,10 +178,14 @@ class EMRIWave(ParallelModuleBase):
                 amplitude_kwargs=cfg.amplitude_kwargs,
                 frame="detector",
             )
-            self._lmax_mode_selection = (
-                _mode_selection_from_lmax(self._gen, cfg.lmax)
-                if cfg.lmax is not None else None
-            )
+            if cfg.lmax is not None:
+                # Extract mode arrays from the already-built generator and
+                # write the filtered selection directly onto the mode_selector
+                # so it is applied at construction time (avoids the FEW
+                # call-time performance warning for large mode selections).
+                _mode_sel = _mode_selection_from_lmax(self._gen, cfg.lmax)
+                if _mode_sel is not None:
+                    self._gen.waveform_generator.mode_selector.mode_selection = _mode_sel
             self._call = self._call_0pa
         else:
             raise ValueError(f"Unknown waveform model: {cfg.model}")
@@ -205,14 +209,12 @@ class EMRIWave(ParallelModuleBase):
         )
 
     def _call_0pa(self, *params, **waveform_kwargs):
-        waveform_kwargs = dict(
+        return self._gen(
+            *params,
             T=self.T_waveform, dt=self.cfg.dt,
             mode_selection_threshold=self.cfg.mode_selection_threshold,
             pad_output=True,
         )
-        if self._lmax_mode_selection is not None:
-            waveform_kwargs['mode_selection'] = self._lmax_mode_selection
-        return self._gen(*params, **waveform_kwargs)
 
     def __call__(self, *params, **waveform_kwargs):
         h = self._call(*params, **waveform_kwargs)

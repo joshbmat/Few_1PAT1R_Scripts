@@ -11,7 +11,6 @@ Supports two models:
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
@@ -92,54 +91,12 @@ class ResponseConfig:
     remove_garbage: bool = False
 
 
-def _mode_selection_from_lmax(gen, lmax: int) -> Optional[List[Tuple]]:
+def _mode_selection_from_lmax(lmax: int) -> List[Tuple]:
     """
-    Return a mode-selection list filtered to l <= lmax from a FEW
-    GenerateEMRIWaveform instance (equatorial orbits: k=0 always).
-
-    Returns None if mode arrays cannot be found anywhere in the generator
-    hierarchy, in which case the caller should proceed without restriction
-    and warn.
+    Return all (l, m, n=0, k=0) modes with l <= lmax for equatorial circular
+    orbits.  Positive m only; FEW derives negative-m counterparts internally.
     """
-    import numpy as np
-
-    # Build an ordered list of objects to probe for l_arr/m_arr/n_arr.
-    # GenerateEMRIWaveform stores the actual waveform at .waveform_generator;
-    # for FastKerrEccentricEquatorialFlux the mode arrays live directly on
-    # that object (inherited from SphericalHarmonic).  For other backends the
-    # arrays may live on a dedicated amplitude sub-module.
-    candidates = [gen]
-    wg = getattr(gen, "waveform_generator", None)
-    if wg is not None:
-        candidates.append(wg)
-        for attr in ("amp_gen", "amplitude_gen", "amp"):
-            sub = getattr(wg, attr, None)
-            if sub is not None:
-                candidates.append(sub)
-    for attr in ("amp_gen", "amplitude_gen", "amp"):
-        sub = getattr(gen, attr, None)
-        if sub is not None:
-            candidates.append(sub)
-
-    for obj in candidates:
-        try:
-            l_arr = np.asarray(obj.l_arr)
-            m_arr = np.asarray(obj.m_arr)
-            n_arr = np.asarray(obj.n_arr)
-        except AttributeError:
-            continue
-        mask = l_arr <= lmax
-        return [
-            (int(l_arr[i]), int(m_arr[i]), int(n_arr[i]), 0)
-            for i in range(len(l_arr)) if mask[i]
-        ]
-
-    warnings.warn(
-        f"Cannot locate mode arrays (l_arr/m_arr/n_arr) on "
-        f"{type(gen).__name__} or its sub-modules to apply lmax={lmax}. "
-        f"Proceeding without mode restriction."
-    )
-    return None
+    return [(l, m, 0, 0) for l in range(2, lmax + 1) for m in range(1, l + 1)]
 
 
 class EMRIWave(ParallelModuleBase):
@@ -171,21 +128,17 @@ class EMRIWave(ParallelModuleBase):
             self._call = self._call_1pa
         elif cfg.model == "0PA_Kerr":
             from few.waveform import GenerateEMRIWaveform
+            mode_selector_kwargs = {}
+            if cfg.lmax is not None:
+                mode_selector_kwargs["mode_selection"] = _mode_selection_from_lmax(cfg.lmax)
             self._gen = GenerateEMRIWaveform(
                 "FastKerrEccentricEquatorialFlux",
                 return_list=False,
                 inspiral_kwargs=cfg.inspiral_kwargs,
                 amplitude_kwargs=cfg.amplitude_kwargs,
+                mode_selector_kwargs=mode_selector_kwargs or None,
                 frame="detector",
             )
-            if cfg.lmax is not None:
-                # Extract mode arrays from the already-built generator and
-                # write the filtered selection directly onto the mode_selector
-                # so it is applied at construction time (avoids the FEW
-                # call-time performance warning for large mode selections).
-                _mode_sel = _mode_selection_from_lmax(self._gen, cfg.lmax)
-                if _mode_sel is not None:
-                    self._gen.waveform_generator.mode_selector.mode_selection = _mode_sel
             self._call = self._call_0pa
         else:
             raise ValueError(f"Unknown waveform model: {cfg.model}")

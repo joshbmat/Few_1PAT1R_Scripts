@@ -123,9 +123,9 @@ def _mode_selection_from_lmax(gen, lmax: int) -> Optional[List[Tuple]]:
 
     for obj in candidates:
         try:
-            l_arr = np.asarray(obj.l_arr)
-            m_arr = np.asarray(obj.m_arr)
-            n_arr = np.asarray(obj.n_arr)
+            l_arr = np.asarray(obj.l_arr.get())
+            m_arr = np.asarray(obj.m_arr.get())
+            n_arr = np.asarray(obj.n_arr.get())
         except AttributeError:
             continue
         mask = l_arr <= lmax

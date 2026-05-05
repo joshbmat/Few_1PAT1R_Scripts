@@ -141,8 +141,21 @@ N_t = xyz_data.shape[1]
 windowing = bool(cfg["Sampler"]["windowing"])
 filter_freq = bool(cfg["Sampler"]["filter_freq"])
 
-# window signal with a Tukey window to avoid spectral leakage
-window = cp.asarray(tukey(N_t, alpha=0.01)) if windowing else cp.ones(N_t)
+# Find the last non-zero sample across all TDI channels so that the window
+# only covers the actual injected signal. Zero-padding beyond Nt_injection
+# suppresses residuals caused by different waveform stopping conditions
+# (e.g. Kerr eccentric equatorial vs 1PA) without contaminating the FFT.
+nonzero_cols = cp.where(cp.any(xyz_data != 0.0, axis=0))[0]
+Nt_injection = int(nonzero_cols[-1]) + 1 if nonzero_cols.size > 0 else N_t
+logger.info(f"Injection signal length: {Nt_injection} / {N_t} samples "
+            f"({Nt_injection / N_t * 100:.1f}%)")
+
+if windowing:
+    win_core = cp.asarray(tukey(Nt_injection, alpha=0.01))
+    window = cp.zeros(N_t)
+    window[:Nt_injection] = win_core
+else:
+    window = cp.ones(N_t)
 
 # reduce data to in-band frequencies for faster likelihood evaluation
 freqs_inband, mask = inband_freqs(N_t, DT, filter_freq=filter_freq)

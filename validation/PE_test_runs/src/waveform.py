@@ -99,6 +99,7 @@ def _mode_selection_from_lmax(lmax: int) -> List[Tuple]:
     return [(l, m, 0, 0) for l in range(2, lmax + 1) for m in range(1, l + 1)]
 
 
+
 class EMRIWave(ParallelModuleBase):
     """
     Unified waveform callable that dispatches to the right FEW backend

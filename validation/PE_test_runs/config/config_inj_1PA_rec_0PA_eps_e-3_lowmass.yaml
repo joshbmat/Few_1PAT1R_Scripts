@@ -6,13 +6,13 @@ Data:
 Injection:
     EMRI:
         # masses are source frame masses and will be redshifted with parameter z. 
-        M: 1000000.0
-        mu: 100.0
-        a: 0.00002
-        p0: 15.0
+        M: 5000000.0
+        mu: 5000.0
+        a: 0.002
+        p0: 16.81230
         e0: 0.0
         x_I0: 1.0
-        d_L: 0.1
+        d_L: 5
         theta_S: 0.5689062462243505
         phi_S: 3.069569972026508
         theta_K: 0.11247032308126413
@@ -21,7 +21,7 @@ Injection:
         Phi_theta0: 0.635376120342196
         Phi_r0: 4.2638433178190684
         chi2: 0.9
-        z: 2.5
+        z: 0.7
 
     Waveform:
         model: 1PAT1R              # '1PAT1R' or '0PA_Kerr'
@@ -66,22 +66,17 @@ Recovery:
         amplitude_kwargs: {}
 
 Sampler:
-    name: inj_1PA_rec_0PA_eps_e-4
+    name: inj_1PA_rec_0PA_eps_e-3_lowmass
     windowing: true
     filter_freq: true
     num_samples: 10000
     burn_in: 0
     use_gpu: true
-    n_temps: 2
+    n_temps: 3
     n_walkers: 40
-    d: 5
+    d: 1
     continue_run: false
-    # resume_backend: path to an existing .h5 file to resume from.
-    # The run continues from the last sample of that backend and writes new
-    # iterations into a freshly-timestamped backend in sampling_data_path.
-    # Example:
-    #   resume_backend: ./sampling_data/inj_1PA_rec_0PA_eps_e-4_2026-04-28_07-29-27/SamplingResults_....h5
-    # resume_backend: # '/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/sampling_data/inj_1PA_rec_0PA_eps_e-4_2026-04-28_07-29-27/SamplingResults_inj_1PA_rec_0PA_eps_e-4_fixedx_I0_1.0_e0_0.0_Phi_theta0_0.635376120342196_Phi_r0_4.2638433178190684_2026-04-28_07-29-27.h5'
+    # resume_backend: '/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/sampling_data/inj_1PA_rec_0PA_eps_e-3_2026-04-29_21-24-37/SamplingResults_inj_1PA_rec_0PA_eps_e-3_fixedx_I0_1.0_e0_0.0_Phi_theta0_0.635376120342196_Phi_r0_4.2638433178190684_2026-04-29_21-24-37.h5'
     sampling_data_path: ./sampling_data
     plots_path: ./Plots
     fixed_params: ['x_I0', 'e0', 'Phi_theta0', 'Phi_r0']

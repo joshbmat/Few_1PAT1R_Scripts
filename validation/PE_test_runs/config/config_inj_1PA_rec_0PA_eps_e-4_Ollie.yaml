@@ -6,13 +6,13 @@ Data:
 Injection:
     EMRI:
         # masses are source frame masses and will be redshifted with parameter z. 
-        M: 1000000.0
-        mu: 100.0
+        M: 500000.0
+        mu: 50.0
         a: 0.00002
-        p0: 15.0
+        p0: 15.7905
         e0: 0.0
         x_I0: 1.0
-        d_L: 0.1
+        # d_L: 0.1
         theta_S: 0.5689062462243505
         phi_S: 3.069569972026508
         theta_K: 0.11247032308126413
@@ -21,7 +21,7 @@ Injection:
         Phi_theta0: 0.635376120342196
         Phi_r0: 4.2638433178190684
         chi2: 0.9
-        z: 2.5
+        z: 1.5
 
     Waveform:
         model: 1PAT1R              # '1PAT1R' or '0PA_Kerr'
@@ -66,7 +66,7 @@ Recovery:
         amplitude_kwargs: {}
 
 Sampler:
-    name: inj_1PA_rec_0PA_eps_e-4
+    name: inj_1PA_rec_0PA_eps_e-4_Ollie
     windowing: true
     filter_freq: true
     num_samples: 10000

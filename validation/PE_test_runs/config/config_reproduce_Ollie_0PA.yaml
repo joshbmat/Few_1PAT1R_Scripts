@@ -24,9 +24,9 @@ Injection:
         z: 0
 
     Waveform:
-        model: 0PA_Kerr              # '1PAT1R' or '0PA_Kerr'
-        evolve_chi1: false
-        include_1PA_amps: false
+        model: 1PAT1R              # '1PAT1R' or '0PA_Kerr'
+        evolve_chi1: true
+        include_1PA_amps: true
         dt: 5
         T: 2
         mode_selection_threshold: 0.0
@@ -51,12 +51,13 @@ Recovery:
     # Waveform settings for the recovery template. Leave equal to injection
     # for a self-consistent test; toggle for systematics studies.
     Waveform:
-        model: 1PAT1R
-        evolve_chi1: true
-        include_1PA_amps: true
+        model: 0PA_Kerr
+        evolve_chi1: false
+        include_1PA_amps: false
         dt: 5
         T: 2
         mode_selection_threshold: 0.0
+        lmax: 5
         inspiral_kwargs:
             DENSE_STEPPING: 0
             max_init_len: 1000

@@ -11,6 +11,7 @@ principle needs to edit before running this script on a new test case.
 import argparse
 import logging
 import os
+import shutil
 import time
 
 import cupy as cp
@@ -254,6 +255,7 @@ fixed_tag = "_".join(f"{n}_{cfg['Injection']['EMRI'][n]}" for n in fixed_names)
 tag = f"{cfg['Sampler']['name']}_fixed{fixed_tag}_{timestamp}"
 run_dir = os.path.join(home, "..", data_dir, f"{cfg['Sampler']['name']}_{timestamp}")
 os.makedirs(run_dir, exist_ok=True)
+shutil.copy(args.config, run_dir)
 fp = os.path.join(run_dir, f"SamplingResults_{tag}.h5")
 log_fp = os.path.join(run_dir, f"RunLog_{tag}.txt")
 

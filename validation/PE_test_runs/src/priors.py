@@ -17,10 +17,10 @@ from eryn.prior import ProbDistContainer, uniform_dist
 # Widths per intrinsic parameter, keyed by name. Everything not listed
 # falls back to its physical parameter space (sky angles, phases, d_L).
 _WIDTHS_INTRINSIC = {
-    "M": 100.0,
-    "mu": 1e-3,
+    "M": 200.0,
+    "mu": 3e-3,
     "a": 1e-4,
-    "p0": 1e-4,
+    "p0": 3e-4,
     "e0": 1e-4,
     "chi2": 1e-3,
 }

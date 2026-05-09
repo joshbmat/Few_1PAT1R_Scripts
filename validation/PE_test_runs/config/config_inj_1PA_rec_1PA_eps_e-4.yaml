@@ -21,7 +21,7 @@ Injection:
         Phi_theta0: 0.635376120342196
         Phi_r0: 4.2638433178190684
         chi2: 0.9
-        z: 1
+        z: 2.5
 
     Waveform:
         model: 1PAT1R              # '1PAT1R' or '0PA_Kerr'
@@ -71,8 +71,8 @@ Sampler:
     num_samples: 10000
     burn_in: 0
     use_gpu: true
-    n_temps: 3
-    n_walkers: 30
+    n_temps: 2
+    n_walkers: 40
     d: 5
     continue_run: false
     sampling_data_path: ./sampling_data

@@ -365,6 +365,7 @@ def corner_plot(
     temp: int = 0,
     plot_name: Optional[str] = None,
     range_overrides: Optional[Dict[str, object]] = None,
+    prior_bounds: Optional[Dict[str, Tuple[float, float]]] = None,
 ):
     """
     Overlay multiple posteriors on a single corner figure.
@@ -389,6 +390,11 @@ def corner_plot(
                       the auto-computed range around its midpoint. Useful when
                       the percentile-based auto-range is too tight to tell a
                       flat posterior from a peaked one.
+    prior_bounds : {param_name: (lo, hi)}
+                   Prior bounds drawn as dashed grey lines on diagonal and
+                   off-diagonal panels. Build from priors.build_priors output:
+                   ``{n: bounds[k] for k, n in enumerate(param_names)}``.
+                   Bounds outside the plotted axis range are silently clipped.
 
     Notes
     -----
@@ -510,11 +516,35 @@ def corner_plot(
             axes[yi, xi].axvline(active_true[xi], color='k', lw=0.8)
             axes[yi, xi].plot(active_true[xi], active_true[yi], 'sk', ms=3)
 
+    if prior_bounds:
+        prior_lo = [prior_bounds.get(n, (None, None))[0] for n in active_names]
+        prior_hi = [prior_bounds.get(n, (None, None))[1] for n in active_names]
+        line_kw = dict(color='grey', ls='--', lw=0.8, alpha=0.7)
+        for i in range(N):
+            if prior_lo[i] is not None:
+                axes[i, i].axvline(prior_lo[i], **line_kw)
+            if prior_hi[i] is not None:
+                axes[i, i].axvline(prior_hi[i], **line_kw)
+        for yi in range(N):
+            for xi in range(yi):
+                if prior_lo[xi] is not None:
+                    axes[yi, xi].axvline(prior_lo[xi], **line_kw)
+                if prior_hi[xi] is not None:
+                    axes[yi, xi].axvline(prior_hi[xi], **line_kw)
+                if prior_lo[yi] is not None:
+                    axes[yi, xi].axhline(prior_lo[yi], **line_kw)
+                if prior_hi[yi] is not None:
+                    axes[yi, xi].axhline(prior_hi[yi], **line_kw)
+
     tick_fs = max(5, base_font - 8)
     for ax in figure.get_axes():
         ax.tick_params(axis='both', labelsize=tick_fs)
 
     legend_handles.append(mlines.Line2D([], [], color='k', lw=1.2, label='True value'))
+    if prior_bounds:
+        legend_handles.append(
+            mlines.Line2D([], [], color='grey', ls='--', lw=0.8, label='Prior bounds')
+        )
 
     title_parts = [p for p in [
         f'Injection: {inj_model}' if inj_model else '',

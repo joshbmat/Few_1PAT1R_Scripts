@@ -364,6 +364,7 @@ def corner_plot(
     exclude_sky: bool = False,
     temp: int = 0,
     plot_name: Optional[str] = None,
+    range_overrides: Optional[Dict[str, object]] = None,
 ):
     """
     Overlay multiple posteriors on a single corner figure.
@@ -382,6 +383,12 @@ def corner_plot(
     exclude_sky  : drop sky-position params (theta_S, phi_S, theta_K, phi_K)
     temp         : temperature index to use when samples are in named-dict format
     plot_name    : if given, save the figure here
+    range_overrides : {param_name: (lo, hi) or float}
+                      Per-parameter range override. A (lo, hi) tuple sets an
+                      absolute axis range; a scalar widens (>1) or narrows (<1)
+                      the auto-computed range around its midpoint. Useful when
+                      the percentile-based auto-range is too tight to tell a
+                      flat posterior from a peaked one.
 
     Notes
     -----
@@ -423,6 +430,7 @@ def corner_plot(
          for e in samples_dict.values()],
         axis=0,
     )
+    overrides = range_overrides or {}
     unified_range = []
     for i in range(N):
         col = all_samples[:, i]
@@ -438,6 +446,17 @@ def corner_plot(
             pad  = 0.05 * span
             lo = min(lo, active_true[i] - pad)
             hi = max(hi, active_true[i] + pad)
+
+        # Per-parameter override: (lo, hi) sets absolute range; a scalar acts
+        # as a half-width multiplier around the current midpoint.
+        ov = overrides.get(active_names[i])
+        if ov is not None:
+            if np.isscalar(ov):
+                mid = 0.5 * (lo + hi)
+                half = 0.5 * (hi - lo) * float(ov)
+                lo, hi = mid - half, mid + half
+            else:
+                lo, hi = float(ov[0]), float(ov[1])
         unified_range.append((lo, hi))
 
     base_kwargs = dict(

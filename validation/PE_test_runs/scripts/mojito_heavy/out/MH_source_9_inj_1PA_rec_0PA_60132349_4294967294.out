@@ -1,0 +1,122 @@
+SLURM_JOB_ID: 60132349
+SLURM_JOB_USER: vsc36785
+SLURM_JOB_ACCOUNT: lp_lisagw
+SLURM_JOB_NAME: MH_source_9_inj_1PA_rec_0PA
+SLURM_CLUSTER_NAME: wice
+SLURM_JOB_PARTITION: gpu_a100
+SLURM_NNODES: 1
+SLURM_NODELIST: k28g27
+SLURM_JOB_CPUS_PER_NODE: 18
+SLURM_JOB_GPUS: 2
+Date: Wed Jun  3 21:41:47 CEST 2026
+Walltime: 00-20:00:00
+========================================================================
+
+The following have been reloaded with a version change:
+  1) cluster/wice/gpu_a100 => cluster/wice/gpu
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: GCCcore/11.3.0
+(required by: GCC/11.3.0), binutils/2.38-GCCcore-11.3.0 (required by:
+GCC/11.3.0)
+-------------------------------------------------------------------------------
+
+
+
+
+The following have been reloaded with a version change:
+  1) CUDA/12.4.0 => CUDA/12.9.1
+  2) GCCcore/11.3.0 => GCCcore/14.3.0
+  3) GSL/2.7-GCC-11.3.0 => GSL/2.8-intel-compilers-2025.2.0
+  4) binutils/2.38-GCCcore-11.3.0 => binutils/2.44-GCCcore-14.3.0
+  5) zlib/1.2.12-GCCcore-11.3.0 => zlib/1.3.1-GCCcore-14.3.0
+
+Wed Jun  3 21:42:04 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 595.58.03              Driver Version: 595.58.03      CUDA Version: 13.2     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:BF:00.0 Off |                    0 |
+| N/A   31C    P0             62W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+2026-06-03 21:42:09,312 [INFO] __main__: Loaded config from /data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/config/mojito_heavy/MH_source_9_inj_1PA_rec_0PA.yaml
+2026-06-03 21:42:09,410 [INFO] __main__: Mojito L1: t0=97729939.827664, dt=2.5
+2026-06-03 21:42:09,410 [WARNING] __main__: Injection and recovery models differ. Expect biases.
+2026-06-03 21:42:09,410 [INFO] lisaorbits.oem: Fetching OEM files from ESA repository
+2026-06-03 21:42:09,410 [INFO] lisaorbits.oem: Found matching OEM orbits from ESA (version 2.0.0)
+2026-06-03 21:42:09,417 [INFO] lisaorbits.oem: Reading OEM file '/data/leuven/367/vsc36785/.cache/lisaorbits/v2.0/crema_2p0/tcb_time_scale/mida-20deg/trajectory_out_mida-20deg_cw_sg-2nmss_may_launch_lisa1.oem'
+2026-06-03 21:42:09,611 [INFO] lisaorbits.oem: Reading OEM file '/data/leuven/367/vsc36785/.cache/lisaorbits/v2.0/crema_2p0/tcb_time_scale/mida-20deg/trajectory_out_mida-20deg_cw_sg-2nmss_may_launch_lisa2.oem'
+2026-06-03 21:42:09,802 [INFO] lisaorbits.oem: Reading OEM file '/data/leuven/367/vsc36785/.cache/lisaorbits/v2.0/crema_2p0/tcb_time_scale/mida-20deg/trajectory_out_mida-20deg_cw_sg-2nmss_may_launch_lisa3.oem'
+2026-06-03 21:42:09,994 [WARNING] lisaorbits.oem: OEM preferred interpolation method ignored, using spline interpolation (see InterpolatedOrbits for details)
+2026-06-03 21:42:09,995 [INFO] lisaorbits.orbits: Initializing orbits (lisaorbit verion 3.0.3)
+2026-06-03 21:42:10,003 [INFO] __main__: Building injection response (1PAT1R)
+2026-06-03 21:42:15,788 [DEBUG] few: Configuration file not found in '/vsc-hard-mounts/leuven-data/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/scripts/mojito_heavy/few.ini'
+2026-06-03 21:42:15,788 [DEBUG] few: Configuration file not found in '/user/leuven/367/vsc36785/.config/few.ini'
+2026-06-03 21:42:15,788 [DEBUG] few: Configuration file not found in '/etc/xdg/few/v0.0/few.ini'
+2026-06-03 21:42:15,791 [DEBUG] few: ConfigInitialization: final configuration entries are
+2026-06-03 21:42:15,791 [DEBUG] few:  ignore_cfg=False (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  ignore_env=False (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  config_file=None (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  log_level=30 (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  log_format=None (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  file_registry_path=None (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  file_storage_path=/vsc-hard-mounts/leuven-data/367/vsc36785/LISA/FEW-dev/src/few/data (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  file_download_path=/data/leuven/367/vsc36785/LISA/FastEMRIWaveforms/data (from: ConfigSource.ENVVAR)
+2026-06-03 21:42:15,791 [DEBUG] few:  file_allow_download=True (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  file_integrity_check=once (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  file_extra_paths=[PosixPath('/vsc-hard-mounts/leuven-data/367/vsc36785/LISA/FEW-dev/src/few/data')] (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  file_disabled_tags=None (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:15,791 [DEBUG] few:  enabled_backends=None (from: ConfigSource.DEFAULT)
+2026-06-03 21:42:38,244 [INFO] __main__: Injection signal length: 12056258 / 12625479 samples (95.5%)
+2026-06-03 21:42:38,514 [INFO] __main__: Building inverse covariance from Mojito noise
+2026-06-03 21:42:46,688 [INFO] __main__: Building recovery response (0PA_Kerr)
+2026-06-03 21:43:43,570 [INFO] __main__: Running consistency checks
+2026-06-03 21:43:51,291 [INFO] __main__: SNR = 16.81
+2026-06-03 21:43:51,291 [INFO] __main__: Mismatch (injection vs recovery at truth) = 9.527e-01
+2026-06-03 21:43:51,291 [INFO] __main__: loglike at truth = -2.693e+02
+2026-06-03 21:43:51,291 [WARNING] __main__: Injection SNR below 20 -- may not be recoverable.
+/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/PE_response.py:306: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  fig.tight_layout()
+/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/PE_response.py:307: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  fig.savefig(os.path.join(plots_dir, f"{tag}_X_fd.png"), dpi=150)
+/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/PE_response.py:324: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  fig.tight_layout()
+/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/PE_response.py:325: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  fig.savefig(os.path.join(plots_dir, f"{tag}_X_td.png"), dpi=150)
+/data/leuven/367/vsc36785/miniconda3/envs/emri_env_ddpc/lib/python3.12/site-packages/matplotlib/axes/_axes.py:8283: RuntimeWarning: divide by zero encountered in log10
+  Z = 10. * np.log10(spec)
+2026-06-03 21:44:26,572 [INFO] __main__: Plots written to /vsc-hard-mounts/leuven-data/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/scripts/mojito_heavy/.././sampling_data/MH_source_9_inj_1PA_rec_0PA_2026-06-03_21-43-51
+2026-06-03 21:44:26,606 [INFO] __main__: Starting MCMC: 10000 iterations -> /vsc-hard-mounts/leuven-data/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/scripts/mojito_heavy/.././sampling_data/MH_source_9_inj_1PA_rec_0PA_2026-06-03_21-43-51/SamplingResults_MH_source_9_inj_1PA_rec_0PA_fixedx_I0_1.0_e0_0.0_Phi_theta0_0.0021620947023328_Phi_r0_1.6577947376459812_2026-06-03_21-43-51.h5
+  0%|          | 0/10000 [00:00<?, ?it/s]  0%|          | 1/10000 [00:27<76:16:19, 27.46s/it]  0%|          | 2/10000 [00:54<75:58:59, 27.36s/it]  0%|          | 3/10000 [01:22<76:11:05, 27.43s/it]  0%|          | 4/10000 [01:49<75:55:57, 27.35s/it]  0%|          | 5/10000 [02:16<75:35:12, 27.22s/it]  0%|          | 6/10000 [02:43<75:46:59, 27.30s/it]  0%|          | 7/10000 [03:11<75:39:29, 27.26s/it]  0%|          | 8/10000 [03:38<75:47:57, 27.31s/it]  0%|          | 9/10000 [04:05<75:24:43, 27.17s/it]  0%|          | 10/10000 [04:32<75:26:55, 27.19s/it]  0%|          | 11/10000 [04:59<75:24:33, 27.18s/it]  0%|          | 12/10000 [05:26<75:16:42, 27.13s/it]  0%|          | 13/10000 [05:53<75:13:27, 27.12s/it]  0%|          | 14/10000 [06:21<75:14:14, 27.12s/it]  0%|          | 15/10000 [06:48<75:13:26, 27.12s/it]  0%|          | 16/10000 [07:15<75:13:07, 27.12s/it]  0%|          | 17/10000 [07:42<75:11:20, 27.11s/it]  0%|          | 18/10000 [08:09<75:05:46, 27.08s/it]  0%|          | 19/10000 [08:36<75:01:49, 27.06s/it]  0%|          | 20/10000 [09:03<75:09:38, 27.11s/it]  0%|          | 21/10000 [09:30<75:06:03, 27.09s/it]  0%|          | 22/10000 [09:57<75:01:29, 27.07s/it]  0%|          | 23/10000 [10:24<75:06:03, 27.10s/it]  0%|          | 24/10000 [10:51<75:02:36, 27.08s/it]  0%|          | 25/10000 [11:18<74:58:28, 27.06s/it]  0%|          | 26/10000 [11:46<75:06:41, 27.11s/it]  0%|          | 27/10000 [12:13<75:01:06, 27.08s/it]  0%|          | 28/10000 [12:40<75:08:21, 27.13s/it]  0%|          | 29/10000 [13:07<75:01:20, 27.09s/it]  0%|          | 30/10000 [13:34<74:57:41, 27.07s/it]  0%|          | 31/10000 [14:01<74:52:49, 27.04s/it]  0%|          | 32/10000 [14:28<74:50:11, 27.03s/it]  0%|          | 33/10000 [14:55<74:58:10, 27.08s/it]  0%|          | 34/10000 [15:22<74:54:16, 27.06s/it]  0%|          | 35/10000 [15:49<74:49:56, 27.03s/it]  0%|          | 36/10000 [16:16<74:47:27, 27.02s/it]  0%|          | 37/10000 [16:43<74:54:58, 27.07s/it]  0%|          | 38/10000 [17:10<74:51:31, 27.05s/it]  0%|          | 39/10000 [17:37<74:47:34, 27.03s/it]  0%|          | 40/10000 [18:04<74:45:12, 27.02s/it]  0%|          | 41/10000 [18:31<74:55:12, 27.08s/it]  0%|          | 42/10000 [18:58<74:48:51, 27.05s/it]  0%|          | 43/10000 [19:25<74:47:18, 27.04s/it]  0%|          | 44/10000 [19:52<74:45:11, 27.03s/it]  0%|          | 45/10000 [20:21<75:59:17, 27.48s/it]  0%|          | 46/10000 [20:48<75:39:37, 27.36s/it]  0%|          | 47/10000 [21:15<75:35:20, 27.34s/it]  0%|          | 48/10000 [21:43<75:29:18, 27.31s/it]  0%|          | 49/10000 [22:10<75:14:09, 27.22s/it]  0%|          | 50/10000 [22:37<75:03:52, 27.16s/it]  1%|          | 51/10000 [23:04<75:07:37, 27.18s/it]  1%|          | 52/10000 [23:31<75:13:41, 27.22s/it]  1%|          | 53/10000 [23:58<75:07:14, 27.19s/it]  1%|          | 54/10000 [24:25<75:08:08, 27.20s/it]  1%|          | 55/10000 [24:53<75:21:00, 27.28s/it]  1%|          | 56/10000 [25:20<75:08:51, 27.21s/it]  1%|          | 57/10000 [25:47<75:07:36, 27.20s/it]  1%|          | 58/10000 [26:14<75:03:12, 27.18s/it]  1%|          | 59/10000 [26:41<74:54:13, 27.13s/it]  1%|          | 60/10000 [27:08<74:46:42, 27.08s/it]  1%|          | 61/10000 [27:35<74:39:59, 27.04s/it]  1%|          | 62/10000 [28:02<74:48:54, 27.10s/it]  1%|          | 63/10000 [28:30<74:52:57, 27.13s/it]  1%|          | 64/10000 [28:57<75:01:39, 27.18s/it]  1%|          | 65/10000 [29:24<74:58:24, 27.17s/it]  1%|          | 66/10000 [29:51<74:42:31, 27.07s/it]  1%|          | 67/10000 [30:18<74:46:16, 27.10s/it]  1%|          | 68/10000 [30:45<74:51:17, 27.13s/it]  1%|          | 69/10000 [31:13<74:53:52, 27.15s/it]  1%|          | 70/10000 [31:40<74:57:56, 27.18s/it]  1%|          | 71/10000 [32:07<75:01:11, 27.20s/it]  1%|          | 72/10000 [32:34<74:58:58, 27.19s/it]  1%|          | 73/10000 [33:01<74:46:56, 27.12s/it]  1%|          | 74/10000 [33:28<74:46:13, 27.12s/it]  1%|          | 75/10000 [33:56<74:53:31, 27.16s/it]  1%|          | 76/10000 [34:23<74:57:33, 27.19s/it]  1%|          | 77/10000 [34:50<75:02:03, 27.22s/it]  1%|          | 78/10000 [35:17<74:55:09, 27.18s/it]  1%|          | 79/10000 [35:44<74:49:51, 27.15s/it]  1%|          | 80/10000 [36:11<74:45:18, 27.13s/it]  1%|          | 81/10000 [36:38<74:18:41, 26.97s/it]  1%|          | 82/10000 [37:05<74:31:46, 27.05s/it]  1%|          | 83/10000 [37:32<74:27:30, 27.03s/it]  1%|          | 84/10000 [37:59<74:14:45, 26.96s/it]  1%|          | 85/10000 [38:26<74:25:57, 27.03s/it]  1%|          | 86/10000 [38:53<74:32:43, 27.07s/it]  1%|          | 87/10000 [39:20<74:27:55, 27.04s/it]  1%|          | 88/10000 [39:47<74:25:20, 27.03s/it]  1%|          | 89/10000 [40:14<74:05:18, 26.91s/it]  1%|          | 90/10000 [40:41<74:13:07, 26.96s/it]  1%|          | 91/10000 [41:08<74:26:18, 27.04s/it]  1%|          | 92/10000 [41:34<73:48:17, 26.82s/it]  1%|          | 93/10000 [42:01<73:26:41, 26.69s/it]  1%|          | 94/10000 [42:27<73:05:13, 26.56s/it]  1%|          | 95/10000 [42:54<73:37:02, 26.76s/it]  1%|          | 96/10000 [43:21<73:13:23, 26.62s/it]  1%|          | 97/10000 [43:47<73:12:48, 26.61s/it]  1%|          | 98/10000 [44:13<72:43:41, 26.44s/it]  1%|          | 99/10000 [44:39<72:04:42, 26.21s/it]  1%|          | 100/10000 [45:05<72:04:23, 26.21s/it]  1%|          | 101/10000 [45:32<72:46:09, 26.46s/it]  1%|          | 102/10000 [46:00<73:34:56, 26.76s/it]  1%|          | 103/10000 [46:26<73:04:09, 26.58s/it]  1%|          | 104/10000 [46:52<72:51:20, 26.50s/it]  1%|          | 105/10000 [47:19<72:59:07, 26.55s/it]  1%|          | 106/10000 [47:45<72:27:00, 26.36s/it]  1%|          | 107/10000 [48:11<72:06:35, 26.24s/it]  1%|          | 108/10000 [48:37<72:03:42, 26.23s/it]  1%|          | 109/10000 [49:03<71:38:25, 26.07s/it]  1%|          | 110/10000 [49:28<70:41:56, 25.73s/it]  1%|          | 111/10000 [49:53<70:29:21, 25.66s/it]  1%|          | 112/10000 [50:19<70:26:16, 25.64s/it]  1%|          | 113/10000 [50:43<69:37:26, 25.35s/it]  1%|          | 114/10000 [51:09<70:04:18, 25.52s/it]  1%|          | 115/10000 [51:34<69:37:07, 25.35s/it]  1%|          | 116/10000 [52:00<70:22:32, 25.63s/it]  1%|          | 117/10000 [52:25<69:29:38, 25.31s/it]  1%|          | 118/10000 [52:50<69:34:13, 25.34s/it]  1%|          | 119/10000 [53:15<69:06:50, 25.18s/it]  1%|          | 120/10000 [53:40<68:40:52, 25.03s/it]  1%|          | 121/10000 [54:05<69:02:54, 25.16s/it]  1%|          | 122/10000 [54:31<69:12:36, 25.22s/it]  1%|          | 123/10000 [54:55<68:22:43, 24.92s/it]  1%|          | 124/10000 [55:21<68:55:10, 25.12s/it]  1%|▏         | 125/10000 [55:45<68:31:20, 24.98s/it]  1%|▏         | 126/10000 [56:10<68:34:40, 25.00s/it]  1%|▏         | 127/10000 [56:36<69:16:32, 25.26s/it]  1%|▏         | 128/10000 [57:01<69:18:39, 25.28s/it]  1%|▏         | 129/10000 [57:26<68:28:48, 24.98s/it]  1%|▏         | 130/10000 [57:52<69:17:45, 25.28s/it]  1%|▏         | 131/10000 [58:17<69:17:50, 25.28s/it]  1%|▏         | 132/10000 [58:41<68:15:29, 24.90s/it]  1%|▏         | 133/10000 [59:06<68:09:53, 24.87s/it]  1%|▏         | 134/10000 [59:30<67:23:23, 24.59s/it]  1%|▏         | 135/10000 [59:54<66:47:56, 24.38s/it]  1%|▏         | 136/10000 [1:00:19<67:16:25, 24.55s/it]  1%|▏         | 137/10000 [1:00:44<67:52:02, 24.77s/it]  1%|▏         | 138/10000 [1:01:08<67:32:31, 24.66s/it]  1%|▏         | 139/10000 [1:01:32<66:38:34, 24.33s/it]  1%|▏         | 140/10000 [1:01:56<66:39:29, 24.34s/it]  1%|▏         | 141/10000 [1:02:19<65:33:55, 23.94s/it]  1%|▏         | 142/10000 [1:02:44<66:25:46, 24.26s/it]  1%|▏         | 143/10000 [1:03:09<66:49:41, 24.41s/it]  1%|▏         | 144/10000 [1:03:34<66:56:03, 24.45s/it]  1%|▏         | 145/10000 [1:03:57<65:53:10, 24.07s/it]  1%|▏         | 146/10000 [1:04:21<66:01:34, 24.12s/it]  1%|▏         | 147/10000 [1:04:45<65:48:07, 24.04s/it]  1%|▏         | 148/10000 [1:05:09<65:48:24, 24.05s/it]  1%|▏         | 149/10000 [1:05:34<66:18:32, 24.23s/it]  2%|▏         | 150/10000 [1:05:58<66:20:33, 24.25s/it]  2%|▏         | 151/10000 [1:06:21<65:46:10, 24.04s/it]  2%|▏         | 152/10000 [1:06:45<65:24:10, 23.91s/it]  2%|▏         | 153/10000 [1:07:10<65:58:23, 24.12s/it]  2%|▏         | 154/10000 [1:07:34<66:36:38, 24.35s/it]  2%|▏         | 155/10000 [1:07:58<65:44:02, 24.04s/it]  2%|▏         | 156/10000 [1:08:23<67:01:21, 24.51s/it]  2%|▏         | 157/10000 [1:08:48<67:02:35, 24.52s/it]  2%|▏         | 158/10000 [1:09:12<66:54:26, 24.47s/it]  2%|▏         | 159/10000 [1:09:36<66:25:49, 24.30s/it]  2%|▏         | 160/10000 [1:10:00<65:51:23, 24.09s/it]  2%|▏         | 161/10000 [1:10:24<66:18:16, 24.26s/it]  2%|▏         | 162/10000 [1:10:50<67:19:56, 24.64s/it]  2%|▏         | 163/10000 [1:11:15<67:24:41, 24.67s/it]  2%|▏         | 164/10000 [1:11:39<66:43:02, 24.42s/it]  2%|▏         | 165/10000 [1:12:03<66:50:13, 24.46s/it]  2%|▏         | 166/10000 [1:12:27<66:23:47, 24.31s/it]  2%|▏         | 167/10000 [1:12:50<65:29:13, 23.98s/it]  2%|▏         | 168/10000 [1:13:13<64:50:56, 23.74s/it]  2%|▏         | 169/10000 [1:13:37<64:51:31, 23.75s/it]  2%|▏         | 170/10000 [1:14:02<65:34:03, 24.01s/it]  2%|▏         | 171/10000 [1:14:25<64:40:22, 23.69s/it]  2%|▏         | 172/10000 [1:14:48<64:29:20, 23.62s/it]  2%|▏         | 173/10000 [1:15:12<64:49:58, 23.75s/it]  2%|▏         | 174/10000 [1:15:36<64:57:18, 23.80s/it]  2%|▏         | 175/10000 [1:16:00<65:04:28, 23.84s/it]  2%|▏         | 176/10000 [1:16:24<64:50:54, 23.76s/it]  2%|▏         | 177/10000 [1:16:48<65:25:09, 23.98s/it]  2%|▏         | 178/10000 [1:17:11<64:02:39, 23.47s/it]  2%|▏         | 179/10000 [1:17:34<64:24:34, 23.61s/it]  2%|▏         | 180/10000 [1:17:58<64:41:14, 23.71s/it]  2%|▏         | 181/10000 [1:18:23<65:21:15, 23.96s/it]  2%|▏         | 182/10000 [1:18:47<65:06:38, 23.87s/it]  2%|▏         | 183/10000 [1:19:10<64:53:51, 23.80s/it]  2%|▏         | 184/10000 [1:19:33<63:38:57, 23.34s/it]  2%|▏         | 185/10000 [1:19:56<63:46:31, 23.39s/it]  2%|▏         | 186/10000 [1:20:22<65:43:43, 24.11s/it]  2%|▏         | 187/10000 [1:20:46<65:24:35, 24.00s/it]  2%|▏         | 188/10000 [1:21:10<65:24:45, 24.00s/it]  2%|▏         | 189/10000 [1:21:32<64:13:40, 23.57s/it]  2%|▏         | 190/10000 [1:21:56<64:14:25, 23.57s/it]  2%|▏         | 191/10000 [1:22:19<63:56:26, 23.47s/it]  2%|▏         | 192/10000 [1:22:42<63:20:06, 23.25s/it]  2%|▏         | 193/10000 [1:23:04<62:43:58, 23.03s/it]  2%|▏         | 194/10000 [1:23:27<62:35:31, 22.98s/it]  2%|▏         | 195/10000 [1:23:51<63:09:30, 23.19s/it]  2%|▏         | 196/10000 [1:24:13<62:04:04, 22.79s/it]  2%|▏         | 197/10000 [1:24:37<63:37:20, 23.36s/it]  2%|▏         | 198/10000 [1:25:00<62:58:02, 23.13s/it]  2%|▏         | 199/10000 [1:25:23<63:00:31, 23.14s/it]  2%|▏         | 200/10000 [1:25:46<63:05:03, 23.17s/it]  2%|▏         | 201/10000 [1:26:10<63:24:09, 23.29s/it]  2%|▏         | 202/10000 [1:26:34<63:56:53, 23.50s/it]  2%|▏         | 203/10000 [1:26:57<63:19:57, 23.27s/it]  2%|▏         | 204/10000 [1:27:21<63:57:42, 23.51s/it]  2%|▏         | 205/10000 [1:27:43<63:25:55, 23.31s/it]  2%|▏         | 206/10000 [1:28:06<62:48:58, 23.09s/it]  2%|▏         | 207/10000 [1:28:29<62:34:33, 23.00s/it]  2%|▏         | 208/10000 [1:28:53<63:23:43, 23.31s/it]  2%|▏         | 209/10000 [1:29:16<63:37:10, 23.39s/it]  2%|▏         | 210/10000 [1:29:40<63:39:10, 23.41s/it]  2%|▏         | 211/10000 [1:30:03<63:32:41, 23.37s/it]  2%|▏         | 212/10000 [1:30:26<62:48:59, 23.10s/it]  2%|▏         | 213/10000 [1:30:48<62:31:59, 23.00s/it]  2%|▏         | 214/10000 [1:31:12<62:40:58, 23.06s/it]  2%|▏         | 215/10000 [1:31:35<63:14:34, 23.27s/it]  2%|▏         | 215/10000 [1:31:58<69:45:51, 25.67s/it]
+Traceback (most recent call last):
+  File "/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/PE_response.py", line 373, in <module>
+    ensemble.run_mcmc(start, int(cfg["Sampler"]["num_samples"]), progress=True)
+  File "/data/leuven/367/vsc36785/miniconda3/envs/emri_env_ddpc/lib/python3.12/site-packages/eryn/ensemble.py", line 1103, in run_mcmc
+    for results in self.sample(initial_state, iterations=nsteps, **kwargs):
+  File "/data/leuven/367/vsc36785/miniconda3/envs/emri_env_ddpc/lib/python3.12/site-packages/eryn/ensemble.py", line 1022, in sample
+    self.backend.save_step(
+  File "/data/leuven/367/vsc36785/miniconda3/envs/emri_env_ddpc/lib/python3.12/site-packages/eryn/backends/hdfbackend.py", line 732, in save_step
+    with self.open("a") as f:
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "/data/leuven/367/vsc36785/miniconda3/envs/emri_env_ddpc/lib/python3.12/site-packages/h5py/_hl/files.py", line 638, in __exit__
+    self.close()
+  File "/data/leuven/367/vsc36785/miniconda3/envs/emri_env_ddpc/lib/python3.12/site-packages/h5py/_hl/files.py", line 621, in close
+    self.id._close_open_objects(h5f.OBJ_LOCAL | h5f.OBJ_FILE)
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "h5py/h5f.pyx", line 359, in h5py.h5f.FileID._close_open_objects
+RuntimeError: Can't decrement id ref count (unable to close file, errno = 122, error message = 'Disk quota exceeded')

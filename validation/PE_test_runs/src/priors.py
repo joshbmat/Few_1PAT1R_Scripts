@@ -17,12 +17,12 @@ from eryn.prior import ProbDistContainer, uniform_dist
 # Widths per intrinsic parameter, keyed by name. Everything not listed
 # falls back to its physical parameter space (sky angles, phases, d_L).
 _WIDTHS_INTRINSIC = {
-    "M": 200.0,
-    "mu": 3e-3,
-    "a": 1e-4,
-    "p0": 3e-4,
-    "e0": 1e-4,
-    "chi2": 1e-3,
+    "M": 7000.0,
+    "mu": 10,
+    "a": 1e-2,
+    "p0": 1,
+    "e0": 1e-3,
+    "chi2": 1,
 }
 _WIDTH_DL = 0.5
 _EPS = 1e-12
@@ -99,7 +99,7 @@ def build_priors(
                 lo, hi = _clamp(true - n * w, true + n * w, -0.999, 0.0, w)
         elif name == "chi2":
             w = widths[name]
-            lo, hi = _clamp(true - n * w, true + n * w, -0.999, 0.999, w)
+            lo, hi = _clamp(-0.999, 0.999, -0.999, 0.999, w)
         elif name == "e0":
             w = widths[name]
             hi_cand = min(true + 2 * n * w, 0.9)

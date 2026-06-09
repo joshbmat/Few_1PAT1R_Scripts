@@ -78,4 +78,4 @@ class LogLikelihood:
             for name, val in zip(self.cfg.param_names, full):
                 logger.warning(f"  {name} = {val:.6e}")
             # return large negative loglikelihood to build barrier around failed point for sampler
-            return np.float32(-1e5)
+            return np.float32(-1e10)

@@ -49,7 +49,7 @@ def sky_indices_for(model: str) -> tuple[int, int]:
 @dataclass
 class WaveformConfig:
     """Settings for a single waveform evaluation (injection or recovery)."""
-    model: Literal["1PAT1R", "0PA_Kerr"] = "1PAT1R"
+    model: Literal["1PAT1R", "0PA_Kerr", "FastSchwarzschildEccentricFlux", "FastSchwarzschildEccentricFluxBicubic"] = "1PAT1R"
     dt: float = 5.0
     T: float = 2.0
     mode_selection_threshold: float = 0.0
@@ -141,6 +141,27 @@ class EMRIWave(ParallelModuleBase):
                 frame="detector",
             )
             self._call = self._call_0pa
+        elif cfg.model == "FastSchwarzschildEccentricFluxBicubic":
+            from few.waveform import GenerateEMRIWaveform
+            self._gen = GenerateEMRIWaveform(
+                'FastSchwarzschildEccentricFluxBicubic',
+                return_list=False,
+                inspiral_kwargs=cfg.inspiral_kwargs,
+                amplitude_kwargs=cfg.amplitude_kwargs,
+                frame='detector',
+            )
+            self._call = self._call_schwarzschild
+        elif cfg.model == "FastSchwarzschildEccentricFlux":
+            from few.waveform import GenerateEMRIWaveform
+            self._gen = GenerateEMRIWaveform(
+                'FastSchwarzschildEccentricFlux',
+                return_list=False,
+                inspiral_kwargs=cfg.inspiral_kwargs,
+                amplitude_kwargs=cfg.amplitude_kwargs,
+                frame='detector',
+            )
+            self._call = self._call_schwarzschild
+        
         else:
             raise ValueError(f"Unknown waveform model: {cfg.model}")
 
@@ -167,6 +188,17 @@ class EMRIWave(ParallelModuleBase):
             *params,
             T=self.T_waveform, dt=self.cfg.dt,
             mode_selection_threshold=self.cfg.mode_selection_threshold,
+            pad_output=True,
+        )
+    def _call_schwarzschild(self, *params, **waveform_kwargs):
+        # exclude a from the list as it is not a parameter in this model
+        # params = list(params)
+        # params.pop(2)
+        # params.pop(4)
+        return self._gen(
+            *params,
+            T=self.T_waveform, dt=self.cfg.dt,
+            # mode_selector_kwargs=self.cfg.mode_selection_threshold,
             pad_output=True,
         )
 

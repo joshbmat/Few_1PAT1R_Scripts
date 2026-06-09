@@ -366,6 +366,7 @@ def corner_plot(
     plot_name: Optional[str] = None,
     range_overrides: Optional[Dict[str, object]] = None,
     prior_bounds: Optional[Dict[str, Tuple[float, float]]] = None,
+    save_dpi=100
 ):
     """
     Overlay multiple posteriors on a single corner figure.
@@ -426,7 +427,7 @@ def corner_plot(
 
     # Font size scales with figure dimension
     fig_size  = max(4.0, N * 2.5)
-    base_font = max(10, int(fig_size * 1.3))
+    base_font = max(30, int(fig_size * 1.2))
 
     # Unified range across all datasets (robust percentiles).
     # Ranges are expanded to include the true value so it is always visible
@@ -536,7 +537,7 @@ def corner_plot(
                 if prior_hi[yi] is not None:
                     axes[yi, xi].axhline(prior_hi[yi], **line_kw)
 
-    tick_fs = max(5, base_font - 8)
+    tick_fs = max(20, base_font - 8)
     for ax in figure.get_axes():
         ax.tick_params(axis='both', labelsize=tick_fs)
 
@@ -558,7 +559,7 @@ def corner_plot(
         legend_ax = axes[0, N - 1]
         legend_ax.legend(
             handles=legend_handles,
-            fontsize=max(8, base_font - 2),
+            fontsize=max(19, base_font - 2),
             frameon=True,
             loc='center',
         )
@@ -566,7 +567,7 @@ def corner_plot(
     else:
         figure.legend(
             handles=legend_handles,
-            fontsize=max(8, base_font - 2),
+            fontsize=max(25, base_font - 2),
             frameon=True,
             loc='upper right',
         )
@@ -577,7 +578,7 @@ def corner_plot(
     figure.set_size_inches(fig_size, fig_size)
 
     if plot_name:
-        figure.savefig(plot_name, bbox_inches='tight')
+        figure.savefig(plot_name, bbox_inches='tight', dpi=save_dpi)
 
     return figure
 

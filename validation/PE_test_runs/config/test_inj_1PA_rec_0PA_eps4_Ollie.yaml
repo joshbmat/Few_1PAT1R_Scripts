@@ -1,0 +1,80 @@
+Data:
+  orbit_file: 
+    /data/leuven/367/vsc36785/LISA/Mojito_analysis/esa-trailing-orbits-mojito_validation_test_2.h5
+  mojito_l1_file: 
+    /scratch/leuven/367/vsc36785/MojitoLight/SIM_data/brickmarket/mojito_light_v1_0_0/data/EMRI/L1/EMRI_731d_2.5s_L1_source0_0_20251203T225446987631Z.h5
+  noise_file: 
+    /scratch/leuven/367/vsc36785/MojitoLight/SIM_data/brickmarket/mojito_light_v1_0_0/data/NOISE/L1/NOISE_731d_2.5s_L1_source0_0_20251206T220508924302Z.h5
+Injection:
+  EMRI:
+    M: 733495.4619255429
+    mu: 73.34954619255429
+    a: 0.0002
+    p0: 15.7905
+    e0: 0.0
+    chi2: 0.9
+    x_I0: 1.0
+    d_L: 2.0
+    theta_S: 2.4314546363447995
+    phi_S: 2.757554564287996
+    theta_K: 2.6973649175810768
+    phi_K: 4.381692553882582
+    Phi_phi0: 0.5917337285168199
+    Phi_theta0: 6.13001602516006
+    Phi_r0: 4.782381792256834
+    z: 0.3633349514867345
+  Waveform:
+    model: 1PAT1R
+    evolve_chi1: true
+    include_1PA_amps: true
+    dt: 5.0
+    T: 2.0
+    mode_selection_threshold: 0.0
+    inspiral_kwargs:
+      DENSE_STEPPING: 0
+      max_init_len: 1000
+    summation_kwargs:
+      pad_output: true
+    amplitude_kwargs: {}
+Response:
+  tdi_gen: 2nd generation
+  tdi_chan: XYZ
+  order: 40
+  offset: 550.0
+  n_samples_delay: 1000
+  t_buffer: 10000.0
+  flip_hx: true
+  is_ecliptic_latitude: false
+Recovery:
+  Waveform:
+    model: 0PA_Kerr
+    evolve_chi1: false
+    include_1PA_amps: false
+    dt: 5.0
+    T: 2.0
+    mode_selection_threshold: 0.0
+    inspiral_kwargs:
+      DENSE_STEPPING: 0
+      max_init_len: 1000
+    summation_kwargs:
+      pad_output: true
+    amplitude_kwargs: {}
+    lmax: 5
+Sampler:
+  name: test_inj_1PA_rec_0PA_eps4_Ollie
+  windowing: true
+  filter_freq: true
+  num_samples: 10000
+  burn_in: 0
+  use_gpu: true
+  n_temps: 2
+  n_walkers: 40
+  d: 5
+  continue_run: false
+  sampling_data_path: ./sampling_data
+  plots_path: ./Plots
+  fixed_params:
+    - x_I0
+    - e0
+    - Phi_theta0
+    - Phi_r0

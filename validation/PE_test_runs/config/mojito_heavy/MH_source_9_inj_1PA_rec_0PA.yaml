@@ -1,0 +1,80 @@
+Data:
+  orbit_file: 
+    /data/leuven/367/vsc36785/LISA/Mojito_analysis/esa-trailing-orbits-mojito_validation_test_2.h5
+  mojito_l1_file: 
+    /scratch/leuven/367/vsc36785/MojitoLight/SIM_data/brickmarket/mojito_light_v1_0_0/data/EMRI/L1/EMRI_731d_2.5s_L1_source0_0_20251203T225446987631Z.h5
+  noise_file: 
+    /scratch/leuven/367/vsc36785/MojitoLight/SIM_data/brickmarket/mojito_light_v1_0_0/data/NOISE/L1/NOISE_731d_2.5s_L1_source0_0_20251206T220508924302Z.h5
+Injection:
+  EMRI:
+    M: 132770.01367900803
+    mu: 8.387662528039282
+    a: 5.571955338188803e-05
+    p0: 19.37167379388279
+    e0: 0.0
+    chi2: 0.4157290104364989
+    x_I0: 1.0
+    d_L: 10.287623727192573
+    theta_S: 1.4786891810326654
+    phi_S: 0.8443102015441367
+    theta_K: 1.55058783752999
+    phi_K: 1.361181985538771
+    Phi_phi0: 4.484453132973826
+    Phi_theta0: 0.0021620947023328
+    Phi_r0: 1.6577947376459812
+    z: 1.4305
+  Waveform:
+    model: 1PAT1R
+    evolve_chi1: true
+    include_1PA_amps: true
+    dt: 5.0
+    T: 2.0
+    mode_selection_threshold: 0.0
+    inspiral_kwargs:
+      DENSE_STEPPING: 0
+      max_init_len: 1000
+    summation_kwargs:
+      pad_output: true
+    amplitude_kwargs: {}
+Response:
+  tdi_gen: 2nd generation
+  tdi_chan: XYZ
+  order: 40
+  offset: 550.0
+  n_samples_delay: 1000
+  t_buffer: 10000.0
+  flip_hx: true
+  is_ecliptic_latitude: false
+Recovery:
+  Waveform:
+    model: 0PA_Kerr
+    evolve_chi1: false
+    include_1PA_amps: false
+    dt: 5.0
+    T: 2.0
+    mode_selection_threshold: 0.0
+    inspiral_kwargs:
+      DENSE_STEPPING: 0
+      max_init_len: 1000
+    summation_kwargs:
+      pad_output: true
+    amplitude_kwargs: {}
+    lmax: 5
+Sampler:
+  name: MH_source_9_inj_1PA_rec_0PA
+  windowing: true
+  filter_freq: true
+  num_samples: 10000
+  burn_in: 0
+  use_gpu: true
+  n_temps: 2
+  n_walkers: 40
+  d: 5
+  continue_run: false
+  sampling_data_path: ./sampling_data
+  plots_path: ./Plots
+  fixed_params:
+    - x_I0
+    - e0
+    - Phi_theta0
+    - Phi_r0

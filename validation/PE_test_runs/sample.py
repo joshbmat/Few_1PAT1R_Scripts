@@ -88,8 +88,7 @@ force_backend = "cuda12x" if use_gpu else None
 inj_wcfg = _waveform_cfg(cfg["Injection"]["Waveform"])
 rec_wcfg = _waveform_cfg(cfg["Recovery"]["Waveform"])
 if inj_wcfg.model != rec_wcfg.model:
-    raise ValueError("Injection and recovery models must share a parameter "
-                     "space (both '1PAT1R' or both '0PA_Kerr').")
+    logger.warning("Injection and recovery models are not the same. Expect biases. ")
 
 param_names = inj_wcfg.param_names()
 x_I0_index = param_names.index("x_I0") if "x_I0" in param_names else None

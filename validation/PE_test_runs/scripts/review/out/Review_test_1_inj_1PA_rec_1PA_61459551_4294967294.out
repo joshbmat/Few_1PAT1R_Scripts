@@ -1,0 +1,102 @@
+SLURM_JOB_ID: 61459551
+SLURM_JOB_USER: vsc36785
+SLURM_JOB_ACCOUNT: lp_lisagw
+SLURM_JOB_NAME: Review_test_1_inj_1PA_rec_1PA
+SLURM_CLUSTER_NAME: wice
+SLURM_JOB_PARTITION: gpu_a100
+SLURM_NNODES: 1
+SLURM_NODELIST: k28g32
+SLURM_JOB_CPUS_PER_NODE: 18
+SLURM_JOB_GPUS: 3
+Date: Wed Jul 15 08:35:56 CEST 2026
+Walltime: 00-23:00:00
+========================================================================
+
+The following have been reloaded with a version change:
+  1) cluster/wice/gpu_a100 => cluster/wice/gpu
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: GCCcore/11.3.0
+(required by: GCC/11.3.0), binutils/2.38-GCCcore-11.3.0 (required by:
+GCC/11.3.0)
+-------------------------------------------------------------------------------
+
+
+
+
+The following have been reloaded with a version change:
+  1) CUDA/12.4.0 => CUDA/12.9.1
+  2) GCCcore/11.3.0 => GCCcore/14.3.0
+  3) GSL/2.7-GCC-11.3.0 => GSL/2.8-intel-compilers-2025.2.0
+  4) binutils/2.38-GCCcore-11.3.0 => binutils/2.44-GCCcore-14.3.0
+  5) zlib/1.2.12-GCCcore-11.3.0 => zlib/1.3.1-GCCcore-14.3.0
+
+Wed Jul 15 08:36:12 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 595.71.05              Driver Version: 595.71.05      CUDA Version: 13.2     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:C0:00.0 Off |                    0 |
+| N/A   41C    P0             66W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+2026-07-15 08:36:16,777 [INFO] __main__: Loaded config from /data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/config/review/Review_test_1_inj_1PA_rec_1PA.yaml
+2026-07-15 08:36:16,779 [INFO] __main__: Mojito L1: t0=97729939.827664, dt=2.5
+2026-07-15 08:36:16,779 [INFO] lisaorbits.oem: Fetching OEM files from ESA repository
+2026-07-15 08:36:16,779 [INFO] lisaorbits.oem: Found matching OEM orbits from ESA (version 2.0.0)
+2026-07-15 08:36:16,786 [INFO] lisaorbits.oem: Reading OEM file '/data/leuven/367/vsc36785/.cache/lisaorbits/v2.0/crema_2p0/tcb_time_scale/mida-20deg/trajectory_out_mida-20deg_cw_sg-2nmss_may_launch_lisa1.oem'
+2026-07-15 08:36:16,978 [INFO] lisaorbits.oem: Reading OEM file '/data/leuven/367/vsc36785/.cache/lisaorbits/v2.0/crema_2p0/tcb_time_scale/mida-20deg/trajectory_out_mida-20deg_cw_sg-2nmss_may_launch_lisa2.oem'
+2026-07-15 08:36:17,167 [INFO] lisaorbits.oem: Reading OEM file '/data/leuven/367/vsc36785/.cache/lisaorbits/v2.0/crema_2p0/tcb_time_scale/mida-20deg/trajectory_out_mida-20deg_cw_sg-2nmss_may_launch_lisa3.oem'
+2026-07-15 08:36:17,355 [WARNING] lisaorbits.oem: OEM preferred interpolation method ignored, using spline interpolation (see InterpolatedOrbits for details)
+2026-07-15 08:36:17,356 [INFO] lisaorbits.orbits: Initializing orbits (lisaorbit verion 3.0.3)
+2026-07-15 08:36:17,364 [INFO] __main__: Building injection response (1PAT1R)
+2026-07-15 08:36:23,110 [DEBUG] few: Configuration file not found in '/vsc-hard-mounts/leuven-data/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/scripts/review/few.ini'
+2026-07-15 08:36:23,111 [DEBUG] few: Configuration file not found in '/user/leuven/367/vsc36785/.config/few.ini'
+2026-07-15 08:36:23,111 [DEBUG] few: Configuration file not found in '/etc/xdg/few/v0.0/few.ini'
+2026-07-15 08:36:23,112 [DEBUG] few: ConfigInitialization: final configuration entries are
+2026-07-15 08:36:23,112 [DEBUG] few:  ignore_cfg=False (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,112 [DEBUG] few:  ignore_env=False (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  config_file=None (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  log_level=30 (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  log_format=None (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  file_registry_path=None (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  file_storage_path=/vsc-hard-mounts/leuven-data/367/vsc36785/LISA/FEW-dev/src/few/data (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  file_download_path=/data/leuven/367/vsc36785/LISA/FastEMRIWaveforms/data (from: ConfigSource.ENVVAR)
+2026-07-15 08:36:23,113 [DEBUG] few:  file_allow_download=True (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  file_integrity_check=once (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  file_extra_paths=[PosixPath('/vsc-hard-mounts/leuven-data/367/vsc36785/LISA/FEW-dev/src/few/data')] (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  file_disabled_tags=None (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:23,113 [DEBUG] few:  enabled_backends=None (from: ConfigSource.DEFAULT)
+2026-07-15 08:36:45,539 [INFO] __main__: Injection signal length: 12623479 / 12625479 samples (100.0%)
+2026-07-15 08:36:46,021 [INFO] __main__: Building inverse covariance from Mojito noise
+2026-07-15 08:36:53,214 [INFO] __main__: Building recovery response (1PAT1R)
+2026-07-15 08:36:57,968 [INFO] __main__: Running consistency checks
+2026-07-15 08:36:58,604 [INFO] __main__: SNR = 66.38
+2026-07-15 08:36:58,604 [INFO] __main__: Mismatch (injection vs recovery at truth) = 0.000e+00
+2026-07-15 08:36:58,604 [INFO] __main__: loglike at truth = -0.000e+00
+> /data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/PE_response.py(232)<module>()
+-> ndim = len(sampled_idx)
+(Pdb) 
+Traceback (most recent call last):
+  File "/data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/PE_response.py", line 232, in <module>
+    ndim = len(sampled_idx)
+           ^^^
+  File "/data/leuven/367/vsc36785/miniconda3/envs/emri_env_ddpc/lib/python3.12/bdb.py", line 90, in trace_dispatch
+    return self.dispatch_line(frame)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/leuven/367/vsc36785/miniconda3/envs/emri_env_ddpc/lib/python3.12/bdb.py", line 115, in dispatch_line
+    if self.quitting: raise BdbQuit
+                      ^^^^^^^^^^^^^
+bdb.BdbQuit

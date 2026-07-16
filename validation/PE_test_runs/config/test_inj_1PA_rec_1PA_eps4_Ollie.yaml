@@ -60,7 +60,7 @@ Recovery:
       pad_output: true
     amplitude_kwargs: {}
 Sampler:
-  name: test_inj_1PA_rec_1PA_eps4_Ollie_extended
+  name: test_inj_1PA_rec_1PA_eps4_Ollie
   windowing: true
   filter_freq: true
   num_samples: 10000
@@ -69,8 +69,8 @@ Sampler:
   n_temps: 2
   n_walkers: 40
   d: 5
-  continue_run: true
-  resume_backend: /data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/sampling_data/test_inj_1PA_rec_1PA_eps4_Ollie_2026-05-11_10-52-27/SamplingResults_test_inj_1PA_rec_1PA_eps4_Ollie_fixedx_I0_1.0_e0_0.0_Phi_theta0_6.13001602516006_Phi_r0_4.782381792256834_2026-05-11_10-52-27.h5
+  continue_run: false
+  # resume_backend: /data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/sampling_data/test_inj_1PA_rec_1PA_eps4_Ollie_2026-05-11_10-52-27/SamplingResults_test_inj_1PA_rec_1PA_eps4_Ollie_fixedx_I0_1.0_e0_0.0_Phi_theta0_6.13001602516006_Phi_r0_4.782381792256834_2026-05-11_10-52-27.h5
   sampling_data_path: ./sampling_data
   plots_path: ./Plots
   fixed_params:

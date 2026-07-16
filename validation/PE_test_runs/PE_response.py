@@ -227,7 +227,7 @@ logger.info(f"Mismatch (injection vs recovery at truth) = {mm:.3e}")
 logger.info(f"loglike at truth = {ll_truth:.3e}")
 if snr < 20:
     logger.warning("Injection SNR below 20 -- may not be recoverable.")
-
+breakpoint()
 # Draw starting positions for all walkers from prior. Tighten prior around truth value to ensure fast convergence during test run
 ndim = len(sampled_idx)
 nwalkers = int(cfg["Sampler"]["n_walkers"])

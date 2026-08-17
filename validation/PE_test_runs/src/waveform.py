@@ -256,10 +256,7 @@ def build_response(
     )
 
     # Tell the wave generator to zero-pad up to the exact length that
-    # fastlisaresponse expects (pyResponseTDI.num_pts). Without this,
-    # plunging systems whose inspiral ends before T_response would produce
-    # a waveform that is too short, triggering the assert inside
-    # get_projections even when pad_output=True is set on the FEW generator.
+    # fastlisaresponse expects (pyResponseTDI.num_pts)
     wave.min_output_length = response.response_model.num_pts
 
     def _call(*params):

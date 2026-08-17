@@ -70,7 +70,8 @@ Sampler:
   n_temps: 2
   n_walkers: 40
   d: 5
-  continue_run: false
+  continue_run: true
+  resume_backend: /data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/sampling_data/test_inj_1PA_rec_0PA_eps3_Ollie_high_SNR_2026-05-27_21-31-13/SamplingResults_test_inj_1PA_rec_0PA_eps3_Ollie_high_SNR_fixedx_I0_1.0_e0_0.0_a_0.0_Phi_theta0_6.13001602516006_Phi_r0_4.782381792256834_2026-05-27_21-31-13.h5
   sampling_data_path: ./sampling_data
   plots_path: ./Plots
   fixed_params:

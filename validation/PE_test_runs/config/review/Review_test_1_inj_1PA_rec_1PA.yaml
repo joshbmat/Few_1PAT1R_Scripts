@@ -9,7 +9,7 @@ Injection:
   EMRI:
     M: 4975124.504066709
     mu: 99.50249008133419
-    a: 0.02
+    a: 0.0002
     p0: 16.8123
     e0: 0.0
     chi2: 0.5
@@ -72,6 +72,7 @@ Sampler:
   d: 50
   continue_run: false
   sampling_data_path: ./sampling_data
+  # resume_backend: /data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/scripts/sampling_data/Review_test_1_inj_1PA_rec_1PA_2026-07-16_04-18-44/SamplingResults_Review_test_1_inj_1PA_rec_1PA_fixedx_I0_1.0_e0_0.0_Phi_theta0_6.13001602516006_Phi_r0_4.782381792256834_2026-07-16_04-18-44.h5
   plots_path: ./Plots
   fixed_params:
     - x_I0

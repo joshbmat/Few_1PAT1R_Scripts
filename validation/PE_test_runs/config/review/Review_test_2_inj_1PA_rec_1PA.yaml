@@ -12,7 +12,7 @@ Injection:
     a: 0.0
     p0: 29.688286969253295
     e0: 0.0
-    chi2: 0.5
+    chi2: 0.9
     x_I0: 1.0
     d_L: 0.00044259741415499115
     theta_S: 2.4314546363447995
@@ -76,5 +76,6 @@ Sampler:
   fixed_params:
     - x_I0
     - e0
+    - a
     - Phi_theta0
     - Phi_r0

@@ -119,11 +119,27 @@ class EMRIWave(ParallelModuleBase):
         # Should return h+ - ihx in detector frame, with 1PA effects toggled on/off
         if cfg.model == "1PAT1R":
             from few.waveform import GenerateEMRIWaveform
+            # Model toggles must be set on the *constructors* of the relevant FEW
+            # modules, not passed at call time. Call-time copies flow into the
+            # summation module's **kwargs (base.py:_generate_waveform ->
+            # create_waveform -> sum) and are silently discarded:
+            #   include_1PA_amps -> AmplitudeCirc1PAT1R(zero_PA_amps_only=...)
+            #   evolve_chi1      -> TrajectoryCirc1PAT1R(evolve_primary=...)
+            #   pad_output       -> SummationBase(pad_output=...)  (via sum_kwargs)
+            amplitude_kwargs = {
+                **cfg.amplitude_kwargs,
+                "zero_PA_amps_only": (not cfg.include_1PA_amps),
+            }
+            inspiral_kwargs = {
+                **cfg.inspiral_kwargs,
+                "evolve_primary": cfg.evolve_chi1,
+            }
             self._gen = GenerateEMRIWaveform(
-                'Waveform1PAT1R',
+                'Circ1PAT1R',
                 return_list=False,
-                inspiral_kwargs=cfg.inspiral_kwargs,
-                amplitude_kwargs=cfg.amplitude_kwargs,
+                inspiral_kwargs=inspiral_kwargs,
+                amplitude_kwargs=amplitude_kwargs,
+                sum_kwargs={"pad_output": True, **cfg.summation_kwargs},
                 frame='detector',
             )
             self._call = self._call_1pa
@@ -137,6 +153,7 @@ class EMRIWave(ParallelModuleBase):
                 return_list=False,
                 inspiral_kwargs=cfg.inspiral_kwargs,
                 amplitude_kwargs=cfg.amplitude_kwargs,
+                sum_kwargs={"pad_output": True, **cfg.summation_kwargs},
                 mode_selector_kwargs=mode_selector_kwargs or None,
                 frame="detector",
             )
@@ -148,6 +165,7 @@ class EMRIWave(ParallelModuleBase):
                 return_list=False,
                 inspiral_kwargs=cfg.inspiral_kwargs,
                 amplitude_kwargs=cfg.amplitude_kwargs,
+                sum_kwargs={"pad_output": True, **cfg.summation_kwargs},
                 frame='detector',
             )
             self._call = self._call_schwarzschild
@@ -158,6 +176,7 @@ class EMRIWave(ParallelModuleBase):
                 return_list=False,
                 inspiral_kwargs=cfg.inspiral_kwargs,
                 amplitude_kwargs=cfg.amplitude_kwargs,
+                sum_kwargs={"pad_output": True, **cfg.summation_kwargs},
                 frame='detector',
             )
             self._call = self._call_schwarzschild
@@ -170,17 +189,18 @@ class EMRIWave(ParallelModuleBase):
         return ["fastlisaresponse_" + b for b in cls.GPU_RECOMMENDED()]
 
     def _call_1pa(self, *params, **waveform_kwargs):
-        # chi2 lives at index 5 in PARAM_NAMES_1PA; FEW expects it as a keyword.
-        # Strip it from the positional vector and forward the 0PA-style params.
+        # chi2 lives at index 5 in PARAM_NAMES_1PA; FEW's GenerateEMRIWaveform
+        # requires it as a POSITIONAL extra argument (it checks len(add_args) == 1
+        # and raises if chi2 is supplied as a keyword). Strip it from the
+        # positional vector, forward the remaining 0PA-style params, then chi2.
+        # The include_1PA_amps / evolve_chi1 / pad_output toggles are wired into
+        # the module constructors in __init__, not passed here.
         chi2 = params[5]
         params_0pa = params[:5] + params[6:]
         return self._gen(
             *params_0pa,
-            chi2=chi2,
+            chi2,
             dt=self.cfg.dt, T=self.T_waveform,
-            zero_PA_amps_only=(not self.cfg.include_1PA_amps),
-            evolve_primary=self.cfg.evolve_chi1,
-            pad_output=True,
         )
 
     def _call_0pa(self, *params, **waveform_kwargs):
@@ -188,7 +208,6 @@ class EMRIWave(ParallelModuleBase):
             *params,
             T=self.T_waveform, dt=self.cfg.dt,
             mode_selection_threshold=self.cfg.mode_selection_threshold,
-            pad_output=True,
         )
     def _call_schwarzschild(self, *params, **waveform_kwargs):
         # exclude a from the list as it is not a parameter in this model
@@ -199,7 +218,6 @@ class EMRIWave(ParallelModuleBase):
             *params,
             T=self.T_waveform, dt=self.cfg.dt,
             # mode_selector_kwargs=self.cfg.mode_selection_threshold,
-            pad_output=True,
         )
 
     def __call__(self, *params, **waveform_kwargs):

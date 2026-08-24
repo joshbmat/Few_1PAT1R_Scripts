@@ -73,7 +73,12 @@ def _response_cfg(block: dict, orbit_file: str) -> ResponseConfig:
         is_ecliptic_latitude=bool(block.get("is_ecliptic_latitude", False)),
     )
 
+from few import git_version
 
+git_commit = git_version.short_id
+logger.info(f'This test run was done using FEW 1PAT1R version {git_commit}')
+
+    
 def _emri_vector(emri_block: dict, model: str) -> list[float]:
     z = float(emri_block.get("z", 0.0))
     names = param_names_for(model)

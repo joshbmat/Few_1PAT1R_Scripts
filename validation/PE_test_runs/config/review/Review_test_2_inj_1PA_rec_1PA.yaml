@@ -7,14 +7,14 @@ Data:
     /scratch/leuven/367/vsc36785/MojitoLight/SIM_data/brickmarket/mojito_light_v1_0_0/data/NOISE/L1/NOISE_731d_2.5s_L1_source0_0_20251206T220508924302Z.h5
 Injection:
   EMRI:
-    M: 4999500.0499950005
-    mu: 99.9900009999
+    M: 499950.0499950005
+    mu: 400.9900009999
     a: 0.0
     p0: 29.388286969253295
     e0: 0.0
     chi2: 0.9
     x_I0: 1.0
-    d_L: 0.00044259741415499115
+    d_L: 3.94259741415499115
     theta_S: 2.4314546363447995
     phi_S: 2.757554564287996
     theta_K: 2.6973649175810768

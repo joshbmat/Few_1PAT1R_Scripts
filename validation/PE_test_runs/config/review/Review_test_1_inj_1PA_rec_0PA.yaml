@@ -7,14 +7,14 @@ Data:
     /scratch/leuven/367/vsc36785/MojitoLight/SIM_data/brickmarket/mojito_light_v1_0_0/data/NOISE/L1/NOISE_731d_2.5s_L1_source0_0_20251206T220508924302Z.h5
 Injection:
   EMRI:
-    M: 499950.0499950005
-    mu: 400.9900009999
-    a: 0.0
-    p0: 29.388286969253295
+    M: 4975124.504066709
+    mu: 99.50249008133419
+    a: 0.000082
+    p0: 8.8123
     e0: 0.0
-    chi2: 0.9
+    chi2: 0.5
     x_I0: 1.0
-    d_L: 3.94259741415499115
+    d_L: 0.022213015032605164
     theta_S: 2.4314546363447995
     phi_S: 2.757554564287996
     theta_K: 2.6973649175810768
@@ -22,7 +22,7 @@ Injection:
     Phi_phi0: 0.5917337285168199
     Phi_theta0: 6.13001602516006
     Phi_r0: 4.782381792256834
-    z: 0.1
+    z: 0.004999974556005059
   Waveform:
     model: 1PAT1R
     evolve_chi1: true
@@ -47,9 +47,9 @@ Response:
   is_ecliptic_latitude: false
 Recovery:
   Waveform:
-    model: 1PAT1R
-    evolve_chi1: true
-    include_1PA_amps: true
+    model: 0PA_Kerr
+    evolve_chi1: false
+    include_1PA_amps: false
     dt: 5.0
     T: 2.0
     mode_selection_threshold: 0.0
@@ -61,7 +61,7 @@ Recovery:
     amplitude_kwargs: {}
     lmax: 5
 Sampler:
-  name: Review_test_2_inj_1PA_rec_1PA
+  name: Review_test_1_inj_1PA_rec_1PA
   windowing: true
   filter_freq: true
   num_samples: 10000
@@ -69,13 +69,13 @@ Sampler:
   use_gpu: true
   n_temps: 1
   n_walkers: 70
-  d: 50
+  d: 10
   continue_run: false
   sampling_data_path: ./sampling_data
+  # resume_backend: /data/leuven/367/vsc36785/LISA/Few_1PAT1R_Scripts/validation/PE_test_runs/scripts/sampling_data/Review_test_1_inj_1PA_rec_1PA_2026-07-16_04-18-44/SamplingResults_Review_test_1_inj_1PA_rec_1PA_fixedx_I0_1.0_e0_0.0_Phi_theta0_6.13001602516006_Phi_r0_4.782381792256834_2026-07-16_04-18-44.h5
   plots_path: ./Plots
   fixed_params:
     - x_I0
     - e0
-    - a
     - Phi_theta0
     - Phi_r0

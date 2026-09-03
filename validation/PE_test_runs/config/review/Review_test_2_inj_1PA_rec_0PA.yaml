@@ -47,9 +47,9 @@ Response:
   is_ecliptic_latitude: false
 Recovery:
   Waveform:
-    model: 1PAT1R
-    evolve_chi1: true
-    include_1PA_amps: true
+    model: 0PA_Kerr
+    evolve_chi1: false
+    include_1PA_amps: false
     dt: 5.0
     T: 2.0
     mode_selection_threshold: 0.0

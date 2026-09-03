@@ -211,10 +211,16 @@ def recovered_snr(
 
     # Full vector: start from the truth (this fills x_I0 and every fixed
     # parameter at its injected value) and overwrite the sampled entries.
+    inj_truth = _emri_vector(cfg["Injection"]["EMRI"], inj_wcfg.model)
     rec_truth = _emri_vector(cfg["Injection"]["EMRI"], rec_wcfg.model)
     full_params = list(rec_truth)
     for k, i in enumerate(idx_sampled):
         full_params[i] = float(params_sampled[k])
+        
+    # do the same for the injection parameters
+    full_params_inj = list(inj_truth)
+    for k, i in enumerate(idx_sampled):
+        full_params_inj[i] = float(params_sampled[k])
 
     # Timing, exactly as in the PE run
     with MojitoL1File(cfg["Data"]["mojito_l1_file"]) as l1:
@@ -231,10 +237,12 @@ def recovered_snr(
     t_init = t0_l1 - resp_cfg.n_samples_delay * mojito_dt - resp_cfg.offset
 
     # Recovery response, evaluated at the ML point and at the truth
+    inj_response = build_response(inj_wcfg, resp_cfg, t_init, t0_orbits,
+                                  T_response, use_gpu=use_gpu)
     rec_response = build_response(rec_wcfg, resp_cfg, t_init, t0_orbits,
                                   T_response, use_gpu=use_gpu)
     xyz_ml = rec_response(*full_params)
-    xyz_true = rec_response(*rec_truth)
+    xyz_true = inj_response(*full_params_inj)
     N_t = xyz_ml.shape[1]
 
     # Window: Tukey over the non-zero extent of the signal, zero beyond it

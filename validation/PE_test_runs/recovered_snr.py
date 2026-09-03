@@ -133,7 +133,7 @@ def recovered_snr(
     discard: int = 0,
     temp: int = 0,
     params_ml: Optional[Sequence[float]] = None,
-    window_source: str = "template",
+    window_source: str = "injection",
     use_gpu: bool = True,
 ) -> Dict[str, object]:
     """
@@ -149,10 +149,9 @@ def recovered_snr(
     params_ml     : optional explicit sampled-parameter vector; when given the
                     chain is not read at all (`h5_path` may then be omitted)
     window_source : how the Tukey window entering the FFT is built --
+                    'injection' : from the non-zero extent of the injection,
+                                  exactly as in the PE run (default)
                     'template'  : from the non-zero extent of the ML template itself
-                                  (recovery settings only, no injection needed)
-                    'injection' : rebuild the injection response and use its
-                                  non-zero extent, exactly as in the PE run
                     'none'      : flat window
     use_gpu       : passed through to `build_response`
 
@@ -161,11 +160,13 @@ def recovered_snr(
     dict with keys
         snr           : float, sqrt(<h_ML|h_ML>)
         params_ml     : full recovery parameter vector (fixed params at true values)
+        params_true   : injected (true) parameter vector in the recovery layout
         params_sampled: the sampled subset that was read from the chain
         param_names   : full recovery parameter names
         sampled_names : names of the sampled subset
         log_like_max  : log-likelihood reported by the sampler at that point (or None)
-        snr_true      : SNR of the recovery model at the true parameters
+        snr_true      : optimal SNR of the injected data (injection model at
+                        its true parameters)
         n_samples     : number of time samples in the TDI series
     """
     if window_source not in ("template", "injection", "none"):
@@ -217,10 +218,12 @@ def recovered_snr(
     for k, i in enumerate(idx_sampled):
         full_params[i] = float(params_sampled[k])
         
-    # do the same for the injection parameters
+    # The injection is evaluated at the truth only -- no sampled entries are
+    # substituted here.  `idx_sampled` indexes the *recovery* layout, which in
+    # general differs from the injection layout (1PAT1R carries chi2 at index
+    # 5, 0PA does not), and `snr_true` is meant to characterise the data, not
+    # the chain.
     full_params_inj = list(inj_truth)
-    for k, i in enumerate(idx_sampled):
-        full_params_inj[i] = float(params_sampled[k])
 
     # Timing, exactly as in the PE run
     with MojitoL1File(cfg["Data"]["mojito_l1_file"]) as l1:
@@ -245,13 +248,10 @@ def recovered_snr(
     xyz_true = inj_response(*full_params_inj)
     N_t = xyz_ml.shape[1]
 
-    # Window: Tukey over the non-zero extent of the signal, zero beyond it
-    if window_source == "injection":
-        inj_response = build_response(inj_wcfg, resp_cfg, t_init, t0_orbits,
-                                      T_response, use_gpu=use_gpu)
-        xyz_win_src = inj_response(*_emri_vector(cfg["Injection"]["EMRI"], inj_wcfg.model))
-    else:
-        xyz_win_src = xyz_ml
+    # Window: Tukey over the non-zero extent of the signal, zero beyond it.
+    # PE_response.py builds it from the injection, so 'injection' reproduces
+    # the likelihood exactly and keeps the result independent of the chain.
+    xyz_win_src = xyz_true if window_source == "injection" else xyz_ml
 
     if bool(cfg["Sampler"]["windowing"]) and window_source != "none":
         nonzero = cp.where(cp.any(xyz_win_src != 0.0, axis=0))[0]
@@ -280,6 +280,7 @@ def recovered_snr(
         snr=snr,
         snr_true=snr_true,
         params_ml=np.array(full_params),
+        params_true=np.array(rec_truth),
         params_sampled=params_sampled,
         param_names=param_names,
         sampled_names=sampled_names,
@@ -296,18 +297,19 @@ if __name__ == "__main__":
     parser.add_argument("run_dir", type=str, help="Sampling run directory.")
     parser.add_argument("--discard", type=int, default=0, help="Burn-in iterations.")
     parser.add_argument("--temp", type=int, default=0, help="Temperature index.")
-    parser.add_argument("--window-source", type=str, default="template",
-                        choices=["template", "injection", "none"])
+    parser.add_argument("--window-source", type=str, default="injection",
+                        choices=["injection", "template", "none"])
     args = parser.parse_args()
 
     res = recovered_snr(run_dir=args.run_dir, discard=args.discard, temp=args.temp,
                         window_source=args.window_source)
 
     print("Max-likelihood parameters (fixed params at true values):")
-    for name, val in zip(res["param_names"], res["params_ml"]):
+    print(f"  {'parameter':<12} {'recovered':>16} {'injected':>16}")
+    for name, val, true_val in zip(res["param_names"], res["params_ml"], res["params_true"]):
         tag = "" if name in res["sampled_names"] else "   (fixed)"
-        print(f"  {name:<12} {val:>16.8g}{tag}")
+        print(f"  {name:<12} {val:>16.8g} {true_val:>16.8g}{tag}")
     if res["log_like_max"] is not None:
         print(f"\nloglike at ML point (sampler) : {res['log_like_max']:.6e}")
-    print(f"SNR at true parameters        : {res['snr_true']:.2f}")
+    print(f"Injected SNR (true parameters): {res['snr_true']:.2f}")
     print(f"Recovered SNR (ML template)   : {res['snr']:.2f}")

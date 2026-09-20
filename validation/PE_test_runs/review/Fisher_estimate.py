@@ -1,82 +1,41 @@
 #!/usr/bin/env python
-# coding: utf-8
+"""
+Fisher estimates for the review test cases, to compare against the PE run posteriors.
 
-# ## Fisher estimates for review test cases
-# 
-# Goal: estimate Fisher information contained in the review test cases, to compare against PE run estimates.
-# 
-# Problem: installing the `stableemrifisher` package inside the PE search environment probably breaks this environment, which is not ideal as it was a pain to set up. First test notebook here with the pre-compiled binaries of the packages instead of the source-builds of specific commit messages.
+Run with the ``few-1PAT1R`` kernel/environment: FEW dev install, ``fastlisaresponse`` 1.1.17,
+``lisatools`` 1.2.8 and an editable ``stableemrifisher``.  That combination needs
+``fastlisaresponse/.dylibs/libstdc++.6.dylib`` and ``libgcc_s.1.1.dylib`` symlinked to the
+``lisatools`` copies, otherwise loading both C++ backends in one process aborts the interpreter;
+a ``pip install --force-reinstall fastlisaresponse`` undoes that and the abort comes back.
 
-# ### Environment
-# 
-# Run this with the **`few-1PAT1R`** kernel. Relevant versions there:
-# 
-# | package | version |
-# |---|---|
-# | `fastemriwaveforms` | dev install from `FEW/1PAT1R/FEW-dev` |
-# | `fastlisaresponse` | 1.1.17 (pre-compiled wheel) |
-# | `lisaanalysistools` | 1.2.8 (pre-compiled wheel) |
-# | `stableemrifisher` | editable from `Projects/StableEMRIFisher` |
-# 
-# `fastlisaresponse` 1.1.17 is **not** the API used by `validation/PE_test_runs/src/waveform_updated.py`.
-# Differences that matter here:
-# 
-# * `ResponseWrapper` takes `force_backend=("cpu"|"cuda11x"|"cuda12x")`, **not** `use_gpu=`.
-#   Passing `use_gpu=` lands in `**kwargs` and is forwarded to `pyResponseTDI`, which rejects it.
-# * `orbits=` must be an *instance* of `lisatools.detector.Orbits` (the signature's default is the
-#   *class* `EqualArmlengthOrbits`, which would fail its own `isinstance` assert).
-# * There is no `t_buffer` argument; `t0` is simply the garbage-removal buffer in seconds.
-# * `__call__` returns a **list** of TDI channels.
-# 
-# Three fixes were needed to get this combination running; all of them are already applied:
-# 
-# 1. **Duplicate `libstdc++` abort.** The `fastlisaresponse` and `lisatools` wheels each vendor their
-#    own copy of `libstdc++.6.dylib` (and `libgcc_s.1.1.dylib`) under `<pkg>/.dylibs/`. Loading both
-#    C++ backends in one process makes dyld map two copies of the GNU C++ runtime and the process
-#    dies with `Fatal Python error: Aborted` — in *either* import order. Fixed by pointing
-#    `fastlisaresponse/.dylibs/*` at the `lisatools` copies:
-# 
-#    ```bash
-#    SP=$(python -c "import site; print(site.getsitepackages()[0])")
-#    cd $SP/fastlisaresponse/.dylibs
-#    ln -sf ../../lisatools/.dylibs/libstdc++.6.dylib  libstdc++.6.dylib
-#    ln -sf ../../lisatools/.dylibs/libgcc_s.1.1.dylib libgcc_s.1.1.dylib
-#    ```
-# 
-#    **A `pip install --force-reinstall fastlisaresponse` will undo this and the abort comes back.**
-# 
-# 2. `stableemrifisher.noise` imported `lisatools` at module import time, so `import stableemrifisher`
-#    died in any environment without it. The import is now deferred into `write_psd_file`.
-# 
-# 3. `stableemrifisher.fisher` built its default PSD path as `os.getcwd() + PSD_filename` (no
-#    separator), dropping the file in the *parent* directory under a mangled name. Now `os.path.join`.
-# 
-# The cell below asserts fix 1 is in place before anything else is imported.
+``fastlisaresponse`` 1.1.17 is an older API than the one ``src/waveform.py`` targets: it takes
+``force_backend=`` rather than ``use_gpu=``, ``orbits=`` must be an *instance*, there is no
+``t_buffer`` argument (``t0`` is itself the garbage buffer, in seconds), and ``__call__`` returns
+a list of TDI channels.  ``response_kwargs`` below translates the PE response settings into it.
+"""
 
-# In[1]:
-
-
+import inspect
 import os
-import site
-
-
-# In[ ]:
-
-# In[2]:
-
-
 import warnings
 from pathlib import Path
 
+import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
+from scipy.ndimage import binary_dilation, median_filter
+from scipy.signal.windows import tukey
 
 from lisaconstants import ASTRONOMICAL_YEAR
 from few.utils.constants import YRSID_SI
 from few.waveform import Circ1PAT1R, GenerateEMRIWaveform
 from fastlisaresponse import ResponseWrapper
-from lisatools.detector import EqualArmlengthOrbits, ESAOrbits, Orbits
+
+try:                                       # newer fastlisaresponse; 1.1.17 takes the raw string
+    from fastlisaresponse.tdiconfig import TDIConfig
+except ImportError:
+    TDIConfig = None
+from lisatools.detector import ESAOrbits, Orbits
 
 from stableemrifisher.fisher import StableEMRIFisher
 
@@ -100,36 +59,9 @@ else:
 
 xp = cp if USE_GPU else np
 
-print("fastlisaresponse", fastlisaresponse.__version__)
-print("lisatools       ", lisatools.__version__)
-print("backend         ", FORCE_BACKEND)
-
 CONFIG_DIR = Path("../config/review").resolve()
 OUT_DIR = Path("fisher_out").resolve()
 OUT_DIR.mkdir(exist_ok=True)
-print("configs:", CONFIG_DIR)
-
-
-# ### Review test-case parameters
-# 
-# Copied from `validation/PE_test_runs/config/review/Review_test_{1,2,3}_inj_1PA_rec_1PA.yaml`.
-# 
-# Two things are *not* verbatim copies of the YAML and are worth being explicit about:
-# 
-# * **Masses are redshifted.** `PE_response_updated.py::_emri_vector` multiplies `M` and `mu` by
-#   `(1 + z)` before handing them to FEW, so the YAML holds source-frame masses and the waveform sees
-#   detector-frame ones. The dicts below store the **detector-frame** values, i.e. what the sampler
-#   actually conditions on. `d_L` is passed through unchanged (Gpc).
-# * **Names are translated** to the `stableemrifisher` convention
-#   (`M -> m1`, `mu -> m2`, `d_L -> dist`, `theta_S -> qS`, `phi_S -> phiS`, `theta_K -> qK`,
-#   `phi_K -> phiK`), and the dict is ordered exactly as `GenerateEMRIWaveform` expects positionally.
-#   `chi2` is *not* in the dict: FEW takes it as a trailing positional extra, which is what
-#   `StableEMRIFisher`'s `add_param_args` produces.
-# 
-# `fisher_params` is the set of parameters the corresponding PE run actually samples: the full 1PA
-# vector minus the YAML's `fixed_params`, minus `x_I0` (always held at 1.0).
-
-# In[10]:
 
 
 # Injection parameters for the three review test cases, in stableemrifisher naming and
@@ -230,17 +162,6 @@ def fisher_params(case):
     return [SEF_NAME[n] for n in PARAM_NAMES_1PA if n not in fixed]
 
 
-for i, c in REVIEW_CASES.items():
-    print(f"case {i}: {len(fisher_params(c)):2d} params  {fisher_params(c)}")
-
-
-# #### Cross-check against the YAML files
-# 
-# Guards against the hard-coded dicts above drifting away from the configs.
-
-# In[11]:
-
-
 def check_against_yaml(case):
     cfg = yaml.safe_load((CONFIG_DIR / case["config"]).read_text())
     emri = cfg["Injection"]["EMRI"]
@@ -269,48 +190,6 @@ def check_against_yaml(case):
     return True
 
 
-for i, c in REVIEW_CASES.items():
-    check_against_yaml(c)
-    print(f"case {i}: matches {c['config']}")
-
-
-# ### Response configuration
-# 
-# This mirrors `validation/PE_test_runs/src/waveform_updated.py::build_response` and the timing block
-# of `PE_response_updated.py`, so the Fisher sees the same response the PE runs do:
-# 
-# * orbits from the `Data.orbit_file` of the review configs (`Orbits(filename=...)`),
-# * `T_response = T + (2 * offset + 2 * n_samples_delay * dt) / ASTRONOMICAL_YEAR`,
-# * `t0 = t_init = t0_L1 - n_samples_delay * dt_mojito - offset`, with `t0_L1` read from the
-#   Mojito L1 file,
-# * `order = 40`, `tdi = "2nd generation"`, `flip_hx = True`, `is_ecliptic_latitude = False`,
-#   `remove_sky_coords = False`, `remove_garbage = False`,
-# * the Tukey window and in-band frequency mask the sampler applies (`windowing`, `filter_freq`).
-# 
-# The orbit file and the Mojito L1 file only exist on the cluster. Off the GPU node the notebook
-# falls back to the `lisatools` bundled `ESAOrbits` and to a plain garbage buffer for `t0`, and says
-# so loudly. Everything else is identical either way.
-# 
-# **One deliberate departure from the PE configuration**, forced by what a Fisher matrix can
-# represent: **the channels**. The PE likelihood uses `XYZ` with the full 3x3 Mojito noise covariance
-# (`src/noise.py::build_inv_covariance`). `StableEMRIFisher`'s inner product is per channel with a
-# diagonal PSD, and X, Y and Z are strongly correlated, so `XYZ` here would badly misestimate the
-# information. `AE` (or `AET`) is noise-orthogonal to a good approximation, which is what the diagonal
-# form assumes. `TDI_CHAN` is set to `"AE"`; pass `tdi_chan="XYZ"` only together with your own
-# `noise_model`.
-# 
-# The noise *itself* is still the measured Mojito estimate, rotated into AET -- see the next section.
-# 
-# `ResponseWrapper` is also handed a padded waveform generator. `fastlisaresponse` and FEW carry
-# values of the sidereal year that differ in the last two digits
-# (`31558149.763545603` vs `...595`), so `int(T * YRSID / dt)` can disagree by a sample and the
-# response then gets a waveform one point short. `src/waveform_updated.py` solves this with
-# `EMRIWave.min_output_length`; `PaddedEMRIWaveform` below is the same fix in a form
-# `StableEMRIFisher` can instantiate itself.
-
-# In[12]:
-
-
 # ---- Data block, identical across the three review configs ----------------------------------
 DATA = {
     "orbit_file": "/data/leuven/367/vsc36785/LISA/Mojito_analysis/"
@@ -333,7 +212,7 @@ RESPONSE = {
     "t_buffer": 10000.0,
     "flip_hx": True,
     "is_ecliptic_latitude": False,
-    # ResponseConfig defaults in src/waveform_updated.py; not set in the YAML
+    # ResponseConfig defaults in src/waveform.py; not set in the YAML
     "remove_sky_coords": False,
     "remove_garbage": False,
 }
@@ -341,17 +220,38 @@ RESPONSE = {
 # ---- Sampler block ---------------------------------------------------------------------------
 WINDOWING = True            # Sampler.windowing
 FILTER_FREQ = True          # Sampler.filter_freq
-TUKEY_ALPHA = 0.01          # PE_response_updated.py
+TUKEY_ALPHA = 0.01          # PE_response.py
 F_MIN = 1e-5                # src/utils.py::inband_freqs default
 
 # ---- Fisher-specific choices -----------------------------------------------------------------
 TDI_CHAN = "AE"             # not XYZ: see the note above
-T0_FALLBACK = 10_000.0      # used for t0 when the Mojito L1 file is unreachable
+
+# fastlisaresponse 1.1.17 has no absolute start epoch and lisatools 1.2.6 no orbit t0, so the
+# constellation phase of the PE runs cannot be reproduced here; warned about once, in build_sef.
+_ORBITS_SUPPORTS_T0 = "t0" in inspect.signature(Orbits.__init__).parameters
+_EPOCH_WARNED = False
+
+
+def _warn_epoch_once():
+    """Warn once that the response epoch cannot be matched to the PE runs in this API."""
+    global _EPOCH_WARNED
+    if _EPOCH_WARNED:
+        return
+    _EPOCH_WARNED = True
+    warnings.warn(
+        "fastlisaresponse 1.1.17 has no absolute start epoch (its `t0` is the garbage buffer) "
+        f"and this lisatools Orbits {'has' if _ORBITS_SUPPORTS_T0 else 'has no'} `t0`. The PE "
+        "runs place the constellation with t_init (Mojito L1) and t0_orbits (esa-trailing "
+        "t_start + 10 s); here the orbits start at their own file epoch. The antenna pattern, "
+        "and so the SNR, differ from the PE runs by the constellation phase; the parameter "
+        "correlations the Fisher matrix measures are not structurally affected.",
+        stacklevel=3,
+    )
 
 
 def mojito_timing(l1_file=None):
     """
-    (t0_L1, dt_mojito, central_freq) from the Mojito L1 file, as PE_response_updated.py reads them.
+    (t0_L1, dt_mojito, central_freq) from the Mojito L1 file, as PE_response.py reads them.
 
     Returns None when `mojito` is not installed or the file is not reachable, which is the normal
     situation anywhere other than the cluster.
@@ -370,100 +270,58 @@ def mojito_timing(l1_file=None):
 
 def response_timing(T=T_OBS, dt=DT, resp=RESPONSE, verbose=True):
     """
-    (T_response, t_init) exactly as PE_response_updated.py derives them.
+    (T_response, t0) for ResponseWrapper, translated from the PE response settings.
 
-    T_response pads the requested observation time by the response buffer on both ends;
-    t_init walks the L1 epoch back through the delay buffer and the offset.
+    T_response is what PE_response.py derives: the requested observation time padded by the
+    response buffer on both ends.
+
+    t0 is the *garbage buffer*, and is deliberately not the PE runs' `t_init`.
+    src/waveform.py targets a fastlisaresponse whose ResponseWrapper takes an absolute start
+    epoch (`t0=t_init`) next to a separate `t_buffer`.  1.1.17 has no `t_buffer`, and there `t0`
+    *is* the buffer: `pyResponseTDI.get_projections` turns it straight into
+    `tdi_start_ind = int(t0 / dt)`.  The value matching the PE configuration is therefore
+    `resp["t_buffer"]`; passing `t_init` would set a buffer of order the mission epoch and index
+    the TDI arrays far outside their length.  The epoch itself has no equivalent here --
+    see `_warn_epoch_once`.
     """
     T_response = T + (2 * resp["offset"] + 2 * resp["n_samples_delay"] * dt) / ASTRONOMICAL_YEAR
+    t0 = float(resp["t_buffer"])
 
-    timing = mojito_timing()
-    if timing is None:
-        if verbose:
-            warnings.warn(
-                f"Mojito L1 file unreachable -> using t0 = {T0_FALLBACK} s instead of the "
-                "L1-derived t_init. The response epoch, and therefore the antenna pattern, will "
-                "not match the PE runs. Expected off the GPU node.",
-                stacklevel=2,
-            )
-        return T_response, T0_FALLBACK
-
-    t0_l1, mojito_dt, _ = timing
-    t0_l0 = t0_l1 - resp["n_samples_delay"] * mojito_dt
-    t_init = t0_l0 - resp["offset"]
     if verbose:
-        print(f"  Mojito L1: t0 = {t0_l1}, dt = {mojito_dt} -> t_init = {t_init}")
-    return T_response, t_init
+        timing = mojito_timing()
+        if timing is not None:
+            t0_l1, mojito_dt, _ = timing
+            t_init = t0_l1 - resp["n_samples_delay"] * mojito_dt - resp["offset"]
+            print(f"  Mojito L1: t0 = {t0_l1}, dt = {mojito_dt} -> PE t_init = {t_init} "
+                  f"(not usable as an epoch in fastlisaresponse {fastlisaresponse.__version__})")
+    return T_response, t0
 
 
-def build_orbits(orbit_file=None, verbose=True):
-    """Orbits from the config's orbit file, falling back to the bundled ESA trailing orbits."""
+def build_orbits(orbit_file=None, t0_orbits=None, verbose=True):
+    """
+    Orbits from the config's orbit file, falling back to the bundled ESA trailing orbits.
+
+    src/waveform.py pins the orbit epoch with `Orbits(..., t0=t0_orbits)`, t0_orbits being
+    `OEMOrbits.from_included("esa-trailing").t_start + 10 s`.  That argument only exists in the
+    newer lisatools; where it does not, it would be swallowed by **kwargs and silently ignored,
+    so it is passed only when the installed signature accepts it.  `use_gpu=`, also passed in
+    src/waveform.py, is covered here by `force_backend`.
+    """
     orbit_file = orbit_file or DATA["orbit_file"]
+    epoch = {"t0": t0_orbits} if (_ORBITS_SUPPORTS_T0 and t0_orbits is not None) else {}
     if os.path.exists(orbit_file):
         if verbose:
             print(f"  orbits: {orbit_file}")
         return Orbits(filename=orbit_file, force_backend=FORCE_BACKEND,
-                      linear_interp_setup=False)
+                      linear_interp_setup=False, **epoch)
     if verbose:
         warnings.warn(
             f"Orbit file not found ({orbit_file}) -> falling back to the lisatools bundled "
             "ESAOrbits. Expected off the GPU node.",
             stacklevel=2,
         )
-    return ESAOrbits(force_backend=FORCE_BACKEND)
+    return ESAOrbits(force_backend=FORCE_BACKEND, **epoch)
 
-
-# #### Noise: measured Mojito PSDs
-# 
-# The PE likelihood uses the measured Mojito noise, so the Fisher should too. The noise file stores a
-# 3x3 XYZ covariance (`noise_estimates/XYZ`, averaged over time bins and divided by the laser
-# frequency squared, exactly as `src/noise.py::load_mojito_xyz_covariance` reads it). Rotating that
-# covariance with the orthonormal XYZ -> AET transform and taking the diagonal gives the A, E and T
-# PSDs, which is what `StableEMRIFisher`'s per-channel inner product wants. If the file exposes an
-# `AE`/`AET` estimate directly, `mojito_aet_psd` picks that up instead and skips the rotation;
-# `inspect_noise_file` prints the tree so you can check which route applies.
-# 
-# The rotation is the point of doing this in AET rather than XYZ: the XYZ covariance has large
-# off-diagonal terms which a diagonal weighting would simply throw away, whereas in AET what is
-# discarded is only the residual off-diagonal left by unequal arms.
-# 
-# **Dead frequencies.** The measured estimate has bins where it collapses towards zero (and some
-# non-finite entries) -- the TDI transfer-function nulls sit inside the analysis band, and the
-# estimator drops out here and there. A Fisher matrix weights by `1/S`, so those bins would each
-# contribute enormous spurious information. `smooth_psd` handles this in log-log space:
-# 
-# 1. a running median over the log-spaced frequency grid gives a baseline. A median is unbiased on
-#    monotonic data, so it tracks the real spectral shape instead of flattening it, and it ignores
-#    isolated dropouts;
-# 2. bins more than `drop_tol` decades below, or `spike_tol` above, that baseline are flagged. The
-#    baseline is then recomputed with the flagged bins excluded, and the whole thing iterates to a
-#    fixed point. Before each re-interpolation the flagged mask is dilated by `reach` bins, so the
-#    interpolation anchors sit *outside* a dropout rather than on its not-yet-flagged interior --
-#    without that the mask never grows and contiguous dead blocks survive untouched;
-# 3. a local median cannot see a dead block wider than its own window, so if the result still has a
-#    notch the fit is retried once at `3 * width`, and kept only if it does better;
-# 4. whatever is left is floored at `floor_decades` below a wide running median, which bounds `1/S`;
-# 5. `mode="full"` returns the smooth baseline everywhere, `mode="repair"` keeps the measured value
-#    wherever it was not flagged;
-# 6. a running median estimates the *median* of a chi-squared-like PSD estimate, which sits below its
-#    mean, so the baseline is rescaled by the mean ratio over the trusted bins (`debias`).
-# 
-# A dead region wide enough to defeat all of that cannot be repaired honestly, only papered over, so
-# it is reported instead: any remaining bin-to-bin jump larger than `step_tol` decades raises a
-# warning naming the frequencies. Interpolating across a hole that wide is a decision for you, not
-# for this function.
-# 
-# The offline test two cells down checks this against a synthetic PSD of known truth, with 3%
-# scattered dead bins, a contiguous dead block, NaNs and an upward spike. Dead blocks up to about
-# three times `width` are repaired to a median accuracy of ~4% with the worst `1/S` overestimate held
-# near 1.25, against 1.6e6 unrepaired; a clean PSD passes through with a maximum error of 0.1% and
-# nothing flagged.
-
-# In[13]:
-
-
-import h5py
-from scipy.ndimage import binary_dilation, median_filter
 
 # XYZ -> AET orthonormal transform, as in src/noise.py.
 _TO_AET = np.array([
@@ -567,9 +425,6 @@ def load_mojito_aet_raw(noise_file=None, central_freq=None, verbose=True):
             stacklevel=2,
         )
     return freqs, psd
-
-
-# In[14]:
 
 
 def _repair_pass(log_filled, good, width, drop_tol, spike_tol, max_passes, reach):
@@ -756,15 +611,6 @@ def noise_for(tdi_chan, verbose=True):
     return psd, [{"channel": c} for c in tdi_chan], list(tdi_chan)
 
 
-# ##### Offline check of the smoothing
-# 
-# Runs against a synthetic PSD with known truth, so it works without the cluster files. It injects
-# the pathologies the repair is meant to survive: scattered dead bins, a contiguous dead block, NaNs,
-# and an upward spike.
-
-# In[15]:
-
-
 def _test_smooth_psd(seed=0, blocks=(0, 5, 15, 31, 61), plot=True):
     """
     Check the repair against a synthetic PSD of known truth.
@@ -839,12 +685,6 @@ def _test_smooth_psd(seed=0, blocks=(0, 5, 15, 31, 61), plot=True):
     return results
 
 
-_test_smooth_psd();
-
-
-# In[16]:
-
-
 def plot_mojito_psd(channels=None, f_min=F_MIN, f_max=None):
     """Raw vs smoothed measured PSD, with the analytic scirdv1 curve for reference."""
     channels = channels or TDI_CHAN
@@ -867,15 +707,6 @@ def plot_mojito_psd(channels=None, f_min=F_MIN, f_max=None):
     return fig
 
 
-# In[17]:
-
-
-plot_mojito_psd()
-
-
-# In[18]:
-
-
 class PaddedEMRIWaveform(GenerateEMRIWaveform):
     """
     GenerateEMRIWaveform that zero-pads its output up to `min_output_length`.
@@ -883,7 +714,7 @@ class PaddedEMRIWaveform(GenerateEMRIWaveform):
     fastlisaresponse sizes its buffers with its own value of the sidereal year, which differs from
     FEW's in the last two digits, so `int(T * YRSID / dt)` can come out one sample short of what
     pyResponseTDI expects.  Same fix as `EMRIWave.min_output_length` in
-    `src/waveform_updated.py`, but as a GenerateEMRIWaveform subclass so that StableEMRIFisher can
+    `src/waveform.py`, but as a GenerateEMRIWaveform subclass so that StableEMRIFisher can
     construct it itself.  `attach_padding` sets the length once the response exists.
     """
 
@@ -951,18 +782,23 @@ def plunge_trimmed_T(case, T=T_OBS, dt=DT, trim_hours=6.0, _gen_cache={}):
 
 def response_kwargs(T, dt=DT, tdi_chan=None, orbits=None, verbose=True):
     """
-    ResponseWrapper kwargs matching src/waveform_updated.py::build_response.
+    ResponseWrapper kwargs matching src/waveform.py::build_response.
 
-    Note the fastlisaresponse 1.1.17 spellings: `force_backend` rather than `use_gpu`, and `orbits`
-    as an instance (the signature default is the *class*, which fails its own isinstance assert).
+    Note the fastlisaresponse 1.1.17 spellings: `force_backend` rather than `use_gpu`, `orbits`
+    as an instance (the signature default is the *class*, which fails its own isinstance assert),
+    and `t0` as the garbage buffer with no `t_buffer` beside it (see `response_timing`).
+
+    `index_beta`/`index_lambda` are 7/8 rather than the 8/9 of src/waveform.py because the
+    parameter vector differs: the PE runs carry chi2 at index 5 (PARAM_NAMES_1PA), whereas
+    StableEMRIFisher appends it after Phi_r0, so theta_S/phi_S each sit one slot earlier here.
     """
-    T_response, t_init = response_timing(T, dt, verbose=verbose)
+    T_response, t0 = response_timing(T, dt, verbose=verbose)
     return dict(
         Tobs=T_response,
         dt=dt,
-        index_lambda=8,        # phiS in the 1PA vector (chi2 is appended after Phi_r0)
+        index_lambda=8,        # phiS; chi2 is appended after Phi_r0, not at index 5
         index_beta=7,          # qS
-        t0=t_init,
+        t0=t0,
         flip_hx=RESPONSE["flip_hx"],
         is_ecliptic_latitude=RESPONSE["is_ecliptic_latitude"],
         remove_sky_coords=RESPONSE["remove_sky_coords"],
@@ -970,7 +806,7 @@ def response_kwargs(T, dt=DT, tdi_chan=None, orbits=None, verbose=True):
         force_backend=FORCE_BACKEND,
         orbits=orbits if orbits is not None else build_orbits(verbose=verbose),
         order=RESPONSE["order"],
-        tdi=RESPONSE["tdi_gen"],
+        tdi=TDIConfig(RESPONSE["tdi_gen"]) if TDIConfig is not None else RESPONSE["tdi_gen"],
         tdi_chan=tdi_chan or TDI_CHAN,
     )
 
@@ -993,6 +829,7 @@ def build_sef(case, T=None, dt=DT, tdi_chan=None, orbits=None,
     if noise_model is None:
         noise_model, noise_kwargs, channels = noise_for(tdi_chan, verbose=verbose)
 
+    _warn_epoch_once()
     rw_kwargs = response_kwargs(T, dt, tdi_chan, orbits, verbose=verbose)
 
     sef = StableEMRIFisher(
@@ -1026,25 +863,9 @@ def build_sef(case, T=None, dt=DT, tdi_chan=None, orbits=None,
     return sef, T
 
 
-# #### Window and frequency mask
-# 
-# `PE_response_updated.py` windows with a Tukey of `alpha = 0.01` that spans only the non-zero part
-# of the response output, so that the zero padding past the plunge is left flat, then restricts the
-# inner product to `f > 1e-5 Hz`. `StableEMRIFisher.__call__` takes `window` and `fmin`/`fmax`
-# directly, so the same treatment carries over.
-# 
-# Building the window costs one response evaluation, which is also a useful check that the response
-# is producing something sane before the derivatives start.
-
-# In[19]:
-
-
-from scipy.signal.windows import tukey
-
-
 def build_window(sef, case, T, dt=DT, alpha=TUKEY_ALPHA, windowing=WINDOWING, verbose=True):
     """
-    Tukey window over the non-zero extent of the response output, as in PE_response_updated.py.
+    Tukey window over the non-zero extent of the response output, as in PE_response.py.
 
     Returns (window, n_samples, peak_amplitude); `window` is None when windowing is off.
     """
@@ -1067,20 +888,6 @@ def build_window(sef, case, T, dt=DT, alpha=TUKEY_ALPHA, windowing=WINDOWING, ve
     return window, n_t, peak
 
 
-# #### Finite-difference step ranges
-# 
-# `Fisher_Stability` falls back to `geomspace(1e-4 * value, 1e-9 * value)` for the intrinsic
-# parameters, which misbehaves for the two parameters that sit near a boundary here:
-# 
-# * `a` is `8.2e-5` (case 1) or exactly `0.0` (cases 2, 3), so a value-scaled grid is either far too
-#   small or undefined. A fixed absolute grid is used instead.
-# * `chi2` would get steps up to `0.1 * chi2`, pushing `chi2 = 0.998` (case 3) above 1. The grid is
-#   capped at `1e-2` and `chi2` is registered in `sef.minmax` so that values near the edge switch to
-#   one-sided differences automatically.
-
-# In[20]:
-
-
 def delta_ranges(Ndelta=8):
     return dict(
         a=np.geomspace(1e-4, 1e-9, Ndelta),        # absolute: a is ~0 in all three cases
@@ -1091,26 +898,6 @@ def delta_ranges(Ndelta=8):
 # Bounds used by Fisher_Stability to pick central/forward/backward differences.
 # a is already there ([0.05, 0.95]); chi2 lives on [-1, 1] and needs the same treatment.
 CHI2_MINMAX = [-0.95, 0.95]
-
-
-# ### SNR check
-# 
-# Cheap sanity pass before committing to the derivatives: build the response once per case and read
-# off the optimal SNR. Compare against the SNRs quoted for the PE runs.
-# 
-# Reference values measured locally, i.e. with the *fallback* orbits and `t0` (`AE`, TDI2, bundled
-# `ESAOrbits`, `scirdv1` without confusion foreground, no window). On the GPU node, with the config
-# orbit file and the L1-derived epoch, expect these to shift somewhat:
-# 
-# | case | plunges at | SNR |
-# |---|---|---|
-# | 1 | 1.519 yr | 975 |
-# | 2 | 1.499 yr | 199 |
-# | 3 | 1.435 yr | 160 |
-# 
-# All three plunge well inside the configured `T = 2 yr`, which is why `plunge_trimmed_T` matters here.
-
-# In[21]:
 
 
 def snr_only(case, T=None, dt=DT, tdi_chan=None):
@@ -1125,38 +912,6 @@ def snr_only(case, T=None, dt=DT, tdi_chan=None):
         T=T_used,
     )
     return rho, T_used
-
-
-snrs = {}
-for i, c in REVIEW_CASES.items():
-    print(f"--- case {i} ---")
-    rho, T_used = snr_only(c)
-    snrs[i] = rho
-    print(f"  SNR (AE, TDI2, T = {T_used:.4f} yr) = {rho:.1f}\n")
-
-
-# ### Fisher matrices
-# 
-# Measured on this machine (CPU, no CuPy): a bare `T = 2 yr`, `dt = 5 s` `Circ1PAT1R` waveform takes
-# about 1 s, but one **response** evaluation takes about **20 s**, and that is what dominates.
-# 
-# Per case, the number of response calls is roughly `n_params * Ndelta * der_order` for the stable-delta
-# search plus `n_params * der_order` for the matrix itself:
-# 
-# | settings | calls (11 params) | wall time |
-# |---|---|---|
-# | `der_order=2, Ndelta=3` | ~90 | ~30 min |
-# | `der_order=2, Ndelta=4` | ~110 | ~40 min |
-# | `der_order=4, Ndelta=8` | ~400 | ~2 h |
-# 
-# `live_dangerously=True` skips the stability search entirely (~`n_params * der_order` calls, a couple
-# of minutes) and falls back to a mass-ratio/SNR heuristic for the step sizes. Good for a first look,
-# not for numbers you would quote.
-# 
-# On the GPU node the response is what speeds up, so `der_order=4, Ndelta=8` should be the default
-# there rather than something to work up to.
-
-# In[ ]:
 
 
 def run_case(case_id, der_order=4, Ndelta=8, tdi_chan=None, T=None,
@@ -1209,27 +964,6 @@ def report(result, case_id):
         print(f"{n:>10} {t:18.8g} {s:14.6e} {rel:>14}")
 
 
-# In[ ]:
-
-
-# Quick pass over all three cases (~40 min each).  For production numbers use
-#     results[case_id] = run_case(case_id, der_order=4, Ndelta=8)
-# and for a first look in a couple of minutes
-#     results[case_id] = run_case(case_id, der_order=2, live_dangerously=True)
-results = {}
-for case_id in (1, 2, 3):
-    results[case_id] = run_case(case_id, der_order=2, Ndelta=4)
-    report(results[case_id], case_id)
-
-
-# ### Summary
-# 
-# Compare `sigma` here against the marginal posterior widths from the matching PE runs in
-# `validation/PE_test_runs/sampling_data/`.
-
-# In[ ]:
-
-
 def summary_table(results):
     all_names = []
     for r in results.values():
@@ -1246,12 +980,6 @@ def summary_table(results):
         print(row)
     print("-" * len(header))
     print(f"{'SNR':>10} " + " ".join(f"{r['snr']:14.1f}" for r in results.values()))
-
-
-summary_table(results)
-
-
-# In[ ]:
 
 
 def plot_sigmas(results):
@@ -1281,5 +1009,47 @@ def plot_sigmas(results):
     return fig
 
 
-plot_sigmas(results);
+def main(case_ids=(1, 2, 3), der_order=2, Ndelta=4, show=True):
+    """
+    Run the whole chain: cross-checks, PSD checks, SNRs, then a Fisher matrix per case.
 
+    Defaults are the quick pass (~40 min per case on CPU).  For production numbers use
+    `der_order=4, Ndelta=8`; for a first look in a couple of minutes call `run_case` directly
+    with `live_dangerously=True`.
+    """
+    print("fastlisaresponse", fastlisaresponse.__version__)
+    print("lisatools       ", lisatools.__version__)
+    print("backend         ", FORCE_BACKEND)
+    print("configs:", CONFIG_DIR)
+
+    for i, c in REVIEW_CASES.items():
+        print(f"case {i}: {len(fisher_params(c)):2d} params  {fisher_params(c)}")
+
+    for i, c in REVIEW_CASES.items():
+        check_against_yaml(c)
+        print(f"case {i}: matches {c['config']}")
+
+    _test_smooth_psd()
+    plot_mojito_psd()
+
+    snrs = {}
+    for i in case_ids:
+        print(f"--- case {i} ---")
+        rho, T_used = snr_only(REVIEW_CASES[i])
+        snrs[i] = rho
+        print(f"  SNR (AE, TDI2, T = {T_used:.4f} yr) = {rho:.1f}\n")
+
+    results = {}
+    for case_id in case_ids:
+        results[case_id] = run_case(case_id, der_order=der_order, Ndelta=Ndelta)
+        report(results[case_id], case_id)
+
+    summary_table(results)
+    plot_sigmas(results)
+    if show:
+        plt.show()
+    return results, snrs
+
+
+if __name__ == "__main__":
+    main()

@@ -78,7 +78,7 @@ REVIEW_CASES = {
             "p0": 8.8123,
             "e0": 0.0,
             "xI0": 1.0,
-            "dist": 0.82213015032605164,
+            "dist": 0.022213015032605164,
             "qS": 2.4314546363447995,
             "phiS": 2.757554564287996,
             "qK": 2.6973649175810768,
@@ -741,19 +741,20 @@ def attach_padding(sef):
     return n_pts
 
 
-def waveform_generator(case, T=T_OBS, dt=DT):
+def waveform_generator(case, T=T_OBS, dt=DT, evolve_primary=None):
     """Bare FEW generator for the 1PAT1R model with this case's toggles."""
+    evolve_primary = EVOLVE_CHI1 if evolve_primary is None else evolve_primary
     return GenerateEMRIWaveform(
         Circ1PAT1R,
         return_list=False,
         frame="detector",
-        inspiral_kwargs={**INSPIRAL_KWARGS, "evolve_primary": EVOLVE_CHI1},
+        inspiral_kwargs={**INSPIRAL_KWARGS, "evolve_primary": evolve_primary},
         amplitude_kwargs={**AMPLITUDE_KWARGS, "zero_PA_amps_only": not INCLUDE_1PA_AMPS},
         sum_kwargs=dict(SUMMATION_KWARGS),
     )
 
 
-def plunge_trimmed_T(case, T=T_OBS, dt=DT, trim_hours=6.0, _gen_cache={}):
+def plunge_trimmed_T(case, T=T_OBS, dt=DT, trim_hours=6.0, evolve_primary=None, _gen_cache={}):
     """
     Observation time in years, shortened if the secondary plunges inside T.
 
@@ -762,8 +763,10 @@ def plunge_trimmed_T(case, T=T_OBS, dt=DT, trim_hours=6.0, _gen_cache={}):
     attached the trimming is silently discarded.  Doing it here instead means the ResponseWrapper
     is *built* with the trimmed duration and the trimming actually takes effect.
     """
-    key = case["config"]
-    gen = _gen_cache.get(key) or _gen_cache.setdefault(key, waveform_generator(case, T, dt))
+    evolve_primary = EVOLVE_CHI1 if evolve_primary is None else evolve_primary
+    key = (case["config"], evolve_primary)
+    gen = _gen_cache.get(key) or _gen_cache.setdefault(
+        key, waveform_generator(case, T, dt, evolve_primary=evolve_primary))
     traj = gen.waveform_generator.inspiral_generator
     p = case["params"]
     t_traj = traj(
@@ -813,10 +816,12 @@ def response_kwargs(T, dt=DT, tdi_chan=None, orbits=None, verbose=True):
 
 def build_sef(case, T=None, dt=DT, tdi_chan=None, orbits=None,
               deriv_type="direct", der_order=4, Ndelta=8, filename=None,
-              noise_model=None, noise_kwargs=None, channels=None, verbose=True):
+              noise_model=None, noise_kwargs=None, channels=None, evolve_primary=None,
+              verbose=True):
     """StableEMRIFisher configured for the 1PAT1R waveform plus the PE-run LISA response."""
+    evolve_primary = EVOLVE_CHI1 if evolve_primary is None else evolve_primary
     if T is None:
-        T = plunge_trimmed_T(case, dt=dt)
+        T = plunge_trimmed_T(case, dt=dt, evolve_primary=evolve_primary)
 
     tdi_chan = tdi_chan or TDI_CHAN
     if tdi_chan not in ("AE", "AET") and noise_model is None:
@@ -835,7 +840,7 @@ def build_sef(case, T=None, dt=DT, tdi_chan=None, orbits=None,
     sef = StableEMRIFisher(
         waveform_class=Circ1PAT1R,
         waveform_class_kwargs=dict(
-            inspiral_kwargs={**INSPIRAL_KWARGS, "evolve_primary": EVOLVE_CHI1},
+            inspiral_kwargs={**INSPIRAL_KWARGS, "evolve_primary": evolve_primary},
             amplitude_kwargs={**AMPLITUDE_KWARGS, "zero_PA_amps_only": not INCLUDE_1PA_AMPS},
             sum_kwargs=dict(SUMMATION_KWARGS),
         ),
